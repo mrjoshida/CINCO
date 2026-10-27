@@ -54,6 +54,9 @@ static void fm1_audio_init(int32_t *buf, uint32_t words, void (*isr)(void), uint
 { (void)buf; (void)words; (void)isr; (void)prio; }
 static void fm1_audio_stop(void) {}
 void isr_alnk0(void) {}
+#include "../../firmware/src/cinco_speech.c"
+#include "../../firmware/src/cinco_groove.c"
+#include "../../firmware/src/cinco_sound.c"
 #include "../../firmware/src/audio.c"
 
 /* ------------------------------------------------------------ the panel --- */
@@ -157,17 +160,6 @@ static void lcd_power(uint32_t s)              /* MENU > SCREEN OFF (lcd.c): off
 static void lcd_wake_now(void) {}
 static void lcd_init(void) {}
 
-#include "../../firmware/src/gfx.c"
-#include "../../firmware/src/panel.c"
-#include "../../firmware/src/ui.c"
-#include "../../firmware/src/menu_items.c"
-#include "../../firmware/src/icons.c"
-#include "../../firmware/src/ui_graph.c"
-#include "../../firmware/src/ui_draw.c"
-#include "../../firmware/src/ui_menu.c"
-#include "../../firmware/src/ui_input.c"
-#include "../../firmware/src/ui_layer.c"
-
 /* ------------------------------------------------------------ the flash --- */
 static uint32_t web_flash_writes;
 static uint8_t flash_ok;
@@ -199,12 +191,14 @@ static int st_prog(uint32_t off, const void *src, uint32_t n)       /* NOR: a wr
 }
 static uint32_t irq_save(void) { return 0; }
 static void irq_restore(uint32_t f) { (void)f; }
-static uint32_t fl_jedec_ram(void) { return 0x856014u; }             /* the FM-1's part (project.c) */
+static uint32_t fl_jedec_ram(void) { return 0x856014u; }
 static void fl_plain_window_init(void) {}
 #define FL_FAR(fn) (fn)
 #include "../../firmware/src/storage.c"
-#include "../../firmware/src/upreset.c"
-#include "../../firmware/src/project.c"
+
+#include "../../firmware/src/gfx.c"
+#include "../../firmware/src/panel.c"
+#include "../../firmware/src/cinco_ui.c"
 
 /* ------------------------------------------------- main.c and its HAL --- */
 #if FELUCCA_CPU2
@@ -269,7 +263,6 @@ static void web_power_on(void)
     settings_init();
     usb_serial_apply();
     lcd_init();
-    draw_splash();                        /* main.c: the splash (ui_draw.c) */
     memset(&felucca_dbg, 0, sizeof felucca_dbg);
     felucca_dbg.magic = DBG_MAGIC;
     fm1_input_init();
@@ -281,7 +274,8 @@ static void web_power_on(void)
     audio_init();
     boot_leds();                          /* main.c: the power-on LED sweep, from the scan's start */
     autosave_boot(boot_clean);            /* main.c: the last session's music (1.2, project.c) */
-    web_boot_ms = fm1_ms + 430u;         /* main.c: 30 + 400 ms before the first frame */
+    draw_splash();                        /* Cinco splash and initial render */
+    web_boot_ms = fm1_ms + 20u;
     web_booted = 1;
 }
 
@@ -328,7 +322,7 @@ static void web_ms(void)
     if (web_boot_ms) {                                    /* main.c: the splash goes, the loop starts */
         web_boot_ms = 0;
         kb_boot_hold = 0;
-        lcd_fill(0, 0, 240, 240, T_BG);
+        lcd_fill(0, 0, 240, 240, C_DESKTOP);
         web_last_frame = fm1_ms - 15u;
     }
     if (fm1_ms - web_last_frame >= 15u) {                /* main.c: a frame, then ui_input until 15 ms are over */
@@ -431,6 +425,9 @@ static uint32_t led_keys(const uint8_t *l)
         m |= led_on(l, 14u + k) << k;
     return m;
 }
+#ifndef LED_PLAY_GREEN
+#define LED_PLAY_GREEN ((8u << 3) | 1u)
+#endif
 EXPORT uint32_t web_lit_buttons(void)
 {
     return led_buttons(fm1_led) | ((fm1_led[LED_PLAY_GREEN >> 3] >> (LED_PLAY_GREEN & 7u)) & 1u) << 14;
@@ -490,10 +487,35 @@ EXPORT void web_test_heavy(void)
     ui.force = 1;
 }
 
-EXPORT uint32_t web_test_user_preset(uint32_t i) { return (uint32_t)up_used(i); }
+EXPORT uint32_t web_test_user_preset(uint32_t i)
+{
+    (void)i;
+    return 0;
+}
 
 EXPORT uint16_t *web_screen(void) { return web_fb; }
 EXPORT uint32_t web_screen_draws(void) { return web_draws; }
 EXPORT uint32_t web_now_ms(void) { return fm1_ms; }
 EXPORT uint32_t web_playing(void) { return song.playing; }
 EXPORT uint32_t web_sample_rate(void) { return FS; }
+EXPORT void web_cinco_set_boss(uint32_t v) { perf.boss_mode = (uint8_t)v; }
+EXPORT void web_cinco_set_view(uint32_t v) { perf.view_mode = (uint8_t)v; }
+EXPORT uint32_t web_cinco_get_view(void) { return perf.view_mode; }
+EXPORT void web_cinco_set_screensaver(uint32_t v) { perf.screensaver = (uint8_t)v; }
+EXPORT void web_cinco_set_diag(uint32_t v) { perf.diag = (uint8_t)v; }
+EXPORT uint32_t web_cinco_coffee_level(void) { return perf.coffee_level; }
+EXPORT uint32_t web_cinco_get_title(void) { return (uint32_t)perf.current_title; }
+EXPORT uint32_t web_cinco_get_mosaic(void) { return perf.current_mosaic; }
+EXPORT uint32_t web_cinco_get_source(void) { return perf.source; }
+EXPORT void web_cinco_set_source(uint32_t s) { cinco_sound_set_source((uint8_t)s); }
+EXPORT uint32_t web_cinco_get_nude(void) { return perf.nude; }
+EXPORT void web_cinco_set_nude(uint32_t n) { perf.nude = (uint8_t)n; }
+EXPORT uint32_t web_cinco_get_wobble(void) { return perf.wobble; }
+EXPORT void web_cinco_set_wobble(uint32_t w) { perf.wobble = (uint8_t)w; if (w) perf.flail = 0; }
+EXPORT uint32_t web_cinco_get_flail(void) { return perf.flail; }
+EXPORT void web_cinco_set_flail(uint32_t f) { perf.flail = (uint8_t)f; if (f) perf.wobble = 0; }
+EXPORT uint32_t web_cinco_get_env_mode(void) { return perf.env_mode; }
+EXPORT void web_cinco_set_env_mode(uint32_t m) { cinco_sound_apply_env((uint8_t)m); }
+EXPORT uint32_t web_cinco_get_scale_mode(void) { return perf.scale_mode; }
+EXPORT void web_cinco_set_scale_mode(uint32_t m) { cinco_sound_apply_scale((uint8_t)m); }
+EXPORT int32_t web_trk0_p(uint32_t param) { return param < P_COUNT ? trk[0].p[param] : -1; }

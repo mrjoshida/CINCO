@@ -2,3 +2,11 @@ build/
 .DS_Store
 __pycache__/
 *.fwsc
+
+# Cinco reference assets
+refs/
+
+# Project artifacts & temp files
+scratch/
+repomix-output.*
+assets/speech/test_*.wav

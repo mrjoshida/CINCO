@@ -29,7 +29,7 @@
 #define FELUCCA_UART 1           /* TRS MIDI IN on UART1 / PH8 */
 #endif
 #ifndef FELUCCA_ID
-#define FELUCCA_ID "FM-1_900"    /* package identity (build.py: the .fwsc marker string) */
+#define FELUCCA_ID "FM-1_925"    /* package identity (build.py: the .fwsc marker string) */
 #endif
 #ifndef FELUCCA_CPU2
 #define FELUCCA_CPU2 1           /* 1 (1.6.1): the second core is built in and renders some parts when MENU > SYSTEM >
@@ -40,7 +40,7 @@
 #define FM1_CPU1_USED FELUCCA_CPU2   /* hal/fm1_sys.h: the second core is built in; every reset holds it first (its
                                       * waiting loop is in RAM the ROM and the SPL use at boot) */
 #ifndef FELUCCA_VERSION
-#define FELUCCA_VERSION "v1.6.1" /* shown in the menu, the console and the editor; build.py --release X.Y */
+#define FELUCCA_VERSION "v2.5"   /* Cinco Identity Generator 2.5 */
 #endif
 #if FELUCCA_OTA && !FELUCCA_FLASH
 #error "FELUCCA_OTA needs FELUCCA_FLASH"
@@ -86,18 +86,10 @@
 #endif
 #include "song_chain.c"
 #include "seq.c"
+#include "cinco_speech.c"
+#include "cinco_groove.c"
+#include "cinco_sound.c"
 #include "audio.c"
-
-/* -------------------------------------------------------------- UI --- */
-#include "panel.c"
-#include "ui.c"
-#include "menu_items.c"          /* MENU's rows and settings (ui_menu.c, editor_menu.c) */
-#include "icons.c"               /* parameter icons (FELUCCA_ICONS), used by ui_draw.c */
-#include "ui_graph.c"
-#include "ui_draw.c"
-#include "ui_menu.c"
-#include "ui_input.c"
-#include "ui_layer.c"              /* the quick layers (FX GLO SCL EDIT REC held; SEQ TOOLS: ui_tools.c) */
 
 /* --------------------------------------------- storage, update, editor --- */
 #if FELUCCA_FLASH
@@ -105,12 +97,14 @@
 #include "storage_hw.c"
 #include "storage.c"
 #endif
-#include "upreset.c"             /* user presets (RAM mirror; flash with FELUCCA_FLASH) */
-#include "project.c"
+
+/* -------------------------------------------------------------- UI --- */
+#include "panel.c"
+#include "cinco_ui.c"
 #if FELUCCA_OTA
 #include "ota.c"
 #include "ota_hw.c"
-#include "editor.c"              /* web editor SysEx (needs the OTA SysEx plumbing) */
+static void ed_service(void) { }
 #endif
 #if FELUCCA_CDC
 #include "console.c"
