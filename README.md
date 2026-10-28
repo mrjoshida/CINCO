@@ -117,7 +117,7 @@ The Cinco Identity Generator 2.5™ maps seamlessly onto the **M-VAVE FM-1** har
 |  Sub-Menu Nav     Dance Variant     Select Character     Key Transpose   |
 |                                                                         |
 |    [K1]               [K2]              [K3]                [K4]        |
-|  4d3d3d3 Macro    Cutoff / Censor   Groove Tempo         Mix Balance    |
+|   4d3d3d3             TONE              TEMPO               MIX         |
 |                                                                         |
 |    [FX]               [LFO]             [ARP]              [PLAY]       |
 |  Nude Mode         Hat Wobble       Flarhgunnstow       Eurodance Run   |
@@ -140,8 +140,8 @@ The Cinco Identity Generator 2.5™ maps seamlessly onto the **M-VAVE FM-1** har
 | **Knob 1 (`K1`)** | **4d3d3d3 Macro Multiplier** | Cascades 1 to 5 windows across LCD, expands stereo chorus width and sub-oscillators (0–127). |
 | **Knob 2 (`K2`)** *(SFW Mode)* | **Tone / Low-Pass Cutoff** | Adjusts analog filter brightness and harmonic richness. |
 | **Knob 2 (`K2`)** *(NSFW Mode)* | **Bitcrusher & Mosaic Decimator** | Modulates audio sample-rate reduction and mosaic censorship tile size (4×4 up to 16×16). |
-| **Knob 3 (`K3`)** | **Workplace Groove Tempo** | Controls internal Eurodance rhythm section tempo (80 to 160 BPM). |
-| **Knob 4 (`K4`)** | **Master Mix Balance** | Adjusts mix balance between lead identity voice and backing rhythm section. |
+| **Knob 3 (`K3`)** | **TEMPO (Groove Tempo)** | Controls internal Eurodance rhythm section tempo (80 to 160 BPM). |
+| **Knob 4 (`K4`)** | **MIX (Master Balance)** | Adjusts mix balance between lead identity voice and backing rhythm section. |
 | **Encoder (`SELECT`)**| **Console Navigation** | Scrolls terminal history or selects sub-options in dialogue prompts. |
 | **Encoder (`ALGO`)**  | **Dance Variant Selector** | Toggles character animation routines and dance variations. |
 | **Encoder (`PRESET`)**| **Identity Selector** | Cycles active persona: `Celery Man` ➔ `Tayne (BETA)` ➔ `Oyster Smiling`. |

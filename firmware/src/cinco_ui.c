@@ -393,6 +393,11 @@ static void ui_input(void)
         if (v > 160) v = 160;
         perf.tempo = (uint8_t)v;
         song.g[G_BPM] = (int16_t)v;
+        if (perf.tempo != old_tempo) {
+            char tmsg[32];
+            snprintf(tmsg, sizeof(tmsg), "> Tempo: %u BPM.", (unsigned)perf.tempo);
+            cinco_term_push(tmsg);
+        }
         if (perf.tempo >= 145 && old_tempo < 145) {
             perf.error_popup_t = 120;
             cinco_str_copy(perf.error_msg, "FATAL: Oyster too wide for current clock speed.", sizeof(perf.error_msg));

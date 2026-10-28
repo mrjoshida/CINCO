@@ -84,3 +84,83 @@ static uint32_t rng(void)
     rng_state ^= rng_state << 5;
     return rng_state;
 }
+
+#if !defined(FELUCCA_WEB) && !defined(__APPLE__) && !defined(__linux__)
+typedef __builtin_va_list va_list;
+#define va_start(ap, param) __builtin_va_start(ap, param)
+#define va_end(ap)          __builtin_va_end(ap)
+#define va_arg(ap, type)    __builtin_va_arg(ap, type)
+
+int snprintf(char *str, unsigned int size, const char *fmt, ...)
+{
+    if (!str || size == 0) return 0;
+    va_list ap;
+    va_start(ap, fmt);
+    unsigned int out_idx = 0;
+    const char *p = fmt;
+
+    while (*p && out_idx + 1 < size) {
+        if (*p != '%') {
+            str[out_idx++] = *p++;
+            continue;
+        }
+        p++;
+        if (*p == '%') {
+            str[out_idx++] = '%';
+            p++;
+            continue;
+        }
+
+        int is_long = 0;
+        if (*p == 'l') {
+            is_long = 1;
+            p++;
+        }
+
+        if (*p == 'u' || *p == 'd' || *p == 'i') {
+            char num_buf[16];
+            uint32_t val;
+            if (*p == 'u') {
+                if (is_long) val = (uint32_t)va_arg(ap, unsigned long);
+                else val = (uint32_t)va_arg(ap, unsigned int);
+            } else {
+                int32_t sval;
+                if (is_long) sval = (int32_t)va_arg(ap, long);
+                else sval = (int32_t)va_arg(ap, int);
+                if (sval < 0) {
+                    if (out_idx + 1 < size) str[out_idx++] = '-';
+                    val = (uint32_t)(-sval);
+                } else {
+                    val = (uint32_t)sval;
+                }
+            }
+            int ni = 0;
+            do {
+                num_buf[ni++] = (char)('0' + (val % 10u));
+                val /= 10u;
+            } while (val > 0 && ni < 15);
+            while (ni > 0 && out_idx + 1 < size) {
+                str[out_idx++] = num_buf[--ni];
+            }
+            p++;
+        } else if (*p == 's') {
+            const char *s = va_arg(ap, const char *);
+            if (!s) s = "(null)";
+            while (*s && out_idx + 1 < size) {
+                str[out_idx++] = *s++;
+            }
+            p++;
+        } else if (*p == 'c') {
+            char c = (char)va_arg(ap, int);
+            if (out_idx + 1 < size) str[out_idx++] = c;
+            p++;
+        } else {
+            if (out_idx + 1 < size) str[out_idx++] = *p++;
+        }
+    }
+    str[out_idx] = '\0';
+    va_end(ap);
+    return (int)out_idx;
+}
+#endif
+

@@ -158,10 +158,10 @@ static void cinco_draw_defrag_content(int32_t ox, int32_t oy, int32_t ww, int32_
     lcd_fill(cw_x, cw_y, cw_w, cw_h, C_WIN_FACE);
 
     /* Sync step to groove sequencer or clock */
-    uint8_t step = cinco_groove_get_step();
-    if (!perf.groove) {
-        step = (uint8_t)((fm1_ms / 125u) & 15u);
-    }
+    uint32_t bpm = perf.tempo ? perf.tempo : 120u;
+    uint32_t ms_per_step = 15000u / bpm;
+    if (ms_per_step == 0) ms_per_step = 1;
+    uint8_t step = perf.groove ? cinco_groove_get_step() : (uint8_t)((fm1_ms / ms_per_step) & 15u);
 
     uint8_t kick_hit = ((step & 3u) == 0u);
     uint8_t clap_hit = (step == 4u || step == 12u);
@@ -199,9 +199,6 @@ static void cinco_draw_defrag_content(int32_t ox, int32_t oy, int32_t ww, int32_
         }
     }
 
-    /* Bottom status: "Defrag: 4d3d3d3 Clusters Optimized" */
-    cinco_draw_string(cw_x + 12, cw_y + 98, "Defrag: 4d3d3d3 Clusters Optimized", C_BLACK);
-
     /* Visual defrag progress bar */
     int32_t bar_w = cw_w - 24;
     lcd_fill(cw_x + 12, cw_y + 112, bar_w, 10, C_WHITE);
@@ -210,8 +207,12 @@ static void cinco_draw_defrag_content(int32_t ox, int32_t oy, int32_t ww, int32_
     lcd_fill(cw_x + 12, cw_y + 121, bar_w, 1, C_WHITE);
     lcd_fill(cw_x + 12 + bar_w - 1, cw_y + 112, 1, 10, C_WHITE);
 
-    int32_t fill_w = (bar_w - 4) * 88 / 100;
+    uint32_t progress = 50u + ((fm1_ms * bpm / 1200u) % 49u);
+    int32_t fill_w = (bar_w - 4) * (int32_t)progress / 100;
     lcd_fill(cw_x + 14, cw_y + 114, fill_w, 6, C_PROG_BLUE);
+    char defrag_buf[40];
+    snprintf(defrag_buf, sizeof(defrag_buf), "Defrag: %u BPM [%lu%% Optimized]", (unsigned)bpm, (unsigned long)progress);
+    cinco_draw_string(cw_x + 12, cw_y + 98, defrag_buf, C_BLACK);
 }
 
 static void cinco_draw_defrag(void)
@@ -220,7 +221,9 @@ static void cinco_draw_defrag(void)
     int32_t oy = 4;
     int32_t ww = 232;
     int32_t wh = 160;
-    cinco_draw_window_chrome(ox, oy, ww, wh, "Disk Defragmenter - Drive C:");
+    char title_buf[40];
+    snprintf(title_buf, sizeof(title_buf), "Disk Defragmenter - %u BPM", (unsigned)(perf.tempo ? perf.tempo : 120u));
+    cinco_draw_window_chrome(ox, oy, ww, wh, title_buf);
     cinco_draw_defrag_content(ox, oy, ww, wh);
 }
 
@@ -615,6 +618,13 @@ static void cinco_view_render(void)
     cinco_draw_string(bx, 230, scl_str, C_BLACK);
     uint32_t slen = 0; while (scl_str[slen]) slen++;
     bx += (int32_t)(slen * 6u) + 2;
+
+    /* Active Tempo: [XXXBPM] */
+    char bpm_badge[12];
+    snprintf(bpm_badge, sizeof(bpm_badge), "[%uBPM]", (unsigned)perf.tempo);
+    cinco_draw_string(bx, 230, bpm_badge, C_PROG_BLUE);
+    uint32_t blen = 0; while (bpm_badge[blen]) blen++;
+    bx += (int32_t)(blen * 6u) + 2;
 
     /* Active Modifiers */
     if (perf.nude && bx + 36 <= 240) {
