@@ -22,11 +22,15 @@ Part No. 04-4D3D3D3-925                              Retail Boxed Edition (1995)
 ================================================================================
 ```
 
+[![Play in Browser Now](https://img.shields.io/badge/▶_PLAY_IN_BROWSER-NOW_(LIVE_EMULATOR)-00ff66?style=for-the-badge&logo=webassembly&logoColor=black)](https://mrjoshida.github.io/CINCO/)
 [![Cinco Approved](https://img.shields.io/badge/CINCO-APPROVED_SOFTWARE-brightgreen?style=for-the-badge)](docs/cinco/manual.md)
 [![Hardware Platform](https://img.shields.io/badge/PLATFORM-M--VAVE_FM--1_RISC-blue?style=for-the-badge)](https://github.com/mrjoshida/CINCO)
 [![Firmware Version](https://img.shields.io/badge/VERSION-2.5_BETA-orange?style=for-the-badge)](build/felucca.fwsc)
 [![4d3d3d3 Tech](https://img.shields.io/badge/4d3d3d3-ENGAGED-red?style=for-the-badge)](docs/cinco/plan.md)
 [![License: GPL-3.0](https://img.shields.io/badge/LICENSE-GPL--3.0-purple?style=for-the-badge)](LICENSE)
+
+> ### 🕹️ **[PLAY IN BROWSER NOW: https://mrjoshida.github.io/CINCO/](https://mrjoshida.github.io/CINCO/)**
+> **No hardware required! Experience Paul's Computer 2.5 live in your browser via WebAssembly synthesis & ST7789 display simulation.**
 
 ---
 
@@ -166,7 +170,11 @@ The Cinco Identity Generator 2.5™ maps seamlessly onto the **M-VAVE FM-1** har
    > *Note:* To return to factory M-VAVE firmware, select **Return to official V15** in the web tool, or hold `OCT-` + `OCT+` on boot for 5 seconds to enter hardware UBoot recovery.
 
 ### Option 2: WebAssembly Browser Emulator (No Hardware Required!)
-Experience Paul's Computer directly in your web browser:
+Experience Paul's Computer directly in your web browser with zero hardware and zero installation:
+
+👉 **[Launch Online Emulator: https://mrjoshida.github.io/CINCO/](https://mrjoshida.github.io/CINCO/)**
+
+Or run locally via Python:
 ```bash
 # Start the local WebAssembly emulator server
 python3 scripts/serve_emu.py
