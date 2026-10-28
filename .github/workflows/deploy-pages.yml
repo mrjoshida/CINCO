@@ -29,7 +29,7 @@ jobs:
           python-version: '3.11'
 
       - name: Install Python dependencies
-        run: pip install Pillow
+        run: pip install Pillow fonttools numpy
 
       - name: Set up Emscripten
         uses: mymindstorm/setup-emsdk@v14
