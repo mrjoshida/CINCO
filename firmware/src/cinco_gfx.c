@@ -131,12 +131,20 @@ static void cinco_draw_char(int32_t x, int32_t y, char c, uint16_t color)
     if (c < 32 || c > 126)
         c = ' ';
     const uint8_t *glyph = CINCO_FONT5X7[(uint8_t)(c - 32)];
-    int col, row;
+    int col;
     for (col = 0; col < 5; col++) {
-        uint8_t line = glyph[col];
-        for (row = 0; row < 7; row++) {
-            if (line & (1u << row))
-                lcd_fill(x + col, y + row, 1, 1, color);
+        uint8_t line = glyph[col] & 0x7Fu;
+        int row = 0;
+        while (row < 7) {
+            if (line & (1u << row)) {
+                int start = row;
+                while (row < 7 && (line & (1u << row))) {
+                    row++;
+                }
+                lcd_fill((uint32_t)(x + col), (uint32_t)(y + start), 1, (uint32_t)(row - start), color);
+            } else {
+                row++;
+            }
         }
     }
 }

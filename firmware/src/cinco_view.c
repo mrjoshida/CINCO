@@ -269,41 +269,98 @@ static void cinco_draw_defrag(void)
 }
 
 /* Cinco After Dark: Flying Celery screensaver */
+static void cinco_init_screensaver_sprites(void)
+{
+    uint16_t *ss_stalk_up = cv_px;
+    uint16_t *ss_stalk_down = cv_px + 480;
+    uint16_t *ss_title = cv_px + 960;
+
+    uint16_t black_sw = swap16(C_BLACK);
+    uint16_t green_sw = swap16(C_GREEN);
+    uint16_t dgreen_sw = swap16(0xE003u);
+    uint16_t white_sw = swap16(C_WHITE);
+    uint16_t paper_sw = swap16(C_PAPER);
+    uint16_t border_sw = swap16(C_BORDER_MID);
+    uint16_t title_color_sw = swap16(C_BORDER_DARK);
+
+    for (int i = 0; i < 480; i++) {
+        ss_stalk_up[i] = black_sw;
+        ss_stalk_down[i] = black_sw;
+    }
+
+    for (int flap = 0; flap < 2; flap++) {
+        uint16_t *buf = flap ? ss_stalk_down : ss_stalk_up;
+        for (int r = 0; r < 4; r++)
+            for (int c = 0; c < 5; c++)
+                buf[(7 + r) * 24 + (0 + c)] = dgreen_sw;
+        for (int r = 0; r < 2; r++)
+            for (int c = 0; c < 4; c++)
+                buf[(6 + r) * 24 + (2 + c)] = green_sw;
+        for (int r = 0; r < 4; r++)
+            for (int c = 0; c < 10; c++)
+                buf[(9 + r) * 24 + (4 + c)] = green_sw;
+        for (int c = 0; c < 7; c++)
+            buf[8 * 24 + (6 + c)] = white_sw;
+        for (int c = 0; c < 8; c++)
+            buf[11 * 24 + (5 + c)] = dgreen_sw;
+        for (int r = 0; r < 4; r++)
+            for (int c = 0; c < 3; c++)
+                buf[(9 + r) * 24 + (14 + c)] = paper_sw;
+
+        if (flap == 0) {
+            /* Wings UP */
+            for (int r = 0; r < 2; r++) for (int c = 0; c < 3; c++) buf[(6 + r) * 24 + (6 + c)] = white_sw;
+            for (int r = 0; r < 2; r++) for (int c = 0; c < 3; c++) buf[(4 + r) * 24 + (5 + c)] = white_sw;
+            for (int r = 0; r < 2; r++) for (int c = 0; c < 3; c++) buf[(2 + r) * 24 + (4 + c)] = white_sw;
+            for (int r = 0; r < 2; r++) for (int c = 0; c < 2; c++) buf[(0 + r) * 24 + (3 + c)] = border_sw;
+
+            for (int r = 0; r < 2; r++) for (int c = 0; c < 3; c++) buf[(6 + r) * 24 + (10 + c)] = white_sw;
+            for (int r = 0; r < 2; r++) for (int c = 0; c < 3; c++) buf[(4 + r) * 24 + (11 + c)] = white_sw;
+            for (int r = 0; r < 2; r++) for (int c = 0; c < 3; c++) buf[(2 + r) * 24 + (12 + c)] = white_sw;
+            for (int r = 0; r < 2; r++) for (int c = 0; c < 2; c++) buf[(0 + r) * 24 + (13 + c)] = border_sw;
+        } else {
+            /* Wings DOWN */
+            for (int r = 0; r < 2; r++) for (int c = 0; c < 3; c++) buf[(11 + r) * 24 + (6 + c)] = white_sw;
+            for (int r = 0; r < 2; r++) for (int c = 0; c < 3; c++) buf[(13 + r) * 24 + (5 + c)] = white_sw;
+            for (int r = 0; r < 2; r++) for (int c = 0; c < 3; c++) buf[(15 + r) * 24 + (4 + c)] = white_sw;
+            for (int r = 0; r < 2; r++) for (int c = 0; c < 2; c++) buf[(17 + r) * 24 + (3 + c)] = border_sw;
+
+            for (int r = 0; r < 2; r++) for (int c = 0; c < 3; c++) buf[(11 + r) * 24 + (10 + c)] = white_sw;
+            for (int r = 0; r < 2; r++) for (int c = 0; c < 3; c++) buf[(13 + r) * 24 + (11 + c)] = white_sw;
+            for (int r = 0; r < 2; r++) for (int c = 0; c < 3; c++) buf[(15 + r) * 24 + (12 + c)] = white_sw;
+            for (int r = 0; r < 2; r++) for (int c = 0; c < 2; c++) buf[(17 + r) * 24 + (13 + c)] = border_sw;
+        }
+    }
+
+    for (int i = 0; i < 156 * 8; i++) {
+        ss_title[i] = black_sw;
+    }
+    const char *str = "Cinco After Dark (c) 1991";
+    int cur_x = 0;
+    while (*str) {
+        char ch = *str++;
+        if (ch >= 32 && ch <= 126) {
+            const uint8_t *glyph = CINCO_FONT5X7[(uint8_t)(ch - 32)];
+            for (int col = 0; col < 5; col++) {
+                uint8_t line = glyph[col];
+                for (int row = 0; row < 7; row++) {
+                    if (line & (1u << row)) {
+                        ss_title[row * 156 + (cur_x + col)] = title_color_sw;
+                    }
+                }
+            }
+        }
+        cur_x += 6;
+    }
+}
+
 static void cinco_draw_celery_stalk(int32_t x, int32_t y, uint8_t flap)
 {
-    /* Dark green leaves at rear */
-    lcd_fill((uint32_t)x, (uint32_t)(y + 1), 5, 4, 0xE003u);
-    lcd_fill((uint32_t)(x + 2), (uint32_t)y, 4, 2, C_GREEN);
-    /* Main green stalk ribs */
-    lcd_fill((uint32_t)(x + 4), (uint32_t)(y + 3), 10, 4, C_GREEN);
-    lcd_fill((uint32_t)(x + 6), (uint32_t)(y + 2), 7, 1, C_WHITE);
-    lcd_fill((uint32_t)(x + 5), (uint32_t)(y + 5), 8, 1, 0xE003u);
-    /* Pale stalk base */
-    lcd_fill((uint32_t)(x + 14), (uint32_t)(y + 3), 3, 4, C_PAPER);
-
-    /* Flapping wings (classic After Dark style) */
-    if (flap == 0) {
-        /* Wings UP */
-        lcd_fill((uint32_t)(x + 6), (uint32_t)y, 3, 2, C_WHITE);
-        lcd_fill((uint32_t)(x + 5), (uint32_t)(y - 2), 3, 2, C_WHITE);
-        lcd_fill((uint32_t)(x + 4), (uint32_t)(y - 4), 3, 2, C_WHITE);
-        lcd_fill((uint32_t)(x + 3), (uint32_t)(y - 6), 2, 2, C_BORDER_MID);
-
-        lcd_fill((uint32_t)(x + 10), (uint32_t)y, 3, 2, C_WHITE);
-        lcd_fill((uint32_t)(x + 11), (uint32_t)(y - 2), 3, 2, C_WHITE);
-        lcd_fill((uint32_t)(x + 12), (uint32_t)(y - 4), 3, 2, C_WHITE);
-        lcd_fill((uint32_t)(x + 13), (uint32_t)(y - 6), 2, 2, C_BORDER_MID);
-    } else {
-        /* Wings DOWN */
-        lcd_fill((uint32_t)(x + 6), (uint32_t)(y + 5), 3, 2, C_WHITE);
-        lcd_fill((uint32_t)(x + 5), (uint32_t)(y + 7), 3, 2, C_WHITE);
-        lcd_fill((uint32_t)(x + 4), (uint32_t)(y + 9), 3, 2, C_WHITE);
-        lcd_fill((uint32_t)(x + 3), (uint32_t)(y + 11), 2, 2, C_BORDER_MID);
-
-        lcd_fill((uint32_t)(x + 10), (uint32_t)(y + 5), 3, 2, C_WHITE);
-        lcd_fill((uint32_t)(x + 11), (uint32_t)(y + 7), 3, 2, C_WHITE);
-        lcd_fill((uint32_t)(x + 12), (uint32_t)(y + 9), 3, 2, C_WHITE);
-        lcd_fill((uint32_t)(x + 13), (uint32_t)(y + 11), 2, 2, C_BORDER_MID);
+    int32_t bx = x;
+    int32_t by = y - 6;
+    if (bx >= 0 && bx + 24 <= 240 && by >= 0 && by + 20 <= 240) {
+        const uint16_t *buf = flap ? (cv_px + 480) : cv_px;
+        lcd_blit((uint32_t)bx, (uint32_t)by, 24, 20, buf);
     }
 }
 
@@ -320,7 +377,7 @@ static void cinco_erase_stalk_bbox(int32_t px, int32_t py)
         lcd_fill((uint32_t)bx, (uint32_t)by, (uint32_t)bw, (uint32_t)bh, C_BLACK);
         /* If bounding box overlapped center text, restore text */
         if (bx < 198 && bx + bw > 42 && by < 124 && by + bh > 116) {
-            cinco_draw_string(42, 116, "Cinco After Dark (c) 1991", C_BORDER_DARK);
+            lcd_blit(42, 116, 156, 8, cv_px + 960);
         }
     }
 }
@@ -484,6 +541,7 @@ static uint8_t last_rendered_cursor = 255;
 static uint32_t last_rendered_state = 0xFFFFFFFFu;
 static char last_rendered_term[3][32];
 static uint32_t last_rendered_taskbar = 0xFFFFFFFFu;
+static uint8_t last_rendered_coffee = 0xFF;
 static uint8_t last_rendered_defrag_step = 255;
 static uint32_t last_rendered_defrag_prog = 0xFFFFFFFFu;
 static uint32_t last_rendered_defrag_ms = 0;
@@ -517,10 +575,9 @@ static inline uint32_t cinco_get_taskbar_state(void)
     s |= (uint32_t)(perf.tempo & 0x01FFu) << 9;
     s |= (uint32_t)(perf.groove & 1u) << 18;
     s |= (uint32_t)(perf.rec & 1u) << 19;
-    s |= (uint32_t)(perf.coffee_level & 0x0Fu) << 20;
-    s |= (uint32_t)(perf.nude & 1u) << 24;
-    s |= (uint32_t)(perf.wobble & 1u) << 25;
-    s |= (uint32_t)(perf.flail & 1u) << 26;
+    s |= (uint32_t)(perf.nude & 1u) << 20;
+    s |= (uint32_t)(perf.wobble & 1u) << 21;
+    s |= (uint32_t)(perf.flail & 1u) << 22;
     return s;
 }
 
@@ -720,8 +777,9 @@ static void cinco_view_render(void)
      * If screensaver active, render screensaver and return */
     if (perf.screensaver) {
         if (!screensaver_init) {
+            cinco_init_screensaver_sprites();
             lcd_fill(0, 0, 240, 240, C_BLACK);
-            cinco_draw_string(42, 116, "Cinco After Dark (c) 1991", C_BORDER_DARK);
+            lcd_blit(42, 116, 156, 8, cv_px + 960);
             uint8_t flap_tick = (uint8_t)(fm1_ms / 150u);
             for (int i = 0; i < 4; i++) {
                 perf.prev_celery_x[i] = perf.celery_x[i];
@@ -928,6 +986,7 @@ static void cinco_view_render(void)
         /* 4. Desktop Status Indicators Taskbar */
         cinco_draw_taskbar();
         last_rendered_taskbar = cur_taskbar;
+        last_rendered_coffee = perf.coffee_level;
 
         /* 5..8 Overlays */
         cinco_draw_overlays();
@@ -951,7 +1010,8 @@ static void cinco_view_render(void)
             cinco_draw_overlays();
             overlay_active = 1;
         }
-        /* While popup is active: PAUSE background updates (dancer & defrag) */
+        /* While popup is active: PAUSE background updates (dancer, defrag, terminal, taskbar) */
+        return;
     } else {
         if (overlay_active) {
             overlay_active = 0;
@@ -969,11 +1029,13 @@ static void cinco_view_render(void)
                 cinco_draw_defrag_grid(ox, oy, ww, wh, step);
                 last_rendered_defrag_step = step;
             }
-            if (step_changed || time_up) {
+            if (time_up) {
                 uint32_t progress = 50u + ((fm1_ms * bpm / 1200u) % 49u);
-                cinco_draw_defrag_progress(ox, oy, ww, wh, bpm, progress);
-                last_rendered_defrag_prog = progress;
-                last_rendered_defrag_ms = fm1_ms;
+                if (progress != last_rendered_defrag_prog) {
+                    cinco_draw_defrag_progress(ox, oy, ww, wh, bpm, progress);
+                    last_rendered_defrag_prog = progress;
+                    last_rendered_defrag_ms = fm1_ms;
+                }
             }
         } else {
             if (perf.frame_idx != last_rendered_frame) {
@@ -1008,6 +1070,11 @@ static void cinco_view_render(void)
     if (cur_taskbar != last_rendered_taskbar) {
         cinco_draw_taskbar();
         last_rendered_taskbar = cur_taskbar;
+        last_rendered_coffee = perf.coffee_level;
+    } else if (perf.coffee_level != last_rendered_coffee) {
+        lcd_fill(214, 222, 26, 17, C_WIN_FACE);
+        cinco_draw_coffee_mug(216, 222, perf.coffee_level);
+        last_rendered_coffee = perf.coffee_level;
     }
 }
 

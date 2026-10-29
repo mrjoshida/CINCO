@@ -132,10 +132,17 @@ static void fm1_irq_on(void) {}
 /* ----------------------------------------------------------- the screen --- */
 static uint16_t web_fb[240 * 240];       /* RGB565 as the panel gets it (high byte first) */
 static uint32_t web_draws;
+static uint32_t web_lcd_pixels;
+static uint32_t web_lcd_calls;
+static uint32_t web_lcd_full_clears;
 static void lcd_fill(uint32_t x, uint32_t y, uint32_t w, uint32_t h, uint16_t c)
 {
     uint32_t i, j;
     uint16_t sw = (uint16_t)((c >> 8) | (c << 8));
+    web_lcd_calls++;
+    web_lcd_pixels += (w * h);
+    if (w >= 240 && h >= 240)
+        web_lcd_full_clears++;
     for (j = 0; j < h && y + j < 240u; j++)
         for (i = 0; i < w && x + i < 240u; i++)
             web_fb[(y + j) * 240u + x + i] = sw;
@@ -144,6 +151,10 @@ static void lcd_fill(uint32_t x, uint32_t y, uint32_t w, uint32_t h, uint16_t c)
 static void lcd_blit(uint32_t x, uint32_t y, uint32_t w, uint32_t h, const uint16_t *p)
 {
     uint32_t i, j;
+    web_lcd_calls++;
+    web_lcd_pixels += (w * h);
+    if (w >= 240 && h >= 240)
+        web_lcd_full_clears++;
     for (j = 0; j < h && y + j < 240u; j++)
         for (i = 0; i < w && x + i < 240u; i++)
             web_fb[(y + j) * 240u + x + i] = p[j * w + i];
@@ -519,3 +530,19 @@ EXPORT void web_cinco_set_env_mode(uint32_t m) { cinco_sound_apply_env((uint8_t)
 EXPORT uint32_t web_cinco_get_scale_mode(void) { return perf.scale_mode; }
 EXPORT void web_cinco_set_scale_mode(uint32_t m) { cinco_sound_apply_scale((uint8_t)m); }
 EXPORT int32_t web_trk0_p(uint32_t param) { return param < P_COUNT ? trk[0].p[param] : -1; }
+EXPORT void web_lcd_stats_reset(void) {
+    web_lcd_pixels = 0;
+    web_lcd_calls = 0;
+    web_lcd_full_clears = 0;
+}
+EXPORT uint32_t web_lcd_get_pixels(void) { return web_lcd_pixels; }
+EXPORT uint32_t web_lcd_get_calls(void) { return web_lcd_calls; }
+EXPORT uint32_t web_lcd_get_full_clears(void) { return web_lcd_full_clears; }
+EXPORT void web_cinco_trigger_nsfw(void) { perf.nsfw_popup_t = 30; }
+EXPORT void web_cinco_trigger_error(void) { perf.error_popup_t = 30; }
+EXPORT void web_cinco_trigger_receipt(void) { perf.receipt_t = 30; }
+EXPORT void web_cinco_clear_popups(void) {
+    perf.nsfw_popup_t = 0;
+    perf.error_popup_t = 0;
+    perf.receipt_t = 0;
+}
