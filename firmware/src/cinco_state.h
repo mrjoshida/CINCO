@@ -50,6 +50,8 @@ typedef struct {
     int16_t celery_y[4];       /* flying celery y */
     int8_t celery_vx[4];       /* flying celery vx */
     int8_t celery_vy[4];       /* flying celery vy */
+    int16_t prev_celery_x[4];  /* flying celery prev x */
+    int16_t prev_celery_y[4];  /* flying celery prev y */
 
     /* Animation clock */
     uint32_t anim_tick;

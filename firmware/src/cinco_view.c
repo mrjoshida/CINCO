@@ -147,33 +147,31 @@ static void cinco_draw_boss_key(void)
     }
 }
 
-/* Disk Defragmenter 16x6 cluster grid visualizer */
-static void cinco_draw_defrag_content(int32_t ox, int32_t oy, int32_t ww, int32_t wh)
+/* Disk Defragmenter 16x6 cluster grid visualizer rendered into cv_px */
+static void cinco_draw_defrag_grid(int32_t ox, int32_t oy, int32_t ww, int32_t wh, uint8_t step)
 {
+    (void)wh;
     int32_t cw_x = ox + 4;
     int32_t cw_y = oy + 21;
     int32_t cw_w = ww - 8;
-    int32_t cw_h = wh - 25;
-
-    lcd_fill(cw_x, cw_y, cw_w, cw_h, C_WIN_FACE);
-
-    /* Sync step to groove sequencer or clock */
-    uint32_t bpm = perf.tempo ? perf.tempo : 120u;
-    uint32_t ms_per_step = 15000u / bpm;
-    if (ms_per_step == 0) ms_per_step = 1;
-    uint8_t step = perf.groove ? cinco_groove_get_step() : (uint8_t)((fm1_ms / ms_per_step) & 15u);
 
     uint8_t kick_hit = ((step & 3u) == 0u);
     uint8_t clap_hit = (step == 4u || step == 12u);
 
-    int32_t start_x = cw_x + (cw_w - (16 * 13 - 2)) / 2;
-    int32_t start_y = cw_y + 8;
+    /* Wait for any pending DMA transfer using cv_px */
+    lcd_sync();
+
+    uint16_t bg_sw = swap16(C_WIN_FACE);
+    uint16_t white_sw = swap16(C_WHITE);
+    uint16_t dark_sw = swap16(C_BORDER_DARK);
+
+    /* Clear the 208x84 buffer to background */
+    for (uint32_t i = 0; i < 208u * 84u; i++) {
+        cv_px[i] = bg_sw;
+    }
 
     for (int r = 0; r < 6; r++) {
         for (int c = 0; c < 16; c++) {
-            int32_t bx = start_x + c * 13;
-            int32_t by = start_y + r * 14;
-
             uint16_t color;
             /* Amber/Red blocks pulse on active drum & bass hits */
             if (r == 4 && c == step) {
@@ -190,29 +188,67 @@ static void cinco_draw_defrag_content(int32_t ox, int32_t oy, int32_t ww, int32_
                 color = C_WHITE; /* Free clusters */
             }
 
-            lcd_fill(bx, by, 11, 11, color);
-            /* Sunken cluster bevel */
-            lcd_fill(bx, by, 11, 1, C_WHITE);
-            lcd_fill(bx, by, 1, 11, C_WHITE);
-            lcd_fill(bx, by + 10, 11, 1, C_BORDER_DARK);
-            lcd_fill(bx + 10, by, 1, 11, C_BORDER_DARK);
+            uint16_t col_sw = swap16(color);
+            int32_t bx = c * 13;
+            int32_t by = r * 14;
+
+            for (int32_t dy = 0; dy < 11; dy++) {
+                uint16_t *dst = &cv_px[(by + dy) * 208 + bx];
+                for (int32_t dx = 0; dx < 11; dx++) {
+                    if (dy == 0 || dx == 0) {
+                        dst[dx] = white_sw;
+                    } else if (dy == 10 || dx == 10) {
+                        dst[dx] = dark_sw;
+                    } else {
+                        dst[dx] = col_sw;
+                    }
+                }
+            }
         }
     }
 
-    /* Visual defrag progress bar */
-    int32_t bar_w = cw_w - 24;
-    lcd_fill(cw_x + 12, cw_y + 112, bar_w, 10, C_WHITE);
-    lcd_fill(cw_x + 12, cw_y + 112, bar_w, 1, C_BORDER_DARK);
-    lcd_fill(cw_x + 12, cw_y + 112, 1, 10, C_BORDER_DARK);
-    lcd_fill(cw_x + 12, cw_y + 121, bar_w, 1, C_WHITE);
-    lcd_fill(cw_x + 12 + bar_w - 1, cw_y + 112, 1, 10, C_WHITE);
+    int32_t gx = cw_x + (cw_w - 208) / 2;
+    int32_t gy = cw_y + 8;
+    lcd_blit((uint32_t)gx, (uint32_t)gy, 208, 84, cv_px);
+}
 
-    uint32_t progress = 50u + ((fm1_ms * bpm / 1200u) % 49u);
-    int32_t fill_w = (bar_w - 4) * (int32_t)progress / 100;
-    lcd_fill(cw_x + 14, cw_y + 114, fill_w, 6, C_PROG_BLUE);
+static void cinco_draw_defrag_progress(int32_t ox, int32_t oy, int32_t ww, int32_t wh, uint32_t bpm, uint32_t progress)
+{
+    (void)wh;
+    int32_t cw_x = ox + 4;
+    int32_t cw_y = oy + 21;
+    int32_t cw_w = ww - 8;
+    int32_t bar_w = cw_w - 24;
+
+    /* Status text at cw_y + 98 */
+    lcd_fill((uint32_t)(cw_x + 12), (uint32_t)(cw_y + 98), (uint32_t)bar_w, 10, C_WIN_FACE);
     char defrag_buf[40];
     snprintf(defrag_buf, sizeof(defrag_buf), "Defrag: %u BPM [%lu%% Optimized]", (unsigned)bpm, (unsigned long)progress);
     cinco_draw_string(cw_x + 12, cw_y + 98, defrag_buf, C_BLACK);
+
+    /* Visual defrag progress bar at cw_y + 112 */
+    lcd_fill((uint32_t)(cw_x + 12), (uint32_t)(cw_y + 112), (uint32_t)bar_w, 10, C_WHITE);
+    lcd_fill((uint32_t)(cw_x + 12), (uint32_t)(cw_y + 112), (uint32_t)bar_w, 1, C_BORDER_DARK);
+    lcd_fill((uint32_t)(cw_x + 12), (uint32_t)(cw_y + 112), 1, 10, C_BORDER_DARK);
+    lcd_fill((uint32_t)(cw_x + 12), (uint32_t)(cw_y + 121), (uint32_t)bar_w, 1, C_WHITE);
+    lcd_fill((uint32_t)(cw_x + 12 + bar_w - 1), (uint32_t)(cw_y + 112), 1, 10, C_WHITE);
+
+    int32_t fill_w = (bar_w - 4) * (int32_t)progress / 100;
+    if (fill_w > 0) {
+        lcd_fill((uint32_t)(cw_x + 14), (uint32_t)(cw_y + 114), (uint32_t)fill_w, 6, C_PROG_BLUE);
+    }
+}
+
+static void cinco_draw_defrag_content(int32_t ox, int32_t oy, int32_t ww, int32_t wh)
+{
+    uint32_t bpm = perf.tempo ? perf.tempo : 120u;
+    uint32_t ms_per_step = 15000u / bpm;
+    if (ms_per_step == 0) ms_per_step = 1;
+    uint8_t step = perf.groove ? cinco_groove_get_step() : (uint8_t)((fm1_ms / ms_per_step) & 15u);
+    uint32_t progress = 50u + ((fm1_ms * bpm / 1200u) % 49u);
+
+    cinco_draw_defrag_grid(ox, oy, ww, wh, step);
+    cinco_draw_defrag_progress(ox, oy, ww, wh, bpm, progress);
 }
 
 static void cinco_draw_defrag(void)
@@ -224,23 +260,86 @@ static void cinco_draw_defrag(void)
     char title_buf[40];
     snprintf(title_buf, sizeof(title_buf), "Disk Defragmenter - %u BPM", (unsigned)(perf.tempo ? perf.tempo : 120u));
     cinco_draw_window_chrome(ox, oy, ww, wh, title_buf);
+    int32_t cw_x = ox + 4;
+    int32_t cw_y = oy + 21;
+    int32_t cw_w = ww - 8;
+    int32_t cw_h = wh - 25;
+    lcd_fill((uint32_t)cw_x, (uint32_t)cw_y, (uint32_t)cw_w, (uint32_t)cw_h, C_WIN_FACE);
     cinco_draw_defrag_content(ox, oy, ww, wh);
 }
 
 /* Cinco After Dark: Flying Celery screensaver */
+static void cinco_draw_celery_stalk(int32_t x, int32_t y, uint8_t flap)
+{
+    /* Dark green leaves at rear */
+    lcd_fill((uint32_t)x, (uint32_t)(y + 1), 5, 4, 0xE003u);
+    lcd_fill((uint32_t)(x + 2), (uint32_t)y, 4, 2, C_GREEN);
+    /* Main green stalk ribs */
+    lcd_fill((uint32_t)(x + 4), (uint32_t)(y + 3), 10, 4, C_GREEN);
+    lcd_fill((uint32_t)(x + 6), (uint32_t)(y + 2), 7, 1, C_WHITE);
+    lcd_fill((uint32_t)(x + 5), (uint32_t)(y + 5), 8, 1, 0xE003u);
+    /* Pale stalk base */
+    lcd_fill((uint32_t)(x + 14), (uint32_t)(y + 3), 3, 4, C_PAPER);
+
+    /* Flapping wings (classic After Dark style) */
+    if (flap == 0) {
+        /* Wings UP */
+        lcd_fill((uint32_t)(x + 6), (uint32_t)y, 3, 2, C_WHITE);
+        lcd_fill((uint32_t)(x + 5), (uint32_t)(y - 2), 3, 2, C_WHITE);
+        lcd_fill((uint32_t)(x + 4), (uint32_t)(y - 4), 3, 2, C_WHITE);
+        lcd_fill((uint32_t)(x + 3), (uint32_t)(y - 6), 2, 2, C_BORDER_MID);
+
+        lcd_fill((uint32_t)(x + 10), (uint32_t)y, 3, 2, C_WHITE);
+        lcd_fill((uint32_t)(x + 11), (uint32_t)(y - 2), 3, 2, C_WHITE);
+        lcd_fill((uint32_t)(x + 12), (uint32_t)(y - 4), 3, 2, C_WHITE);
+        lcd_fill((uint32_t)(x + 13), (uint32_t)(y - 6), 2, 2, C_BORDER_MID);
+    } else {
+        /* Wings DOWN */
+        lcd_fill((uint32_t)(x + 6), (uint32_t)(y + 5), 3, 2, C_WHITE);
+        lcd_fill((uint32_t)(x + 5), (uint32_t)(y + 7), 3, 2, C_WHITE);
+        lcd_fill((uint32_t)(x + 4), (uint32_t)(y + 9), 3, 2, C_WHITE);
+        lcd_fill((uint32_t)(x + 3), (uint32_t)(y + 11), 2, 2, C_BORDER_MID);
+
+        lcd_fill((uint32_t)(x + 10), (uint32_t)(y + 5), 3, 2, C_WHITE);
+        lcd_fill((uint32_t)(x + 11), (uint32_t)(y + 7), 3, 2, C_WHITE);
+        lcd_fill((uint32_t)(x + 12), (uint32_t)(y + 9), 3, 2, C_WHITE);
+        lcd_fill((uint32_t)(x + 13), (uint32_t)(y + 11), 2, 2, C_BORDER_MID);
+    }
+}
+
+static void cinco_erase_stalk_bbox(int32_t px, int32_t py)
+{
+    int32_t bx = px;
+    int32_t by = py - 6;
+    int32_t bw = 24;
+    int32_t bh = 20;
+
+    if (bx < 0) { bw += bx; bx = 0; }
+    if (by < 0) { bh += by; by = 0; }
+    if (bw > 0 && bh > 0 && bx < 240 && by < 240) {
+        lcd_fill((uint32_t)bx, (uint32_t)by, (uint32_t)bw, (uint32_t)bh, C_BLACK);
+        /* If bounding box overlapped center text, restore text */
+        if (bx < 198 && bx + bw > 42 && by < 124 && by + bh > 116) {
+            cinco_draw_string(42, 116, "Cinco After Dark (c) 1991", C_BORDER_DARK);
+        }
+    }
+}
+
 static void cinco_draw_screensaver(void)
 {
-    /* Full black screen */
-    lcd_fill(0, 0, 240, 240, C_BLACK);
-
-    /* Center text in dim grey: "Cinco After Dark (c) 1991" */
-    cinco_draw_string(42, 116, "Cinco After Dark (c) 1991", C_BORDER_DARK);
-
-    /* Animate 4 flying celery stalks with flapping wings */
+    static uint32_t last_ss_ms = 0;
     uint32_t now = fm1_ms;
+    if (now - last_ss_ms < 50u) {
+        return;
+    }
+    last_ss_ms = now;
+
     uint8_t flap_tick = (uint8_t)(now / 150u);
 
     for (int i = 0; i < 4; i++) {
+        /* Erase previous stalk bounding box */
+        cinco_erase_stalk_bbox(perf.prev_celery_x[i], perf.prev_celery_y[i]);
+
         perf.celery_x[i] += perf.celery_vx[i];
         perf.celery_y[i] += perf.celery_vy[i];
 
@@ -254,41 +353,10 @@ static void cinco_draw_screensaver(void)
         int32_t y = perf.celery_y[i];
         uint8_t flap = (flap_tick + (uint8_t)i) & 1u;
 
-        /* Draw celery stalk body */
-        /* Dark green leaves at rear */
-        lcd_fill(x, y + 1, 5, 4, 0xE003u);
-        lcd_fill(x + 2, y, 4, 2, C_GREEN);
-        /* Main green stalk ribs */
-        lcd_fill(x + 4, y + 3, 10, 4, C_GREEN);
-        lcd_fill(x + 6, y + 2, 7, 1, C_WHITE);
-        lcd_fill(x + 5, y + 5, 8, 1, 0xE003u);
-        /* Pale stalk base */
-        lcd_fill(x + 14, y + 3, 3, 4, C_PAPER);
+        cinco_draw_celery_stalk(x, y, flap);
 
-        /* Flapping wings (classic After Dark style) */
-        if (flap == 0) {
-            /* Wings UP */
-            lcd_fill(x + 6, y, 3, 2, C_WHITE);
-            lcd_fill(x + 5, y - 2, 3, 2, C_WHITE);
-            lcd_fill(x + 4, y - 4, 3, 2, C_WHITE);
-            lcd_fill(x + 3, y - 6, 2, 2, C_BORDER_MID);
-
-            lcd_fill(x + 10, y, 3, 2, C_WHITE);
-            lcd_fill(x + 11, y - 2, 3, 2, C_WHITE);
-            lcd_fill(x + 12, y - 4, 3, 2, C_WHITE);
-            lcd_fill(x + 13, y - 6, 2, 2, C_BORDER_MID);
-        } else {
-            /* Wings DOWN */
-            lcd_fill(x + 6, y + 5, 3, 2, C_WHITE);
-            lcd_fill(x + 5, y + 7, 3, 2, C_WHITE);
-            lcd_fill(x + 4, y + 9, 3, 2, C_WHITE);
-            lcd_fill(x + 3, y + 11, 2, 2, C_BORDER_MID);
-
-            lcd_fill(x + 10, y + 5, 3, 2, C_WHITE);
-            lcd_fill(x + 11, y + 7, 3, 2, C_WHITE);
-            lcd_fill(x + 12, y + 9, 3, 2, C_WHITE);
-            lcd_fill(x + 13, y + 11, 2, 2, C_BORDER_MID);
-        }
+        perf.prev_celery_x[i] = perf.celery_x[i];
+        perf.prev_celery_y[i] = perf.celery_y[i];
     }
 }
 
@@ -418,6 +486,8 @@ static char last_rendered_term[3][32];
 static uint32_t last_rendered_taskbar = 0xFFFFFFFFu;
 static uint8_t last_rendered_defrag_step = 255;
 static uint32_t last_rendered_defrag_prog = 0xFFFFFFFFu;
+static uint32_t last_rendered_defrag_ms = 0;
+static uint8_t overlay_active = 0;
 
 static inline uint32_t cinco_get_layout_state(int32_t nwindows)
 {
@@ -642,19 +712,54 @@ static void cinco_draw_overlays(void)
 /* Compose the complete Cinco screen frame */
 static void cinco_view_render(void)
 {
+    static uint8_t screensaver_init = 0;
+    static uint8_t boss_rendered = 0;
+    static uint8_t last_boss_cursor = 255;
+
     /* Master View Router:
      * If screensaver active, render screensaver and return */
     if (perf.screensaver) {
-        cinco_draw_screensaver();
-        view_initialized = 0;
+        if (!screensaver_init) {
+            lcd_fill(0, 0, 240, 240, C_BLACK);
+            cinco_draw_string(42, 116, "Cinco After Dark (c) 1991", C_BORDER_DARK);
+            uint8_t flap_tick = (uint8_t)(fm1_ms / 150u);
+            for (int i = 0; i < 4; i++) {
+                perf.prev_celery_x[i] = perf.celery_x[i];
+                perf.prev_celery_y[i] = perf.celery_y[i];
+                uint8_t flap = (flap_tick + (uint8_t)i) & 1u;
+                cinco_draw_celery_stalk(perf.celery_x[i], perf.celery_y[i], flap);
+            }
+            screensaver_init = 1;
+        } else {
+            cinco_draw_screensaver();
+        }
         return;
+    }
+    if (screensaver_init) {
+        screensaver_init = 0;
+        view_initialized = 0;
+        ui.force = 1;
     }
 
     /* If boss mode spreadsheet active, render spreadsheet and return */
     if (perf.boss_mode) {
-        cinco_draw_boss_key();
-        view_initialized = 0;
+        if (!boss_rendered) {
+            cinco_draw_boss_key();
+            boss_rendered = 1;
+            last_boss_cursor = (uint8_t)((fm1_ms / 500u) & 1u);
+        } else {
+            uint8_t cur_cursor = (uint8_t)((fm1_ms / 500u) & 1u);
+            if (cur_cursor != last_boss_cursor) {
+                lcd_fill(228, 227, 4, 7, cur_cursor ? C_BLACK : C_WIN_FACE);
+                last_boss_cursor = cur_cursor;
+            }
+        }
         return;
+    }
+    if (boss_rendered) {
+        boss_rendered = 0;
+        view_initialized = 0;
+        ui.force = 1;
     }
 
     /* Determine active animation and window title */
@@ -793,12 +898,18 @@ static void cinco_view_render(void)
             /* Only draw content on topmost window */
             if (i == nwindows - 1) {
                 if (perf.view_mode == 1) {
+                    int32_t cw_x = ox + 4;
+                    int32_t cw_y = oy + 21;
+                    int32_t cw_w = ww - 8;
+                    int32_t cw_h = wh - 25;
+                    lcd_fill((uint32_t)cw_x, (uint32_t)cw_y, (uint32_t)cw_w, (uint32_t)cw_h, C_WIN_FACE);
                     cinco_draw_defrag_content(ox, oy, ww, wh);
                     uint32_t bpm = perf.tempo ? perf.tempo : 120u;
                     uint32_t ms_per_step = 15000u / bpm;
                     if (ms_per_step == 0) ms_per_step = 1;
                     last_rendered_defrag_step = perf.groove ? cinco_groove_get_step() : (uint8_t)((fm1_ms / ms_per_step) & 15u);
                     last_rendered_defrag_prog = 50u + ((fm1_ms * bpm / 1200u) % 49u);
+                    last_rendered_defrag_ms = fm1_ms;
                 } else {
                     int32_t cx = ox + 4 + (ww - 8 - anim->w) / 2;
                     int32_t cy = oy + 21 + (wh - 25 - anim->h) / 2;
@@ -820,6 +931,7 @@ static void cinco_view_render(void)
 
         /* 5..8 Overlays */
         cinco_draw_overlays();
+        overlay_active = (perf.nsfw_popup_t > 0 || perf.error_popup_t > 0 || perf.receipt_t > 0 || perf.diag > 0);
         return;
     }
 
@@ -831,27 +943,44 @@ static void cinco_view_render(void)
     if (ww < 160) ww = 160;
     if (wh < 120) wh = 120;
 
-    /* A. Window Content Update */
-    if (perf.view_mode == 1) {
-        uint32_t bpm = perf.tempo ? perf.tempo : 120u;
-        uint32_t ms_per_step = 15000u / bpm;
-        if (ms_per_step == 0) ms_per_step = 1;
-        uint8_t step = perf.groove ? cinco_groove_get_step() : (uint8_t)((fm1_ms / ms_per_step) & 15u);
-        uint32_t progress = 50u + ((fm1_ms * bpm / 1200u) % 49u);
-        if (step != last_rendered_defrag_step || progress != last_rendered_defrag_prog) {
-            cinco_draw_defrag_content(ox, oy, ww, wh);
-            last_rendered_defrag_step = step;
-            last_rendered_defrag_prog = progress;
-        }
-    } else {
-        if (perf.frame_idx != last_rendered_frame) {
-            int32_t cx = ox + 4 + (ww - 8 - anim->w) / 2;
-            int32_t cy = oy + 21 + (wh - 25 - anim->h) / 2;
-            cinco_blit_sprite(anim, perf.frame_idx, cx, cy, mosaic);
-            last_rendered_frame = perf.frame_idx;
+    uint8_t any_overlay = (perf.nsfw_popup_t > 0 || perf.error_popup_t > 0 || perf.receipt_t > 0 || perf.diag > 0);
 
-            if (perf.nsfw_popup_t > 0 || perf.receipt_t > 0 || perf.diag > 0 || perf.error_popup_t > 0) {
-                cinco_draw_overlays();
+    /* A. Window Content Update */
+    if (any_overlay) {
+        if (!overlay_active) {
+            cinco_draw_overlays();
+            overlay_active = 1;
+        }
+        /* While popup is active: PAUSE background updates (dancer & defrag) */
+    } else {
+        if (overlay_active) {
+            overlay_active = 0;
+            view_initialized = 0;
+            ui.force = 1;
+        } else if (perf.view_mode == 1) {
+            uint32_t bpm = perf.tempo ? perf.tempo : 120u;
+            uint32_t ms_per_step = 15000u / bpm;
+            if (ms_per_step == 0) ms_per_step = 1;
+            uint8_t step = perf.groove ? cinco_groove_get_step() : (uint8_t)((fm1_ms / ms_per_step) & 15u);
+            uint8_t step_changed = (step != last_rendered_defrag_step);
+            uint8_t time_up = (fm1_ms - last_rendered_defrag_ms >= 500u);
+
+            if (step_changed) {
+                cinco_draw_defrag_grid(ox, oy, ww, wh, step);
+                last_rendered_defrag_step = step;
+            }
+            if (step_changed || time_up) {
+                uint32_t progress = 50u + ((fm1_ms * bpm / 1200u) % 49u);
+                cinco_draw_defrag_progress(ox, oy, ww, wh, bpm, progress);
+                last_rendered_defrag_prog = progress;
+                last_rendered_defrag_ms = fm1_ms;
+            }
+        } else {
+            if (perf.frame_idx != last_rendered_frame) {
+                int32_t cx = ox + 4 + (ww - 8 - anim->w) / 2;
+                int32_t cy = oy + 21 + (wh - 25 - anim->h) / 2;
+                cinco_blit_sprite(anim, perf.frame_idx, cx, cy, mosaic);
+                last_rendered_frame = perf.frame_idx;
             }
         }
     }

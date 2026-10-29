@@ -94,6 +94,10 @@ void cinco_perf_init(void)
     perf.celery_x[1] = 180; perf.celery_y[1] = 60;  perf.celery_vx[1] = -2; perf.celery_vy[1] = 2;
     perf.celery_x[2] = 80;  perf.celery_y[2] = 160; perf.celery_vx[2] = 3;  perf.celery_vy[2] = -1;
     perf.celery_x[3] = 160; perf.celery_y[3] = 200; perf.celery_vx[3] = -2; perf.celery_vy[3] = -2;
+    for (int ci = 0; ci < 4; ci++) {
+        perf.prev_celery_x[ci] = perf.celery_x[ci];
+        perf.prev_celery_y[ci] = perf.celery_y[ci];
+    }
 
     perf.current_mosaic = 1;
     perf.current_title[0] = '\0';
