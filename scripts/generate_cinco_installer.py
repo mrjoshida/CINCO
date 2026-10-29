@@ -1105,6 +1105,236 @@ template = r"""<!doctype html>
     line-height: 1.35;
   }
 
+  /* --- CINCO OS 2.5: TIM & ERIC SKETCH VISUAL SUITE --- */
+
+  /* 1. Phone Alert & Celebration Flash */
+  @keyframes phone-vibrate {
+    0%, 100% { transform: rotate(0deg); }
+    20% { transform: rotate(-10deg) scale(1.05); }
+    40% { transform: rotate(10deg) scale(1.05); }
+    60% { transform: rotate(-8deg); }
+    80% { transform: rotate(8deg); }
+  }
+  .phone-ring-icon {
+    animation: phone-vibrate 0.6s ease-in-out infinite alternate;
+  }
+  @keyframes dance-celebration-flash {
+    0% { filter: invert(0%) brightness(1); }
+    25% { filter: invert(80%) brightness(1.6) hue-rotate(90deg); }
+    50% { filter: invert(30%) brightness(1.3) hue-rotate(180deg); }
+    75% { filter: invert(90%) brightness(1.8) hue-rotate(270deg); }
+    100% { filter: invert(0%) brightness(1); }
+  }
+  .celebration-flash {
+    animation: dance-celebration-flash 0.8s ease-out 3;
+  }
+
+  /* 2. Interactive Sketch Command Prompt Bar */
+  .sketch-prompt-bar {
+    background: #08080a;
+    color: #00ff66;
+    border: 2px solid var(--win-dark);
+    border-top-color: var(--win-darker);
+    border-left-color: var(--win-darker);
+    border-right-color: var(--win-light);
+    border-bottom-color: var(--win-light);
+    box-shadow: inset 1px 1px 0 #000, inset -1px -1px 0 var(--win-lighter);
+    padding: 6px 10px;
+    margin: 6px 0 8px 0;
+    font-family: "Courier New", Consolas, monospace;
+  }
+  .prompt-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 4px;
+    font-size: 11px;
+    color: #5fe08a;
+    border-bottom: 1px solid #1a3320;
+    padding-bottom: 3px;
+  }
+  .prompt-title {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .prompt-dos-badge {
+    background: #00aa44;
+    color: #000;
+    font-weight: bold;
+    padding: 0 4px;
+    font-size: 9px;
+    border-radius: 2px;
+  }
+  .prompt-status {
+    font-size: 10px;
+    font-weight: bold;
+    color: #00ff66;
+    text-shadow: 0 0 4px #00ff66;
+  }
+  .prompt-log {
+    font-size: 11px;
+    min-height: 16px;
+    color: #a3ffc2;
+    margin-bottom: 4px;
+    white-space: pre-wrap;
+    word-break: break-all;
+  }
+  .prompt-input-row {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    background: #000000;
+    padding: 2px 4px;
+    border: 1px solid #005522;
+    margin-bottom: 6px;
+  }
+  .prompt-prefix {
+    font-size: 12px;
+    font-weight: bold;
+    color: #00ff66;
+    white-space: nowrap;
+  }
+  .prompt-input {
+    flex: 1;
+    background: transparent;
+    border: none;
+    outline: none;
+    color: #ffffff;
+    font-family: inherit;
+    font-size: 12px;
+  }
+  .prompt-input::placeholder {
+    color: #005522;
+  }
+  .prompt-submit-btn {
+    background: #11331a;
+    color: #00ff66;
+    border: 1px solid #00aa44;
+    cursor: pointer;
+    font-family: inherit;
+    font-size: 11px;
+    font-weight: bold;
+    padding: 1px 8px;
+  }
+  .prompt-submit-btn:hover {
+    background: #00aa44;
+    color: #000;
+  }
+  .prompt-pills {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+    align-items: center;
+  }
+  .prompt-pill {
+    background: var(--win-gray);
+    color: #000080;
+    border-top: 1px solid var(--win-light);
+    border-left: 1px solid var(--win-light);
+    border-right: 1px solid var(--win-darker);
+    border-bottom: 1px solid var(--win-darker);
+    font-family: Tahoma, "Segoe UI", sans-serif;
+    font-size: 10px;
+    font-weight: bold;
+    padding: 1px 6px;
+    cursor: pointer;
+    white-space: nowrap;
+  }
+  .prompt-pill:hover {
+    background: var(--win-blue);
+    color: #ffffff;
+  }
+  .prompt-pill:active {
+    border-top: 1px solid var(--win-darker);
+    border-left: 1px solid var(--win-darker);
+    border-right: 1px solid var(--win-light);
+    border-bottom: 1px solid var(--win-light);
+  }
+
+  /* 3. CRT Scanline & Phosphor Glass Bloom */
+  .crt-glass-overlay {
+    position: absolute;
+    pointer-events: none;
+    display: none;
+    z-index: 10;
+    border-radius: 8px;
+    overflow: hidden;
+  }
+  .crt-glass-overlay.active {
+    display: block;
+    background: 
+      repeating-linear-gradient(
+        0deg,
+        rgba(0, 0, 0, 0.28) 0px,
+        rgba(0, 0, 0, 0.28) 1.5px,
+        transparent 1.5px,
+        transparent 3px
+      ),
+      radial-gradient(
+        circle at 50% 50%,
+        rgba(255, 255, 255, 0.08) 0%,
+        rgba(0, 0, 0, 0.15) 70%,
+        rgba(0, 0, 0, 0.45) 100%
+      );
+    box-shadow: 
+      inset 0 0 16px rgba(0, 255, 100, 0.15),
+      inset 0 0 4px rgba(255, 255, 255, 0.25),
+      0 0 8px rgba(0, 255, 120, 0.2);
+  }
+  canvas#screen.crt-glass-bloom {
+    filter: contrast(1.12) brightness(1.1) drop-shadow(0 0 6px rgba(0, 255, 100, 0.4));
+  }
+  .tayne-stage.crt-active {
+    filter: contrast(1.08) brightness(1.05) drop-shadow(0 0 4px rgba(0, 200, 100, 0.3));
+  }
+  .tayne-stage.crt-active::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background: repeating-linear-gradient(
+      0deg,
+      rgba(0, 0, 0, 0.22) 0px,
+      rgba(0, 0, 0, 0.22) 2px,
+      transparent 2px,
+      transparent 4px
+    );
+  }
+
+  /* 4. 4d3d3d3 Cascade Glitch Effect */
+  .cascade-overlay {
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 99999;
+    overflow: hidden;
+  }
+  .cascade-ghost {
+    position: absolute;
+    box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.5);
+    border: 2px solid var(--win-blue);
+    background: var(--win-gray);
+    pointer-events: none;
+    animation: cascade-fade 1.4s ease-out forwards;
+  }
+  @keyframes cascade-fade {
+    0% { opacity: 0.95; transform: scale(1); filter: hue-rotate(0deg); }
+    50% { opacity: 0.8; filter: hue-rotate(180deg) brightness(1.2); }
+    100% { opacity: 0; transform: scale(1.05) translate(30px, 30px); filter: hue-rotate(360deg); }
+  }
+  @keyframes glitch-shake {
+    0% { transform: translate(0, 0); }
+    20% { transform: translate(-4px, 3px); }
+    40% { transform: translate(4px, -3px); }
+    60% { transform: translate(-3px, -2px); }
+    80% { transform: translate(3px, 2px); }
+    100% { transform: translate(0, 0); }
+  }
+  .glitch-shake {
+    animation: glitch-shake 0.35s ease-in-out;
+  }
+
 </style>
 </head>
 <body>
@@ -1234,6 +1464,7 @@ template = r"""<!doctype html>
       <div class="banner-corp">CINCO BUSINESS SYSTEMS, INC. &bull; CELERY MAN EDITION [v2.5]</div>
     </div>
     <div class="banner-right">
+      <button class="dialog-btn" id="btn-crt-toggle" title="Toggle CRT Scanlines &amp; Glass Bloom (F7)" style="min-width: 50px; height: 21px; font-size: 11px; padding: 1px 6px;">CRT [F7]</button>
       <button class="dialog-btn" id="lang" title="Toggle Language (English / 日本語)" style="min-width: 54px; height: 21px; font-size: 11px; padding: 1px 6px;">English</button>
       <svg class="banner-pc-art" viewBox="0 0 54 46" fill="none" aria-label="4d3d3d3 Retro Terminal">
         <!-- CRT Monitor -->
@@ -1285,6 +1516,31 @@ template = r"""<!doctype html>
         </div>
       </div>
     </fieldset>
+
+    <!-- Interactive Sketch Command Prompt Bar -->
+    <div class="sketch-prompt-bar bevel-thin-sunken" id="sketch-prompt-bar">
+      <div class="prompt-header">
+        <div class="prompt-title">
+          <span class="prompt-dos-badge">CINCO MS-DOS</span>
+          <span>Corporate Voice Interactive Command Terminal</span>
+        </div>
+        <div class="prompt-status" id="prompt-status">ONLINE ●</div>
+      </div>
+      <div class="prompt-log" id="sketch-prompt-log">&gt; Computer: Standing by for Paul's voice command...</div>
+      <form class="prompt-input-row" id="sketch-prompt-form" onsubmit="return false;">
+        <label class="prompt-prefix" for="sketch-prompt-input">C:\CINCO&gt; Computer,</label>
+        <input type="text" class="prompt-input" id="sketch-prompt-input" placeholder='type: load "celery man", 4d3d3d3 engaged, hat wobble, flarhgunnstow...' autocomplete="off" spellcheck="false">
+        <button type="submit" class="prompt-submit-btn" id="sketch-prompt-submit">↵</button>
+      </form>
+      <div class="prompt-pills">
+        <button type="button" class="prompt-pill" data-cmd='load "celery man"'>[ load "celery man" ]</button>
+        <button type="button" class="prompt-pill" data-cmd="4d3d3d3 engaged">[ 4d3d3d3 engaged ]</button>
+        <button type="button" class="prompt-pill" data-cmd="add hat wobble">[ add hat wobble ]</button>
+        <button type="button" class="prompt-pill" data-cmd="flarhgunnstow">[ flarhgunnstow ]</button>
+        <button type="button" class="prompt-pill" data-cmd="printout of oyster smiling">[ printout of oyster smiling ]</button>
+        <button type="button" class="prompt-pill" data-cmd="generate nude tayne">[ generate nude tayne ]</button>
+      </div>
+    </div>
 
     <!-- Progress Bar -->
     <div class="section-label">Installation Progress:</div>
@@ -1407,6 +1663,39 @@ template = r"""<!doctype html>
     <div style="display:flex; justify-content:flex-end; gap:8px; padding:10px; background:var(--win-gray); border-top:1px solid var(--win-light);">
       <button class="dialog-btn" id="btn-nude-cancel" style="width:70px;">Cancel</button>
       <button class="dialog-btn" id="btn-nude-ok" style="width:70px; font-weight:bold;">OK</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Dialog: Incoming Emergency Phone Call Alert -->
+<div class="modal-overlay" id="modal-wife-call">
+  <div class="win-dialog bevel-raised" style="max-width: 420px; width: 100%;">
+    <div class="win-titlebar">
+      <div class="win-titlebar-left">
+        <svg viewBox="0 0 16 16" class="win-title-icon" style="fill:#ffffff;">
+          <path d="M3.6 1.5c-.4 0-.8.2-1 .5l-1.5 2c-.4.5-.4 1.2-.1 1.8 1.4 3.2 4.1 5.9 7.3 7.3.6.3 1.3.3 1.8-.1l2-1.5c.3-.2.5-.6.5-1 0-.3-.1-.6-.3-.8l-2-1.5c-.4-.3-.9-.3-1.3 0l-1 .7c-1.8-.8-3.2-2.2-4-4l.7-1c.3-.4.3-.9 0-1.3l-1.5-2c-.2-.2-.5-.4-.9-.4z"/>
+        </svg>
+        <span>Cinco Telecom Services — Line 1</span>
+      </div>
+      <div class="win-controls">
+        <button class="win-btn win-close-btn" data-target="modal-wife-call" id="btn-wife-close" title="Ignore Call">×</button>
+      </div>
+    </div>
+    <div class="dialog-body" style="display:flex; gap:16px; align-items:center; padding:16px;">
+      <div class="phone-ring-icon" style="flex-shrink:0;">
+        <svg viewBox="0 0 48 48" style="width:44px; height:44px; filter:drop-shadow(1px 2px 2px rgba(0,0,0,0.4));">
+          <circle cx="24" cy="24" r="22" fill="#d32f2f" stroke="#8b0000" stroke-width="2"/>
+          <path d="M15 13c-1.1 0-2.1.6-2.6 1.5l-2.4 4c-.7 1.2-.6 2.7.2 3.8 3 4.8 7.2 9 12 12 1.1.8 2.6.9 3.8.2l4-2.4c.9-.5 1.5-1.5 1.5-2.6 0-.8-.3-1.6-.9-2.1l-4.5-3.5c-.9-.7-2.1-.7-3 .1l-1.8 1.4c-3.2-1.6-5.8-4.2-7.4-7.4l1.4-1.8c.8-.9.8-2.1.1-3l-3.5-4.5c-.5-.6-1.3-.9-2.1-.9z" fill="#ffffff"/>
+        </svg>
+      </div>
+      <div style="font-size:12px; line-height:1.5;">
+        <div style="font-weight:bold; font-size:13px; margin-bottom:4px; color:#202020;">Paul, your wife is on the phone.</div>
+        <div style="color:#aa0000; font-weight:bold;">It's an emergency.</div>
+      </div>
+    </div>
+    <div style="display:flex; justify-content:flex-end; gap:8px; padding:10px 14px; background:var(--win-gray); border-top:1px solid var(--win-light);">
+      <button class="dialog-btn" id="btn-wife-work" style="padding:4px 12px; font-weight:bold;">"We have important work to do"</button>
+      <button class="dialog-btn" id="btn-wife-ignore" style="padding:4px 12px;">Ignore Call</button>
     </div>
   </div>
 </div>
@@ -2330,6 +2619,7 @@ document.getElementById("btn-tayne-speed")?.addEventListener("click", () => {
   if (tayneHardwareSync && typeof turnKnob === "function") {
     turnKnob("KNOB 1", 10);
   }
+  trigger4d3dCascade();
 });
 
 // Nude Tayne with confirmation modal
@@ -2346,6 +2636,10 @@ document.getElementById("btn-nude-ok")?.addEventListener("click", () => {
   setTayneStage("nude", "NUDE TAYNE (NSFW)", "snd_nsfw", () => {
     if (typeof pressBtn === "function") pressBtn("FX");
   });
+  if (wifeCallTimer) clearTimeout(wifeCallTimer);
+  wifeCallTimer = setTimeout(() => {
+    triggerWifeCall();
+  }, 7000);
 });
 
 // Print Oyster receipt
@@ -2668,6 +2962,7 @@ if (dosInput) {
           ]);
           playTayneSound("snd_4d3d");
           if (typeof turnKnob === "function") turnKnob("KNOB 1", 10);
+          trigger4d3dCascade();
           break;
 
         case "oyster":
@@ -2686,6 +2981,8 @@ if (dosInput) {
           ]);
           playTayneSound("snd_nsfw");
           if (typeof pressBtn === "function") pressBtn("FX");
+          if (wifeCallTimer) clearTimeout(wifeCallTimer);
+          wifeCallTimer = setTimeout(() => { triggerWifeCall(); }, 7000);
           break;
 
         case "win":
@@ -2758,6 +3055,270 @@ function confirmStockModal() {
     $("btn-confirm-stock-x").addEventListener("click", onNo);
   });
 }
+
+// --- TIM & ERIC SKETCH FEATURES: CORE LOGIC ---
+
+// 1. Incoming Emergency Phone Call Alert (#modal-wife-call)
+let wifeCallTimer = null;
+let phoneRingAudioCtx = null;
+let phoneRingInterval = null;
+
+function startPhoneRing() {
+  stopPhoneRing();
+  try {
+    const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+    if (!AudioContextClass) return;
+    if (!phoneRingAudioCtx || phoneRingAudioCtx.state === "closed") {
+      phoneRingAudioCtx = new AudioContextClass();
+    }
+    if (phoneRingAudioCtx.state === "suspended") {
+      phoneRingAudioCtx.resume().catch(() => {});
+    }
+    
+    function ringPulse() {
+      const modal = document.getElementById("modal-wife-call");
+      if (!modal || !modal.classList.contains("open")) {
+        stopPhoneRing();
+        return;
+      }
+      try {
+        const now = phoneRingAudioCtx.currentTime;
+        const osc1 = phoneRingAudioCtx.createOscillator();
+        const osc2 = phoneRingAudioCtx.createOscillator();
+        const gain = phoneRingAudioCtx.createGain();
+        
+        osc1.type = "sine";
+        osc2.type = "sine";
+        osc1.frequency.setValueAtTime(440, now);
+        osc2.frequency.setValueAtTime(480, now);
+        
+        gain.gain.setValueAtTime(0, now);
+        gain.gain.linearRampToValueAtTime(0.14, now + 0.05);
+        gain.gain.setValueAtTime(0.14, now + 1.15);
+        gain.gain.linearRampToValueAtTime(0, now + 1.2);
+        
+        osc1.connect(gain);
+        osc2.connect(gain);
+        gain.connect(phoneRingAudioCtx.destination);
+        
+        osc1.start(now);
+        osc2.start(now);
+        osc1.stop(now + 1.25);
+        osc2.stop(now + 1.25);
+      } catch (err) {}
+    }
+    
+    ringPulse();
+    phoneRingInterval = setInterval(ringPulse, 3000);
+  } catch (e) {}
+}
+
+function stopPhoneRing() {
+  if (phoneRingInterval) {
+    clearInterval(phoneRingInterval);
+    phoneRingInterval = null;
+  }
+}
+
+function triggerWifeCall() {
+  const modal = document.getElementById("modal-wife-call");
+  if (modal) modal.classList.add("open");
+  startPhoneRing();
+}
+
+function dismissWifeCall(isWork) {
+  const modal = document.getElementById("modal-wife-call");
+  if (modal) modal.classList.remove("open");
+  stopPhoneRing();
+  if (isWork) {
+    playTayneSound("snd_yes");
+    const targets = [
+      document.getElementById("tayne-stage"),
+      document.getElementById("main-win")
+    ];
+    targets.forEach((t) => {
+      if (t) {
+        t.classList.remove("celebration-flash");
+        void t.offsetWidth;
+        t.classList.add("celebration-flash");
+        setTimeout(() => t.classList.remove("celebration-flash"), 2500);
+      }
+    });
+  }
+}
+
+document.getElementById("btn-wife-work")?.addEventListener("click", () => dismissWifeCall(true));
+document.getElementById("btn-wife-ignore")?.addEventListener("click", () => dismissWifeCall(false));
+document.getElementById("btn-wife-close")?.addEventListener("click", () => dismissWifeCall(false));
+
+// 2. CRT Scanline & Phosphor Glass Bloom Toggle
+let crtScanlinesEnabled = true;
+
+function toggleCrtScanlines(enable) {
+  if (typeof enable === "boolean") {
+    crtScanlinesEnabled = enable;
+  } else {
+    crtScanlinesEnabled = !crtScanlinesEnabled;
+  }
+  const stage = document.getElementById("tayne-stage");
+  const pcArt = document.querySelector(".banner-pc-art");
+  const btnCrt = document.getElementById("btn-crt-toggle");
+  
+  if (stage) stage.classList.toggle("crt-active", crtScanlinesEnabled);
+  if (pcArt) pcArt.classList.toggle("crt-glass-bloom", crtScanlinesEnabled);
+  if (btnCrt) {
+    btnCrt.style.background = crtScanlinesEnabled ? "#000080" : "var(--win-gray)";
+    btnCrt.style.color = crtScanlinesEnabled ? "#ffffff" : "var(--win-text)";
+  }
+  try {
+    localStorage.setItem("cinco-crt-scanlines", crtScanlinesEnabled ? "1" : "0");
+  } catch (e) {}
+}
+
+document.getElementById("btn-crt-toggle")?.addEventListener("click", () => toggleCrtScanlines());
+
+try {
+  const savedCrt = localStorage.getItem("cinco-crt-scanlines");
+  if (savedCrt !== null) {
+    toggleCrtScanlines(savedCrt === "1");
+  } else {
+    toggleCrtScanlines(true);
+  }
+} catch (e) {
+  toggleCrtScanlines(true);
+}
+
+// 3. 4d3d3d3 Cascade Glitch Effect
+function trigger4d3dCascade() {
+  const targetWin = (document.getElementById("win-tayne")?.classList.contains("open"))
+    ? document.getElementById("win-tayne")
+    : document.getElementById("main-win");
+  if (!targetWin) return;
+  
+  const rect = targetWin.getBoundingClientRect();
+  const container = document.createElement("div");
+  container.className = "cascade-overlay";
+  document.body.appendChild(container);
+  
+  document.body.classList.remove("glitch-shake");
+  void document.body.offsetWidth;
+  document.body.classList.add("glitch-shake");
+  setTimeout(() => document.body.classList.remove("glitch-shake"), 400);
+
+  const numGhosts = 8;
+  for (let i = 0; i < numGhosts; i++) {
+    setTimeout(() => {
+      const ghost = document.createElement("div");
+      ghost.className = "cascade-ghost bevel-raised";
+      const offsetX = (i + 1) * 22;
+      const offsetY = (i + 1) * 22;
+      ghost.style.left = `${Math.min(window.innerWidth - 120, Math.max(10, rect.left + offsetX))}px`;
+      ghost.style.top = `${Math.min(window.innerHeight - 100, Math.max(10, rect.top + offsetY))}px`;
+      ghost.style.width = `${Math.min(rect.width, window.innerWidth - 40)}px`;
+      ghost.style.height = `${Math.min(rect.height, window.innerHeight - 40)}px`;
+      
+      ghost.innerHTML = `
+        <div class="win-titlebar" style="height:18px; font-size:11px;">
+          <div class="win-titlebar-left"><span>⚡ 4D3D3D3 CASCADE OVERCLOCK ⚡</span></div>
+          <div class="win-controls"><button class="win-btn" style="height:12px;width:12px;font-size:9px;">口</button></div>
+        </div>
+        <div style="background:#000; color:#00ff66; font-family:'Courier New', Consolas, monospace; font-size:11px; padding:10px; height:calc(100% - 18px); overflow:hidden; display:flex; align-items:center; justify-content:center;">
+          <div style="text-align:center;">
+            <div style="font-size:18px; font-weight:bold; letter-spacing:2px; color:#00ff66; text-shadow:0 0 6px #00ff66;">4D3D3D3 ENGAGED</div>
+            <div style="font-size:11px; color:#5fe08a; margin-top:4px;">FRAME CLUSTER ECHO #${i + 1} &bull; KINETIC SURGE</div>
+          </div>
+        </div>
+      `;
+      container.appendChild(ghost);
+    }, i * 65);
+  }
+  
+  setTimeout(() => {
+    container.remove();
+  }, 2200);
+}
+
+// 4. Interactive Sketch Command Prompt Bar (#sketch-prompt-bar)
+function executeSketchCommand(rawCmd) {
+  if (!rawCmd) return;
+  const cmd = rawCmd.trim().toLowerCase();
+  const logEl = document.getElementById("sketch-prompt-log");
+  
+  if (cmd.includes("celery")) {
+    if (logEl) logEl.textContent = '> Computer, load up Celery Man, please.';
+    playTayneSound("snd_yes");
+    setTayneStage("idle", "CELERY MAN LOADED", "snd_tayne");
+  } else if (cmd.includes("4d3d")) {
+    if (logEl) logEl.textContent = '> Computer, can I get a 4d3d3d3 engaged?';
+    playTayneSound("snd_yes");
+    const stage = document.getElementById("tayne-stage");
+    const badge = document.getElementById("tayne-status-card");
+    tayneSpeedBoosted = true;
+    if (stage) stage.classList.add("pulse-4d3d");
+    if (badge) badge.textContent = "4D3D3D3 ENGAGED ⚡";
+    trigger4d3dCascade();
+  } else if (cmd.includes("wobble") || cmd.includes("hat")) {
+    if (logEl) logEl.textContent = '> Computer, can I get a hat wobble?';
+    playTayneSound("snd_yes");
+    setTayneStage("wobble", "HAT WOBBLE", "snd_wobble");
+  } else if (cmd.includes("flarh") || cmd.includes("flarhgunnstow")) {
+    if (logEl) logEl.textContent = '> Computer, could you kick up the 4d3d3d3? ... Can I get a flarhgunnstow?';
+    playTayneSound("snd_yes");
+    setTayneStage("flarh", "FLARHGUNNSTOW", "snd_flarh");
+  } else if (cmd.includes("oyster") || cmd.includes("smiling") || cmd.includes("printout")) {
+    if (logEl) logEl.textContent = '> Computer, give me a printout of Oyster smiling.';
+    playTayneSound("snd_yes");
+    const receiptBox = document.getElementById("tayne-receipt-box");
+    const badge = document.getElementById("tayne-status-card");
+    if (receiptBox) receiptBox.style.display = "flex";
+    if (badge) badge.textContent = "OYSTER RECEIPT";
+    playTayneSound("snd_printout");
+  } else if (cmd.includes("nude") || cmd.includes("nsfw")) {
+    if (logEl) logEl.textContent = '> Computer, generate a nude Tayne.';
+    playTayneSound("snd_yes");
+    document.getElementById("modal-confirm-nude")?.classList.add("open");
+  } else if (cmd.includes("call") || cmd.includes("wife") || cmd.includes("emergency")) {
+    if (logEl) logEl.textContent = '> Corporate telecom alert incoming...';
+    triggerWifeCall();
+  } else {
+    if (logEl) logEl.textContent = `> Computer, ${rawCmd}`;
+    playTayneSound("snd_yes");
+  }
+}
+
+document.getElementById("sketch-prompt-form")?.addEventListener("submit", (e) => {
+  e.preventDefault();
+  const input = document.getElementById("sketch-prompt-input");
+  if (input && input.value) {
+    executeSketchCommand(input.value);
+    input.value = "";
+  }
+});
+
+document.getElementById("sketch-prompt-submit")?.addEventListener("click", () => {
+  const input = document.getElementById("sketch-prompt-input");
+  if (input && input.value) {
+    executeSketchCommand(input.value);
+    input.value = "";
+  }
+});
+
+document.querySelectorAll(".prompt-pill").forEach((pill) => {
+  pill.addEventListener("click", () => {
+    const cmd = pill.dataset.cmd;
+    if (cmd) executeSketchCommand(cmd);
+  });
+});
+
+window.addEventListener("keydown", (e) => {
+  if (e.key === "F7") {
+    e.preventDefault();
+    toggleCrtScanlines();
+  } else if (e.key === "F8") {
+    e.preventDefault();
+    triggerWifeCall();
+  }
+});
 
 // ------------------------------------------------------------------ SysEx Installer Core
 const sayK = (k, arg = "") => {

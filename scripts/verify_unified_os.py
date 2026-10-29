@@ -81,6 +81,17 @@ def verify_file(rel_path, is_installer=False):
         ]),
         ("Volume Popup & Systray", [
             'id="volume-popup"', 'id="systray-vol"', 'id="master-vol-slider"'
+        ]),
+        ("Tim & Eric Sketch Visual Suite", [
+            'id="modal-wife-call"', 'Cinco Telecom Services — Line 1',
+            'Paul, your wife is on the phone.', "It's an emergency.",
+            '"We have important work to do"', 'id="btn-wife-work"', 'id="btn-wife-ignore"',
+            'id="sketch-prompt-bar"', 'C:\\CINCO&gt; Computer,',
+            'id="sketch-prompt-input"', 'id="sketch-prompt-log"',
+            'load "celery man"', '4d3d3d3 engaged', 'add hat wobble',
+            'flarhgunnstow', 'printout of oyster smiling', 'generate nude tayne',
+            'crt-glass-overlay', 'repeating-linear-gradient',
+            'cascade-ghost', 'trigger4d3dCascade'
         ])
     ]
     for win_name, tokens in windows_checks:
