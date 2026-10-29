@@ -86,7 +86,8 @@ def main():
     print(f"Checking if release {TAG} exists...")
     rel_view = run_cmd(["gh", "release", "view", TAG, "-R", REPO], env=env, check=False)
     if rel_view.returncode == 0:
-        print(f"Release {TAG} already exists. Uploading asset...")
+        print(f"Release {TAG} already exists. Updating notes and uploading asset...")
+        run_cmd(["gh", "release", "edit", TAG, "--title", TITLE, "--notes", NOTES, "-R", REPO], env=env)
         run_cmd(["gh", "release", "upload", TAG, str(FWSC_PATH), "--clobber", "-R", REPO], env=env)
     else:
         print(f"Creating release {TAG} on {REPO}...")
