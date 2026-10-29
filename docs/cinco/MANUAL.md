@@ -79,6 +79,14 @@ Welcome to the cutting edge of electronic office identity deployment. The **Cinc
 +-------------------------------------------------------------------------+
 ```
 
+### Flashing Hardware Terminal via WebMIDI Installer
+To install or update the Cinco Identity Generator 2.5™ directly on your M-VAVE FM-1 hardware without any local toolchain:
+1. Open Google Chrome or Microsoft Edge on your computer.
+2. Navigate to the **[Cinco Web Installer](https://mrjoshida.github.io/CINCO/installer/)**.
+3. Connect your FM-1 console via USB-C.
+4. Click **INSTALL CINCO 2.5 (cinco.fwsc)**.
+5. The web flasher stages and writes the image over WebMIDI SysEx and restarts your console automatically.
+
 ### Initial Power-On Sequence
 1. Connect the supplied USB-C Communications Cable from your desktop power supply or mainframe terminal into the rear receptacle of the FM-1 console.
 2. Tap the **POWER** toggle or depress any keyboard key.
@@ -275,7 +283,7 @@ In addition to identity modulation, Cinco Corporation has supplied full workplac
 * **Color Depth:** RGB565 (16-bit, 65,536 colors)
 * **Sound Generation Sample Rate:** 44,100 Hz @ 16-bit Stereo PCM
 * **Speech Compression:** 4-bit IMA-ADPCM (DVI standard) @ 8,000 Hz, linear interpolated
-* **Physical Flash Footprint:** 478,580 bytes (`build/felucca.bin`)
+* **Physical Flash Footprint:** 478,580 bytes (`build/cinco.bin` / `build/cinco.fwsc`)
 * **Flash Budget Allocation:** 581,564 bytes (`APP_SLOT`, 102.9 KB free headroom)
 * **RAM Allocation:** 57,004 bytes static (.data + .bss), 16.7 KB free headroom
 

@@ -164,10 +164,10 @@ The Cinco Identity Generator 2.5™ maps seamlessly onto the **M-VAVE FM-1** har
 ### Option 1: WebMIDI Browser Flasher (Zero Install)
 1. Connect your **M-VAVE FM-1** to your computer via USB-C.
 2. Launch a WebMIDI-compliant browser (Google Chrome or Microsoft Edge).
-3. Open the **[Web Installer](https://hugelton.github.io/Felucca/)**.
-4. Select the pre-compiled firmware binary: **`build/felucca.fwsc`**.
-5. Click **Install**. The device will update and reboot directly into **Cinco Identity Generator 2.5™**.
-   > *Note:* To return to factory M-VAVE firmware, select **Return to official V15** in the web tool, or hold `OCT-` + `OCT+` on boot for 5 seconds to enter hardware UBoot recovery.
+3. Open the **[Web Installer](https://mrjoshida.github.io/CINCO/installer/)**.
+4. Click **INSTALL CINCO 2.5 (cinco.fwsc)**. The firmware binary is pre-loaded directly from the site over WebMIDI SysEx.
+5. The device will update, verify, and reboot directly into **Cinco Identity Generator 2.5™**.
+   > *Note:* To return to factory M-VAVE firmware, expand **Restore Factory M-VAVE Firmware (Stock V15)** in the web installer, or hold `OCT-` + `OCT+` on boot for 5 seconds to enter hardware UBoot recovery.
 
 ### Option 2: WebAssembly Browser Emulator (No Hardware Required!)
 Experience Paul's Computer directly in your web browser with zero hardware and zero installation:

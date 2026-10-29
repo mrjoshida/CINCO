@@ -1,13 +1,14 @@
-name: Deploy Web Emulator to GitHub Pages
+name: Deploy Web Emulator and Installer to GitHub Pages
 
 on:
   push:
     branches:
       - main
     paths:
-      - 'web/emu/**'
+      - 'web/**'
       - 'firmware/**'
       - 'tools/**'
+      - 'scripts/**'
       - '.github/workflows/deploy-pages.yml'
   workflow_dispatch:
 
@@ -47,15 +48,12 @@ jobs:
           python3 tools/gen_fm6_patches.py build/gen/felucca_fm6.h
           python3 tools/gen_samples.py build/gen/felucca_samples.h
 
-      - name: Build WebAssembly emulator
-        run: ./web/emu/build.sh
-
-      - name: Add .nojekyll
-        run: touch build/emu/.nojekyll
+      - name: Build Web Site (Emulator, Installer, Firmware)
+        run: python3 scripts/build_web_site.py
 
       - name: Deploy to GitHub Pages branch
         uses: peaceiris/actions-gh-pages@v4
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./build/emu
+          publish_dir: ./build/site
           publish_branch: gh-pages

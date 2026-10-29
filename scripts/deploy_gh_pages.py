@@ -41,16 +41,21 @@ def run_cmd(cmd, cwd=None, env=None, check=True):
     return res
 
 def main():
-    print("=== Step 1: Ensure build/emu is up-to-date ===")
-    run_cmd(["./web/emu/build.sh"], cwd=REPO_ROOT)
+    print("=== Step 1: Build Web Site (Emulator, Installer, Firmware) ===")
+    run_cmd(["python3", "scripts/build_web_site.py"], cwd=REPO_ROOT)
     
     emu_dir = REPO_ROOT / "build" / "emu"
+    installer_dir = REPO_ROOT / "build" / "installer"
+    firmware_dir = REPO_ROOT / "build" / "firmware"
+
     required_files = [
         emu_dir / "index.html",
         emu_dir / "felucca.wasm",
         emu_dir / "worklet.js",
         emu_dir / "fonts" / "DotGothic16-subset.woff",
-        emu_dir / "fonts" / "OFL.txt"
+        emu_dir / "fonts" / "OFL.txt",
+        installer_dir / "index.html",
+        firmware_dir / "cinco.fwsc"
     ]
     for rf in required_files:
         if not rf.is_file() or rf.stat().st_size == 0:
@@ -63,17 +68,37 @@ def main():
         tmp_path = Path(tmpdir)
         print(f"Staging deploy in {tmp_path}")
         
-        # Copy build/emu contents
+        # 1. Copy build/emu contents to root /
         for item in emu_dir.iterdir():
             if item.is_dir():
                 shutil.copytree(item, tmp_path / item.name)
             else:
                 shutil.copy2(item, tmp_path / item.name)
         
-        # Create .nojekyll
+        # 2. Copy build/installer to /installer/
+        shutil.copytree(installer_dir, tmp_path / "installer")
+
+        # 3. Copy build/firmware to /firmware/
+        shutil.copytree(firmware_dir, tmp_path / "firmware")
+
+        # 4. Create .nojekyll
         nojekyll = tmp_path / ".nojekyll"
         nojekyll.write_text("")
         print("  Created .nojekyll")
+
+        # Verify staged tree
+        print("  Staged files:")
+        for staged in [
+            tmp_path / "index.html",
+            tmp_path / "felucca.wasm",
+            tmp_path / "installer" / "index.html",
+            tmp_path / "firmware" / "cinco.fwsc",
+            tmp_path / ".nojekyll"
+        ]:
+            if not staged.exists():
+                print(f"ERROR: Failed to stage {staged}")
+                sys.exit(1)
+            print(f"    - /{staged.relative_to(tmp_path)}")
 
         # Initialize git
         run_cmd(["git", "init", "-b", "gh-pages"], cwd=tmp_path)
@@ -81,7 +106,7 @@ def main():
         run_cmd(["git", "config", "user.email", "jpcaldwell@gmail.com"], cwd=tmp_path)
         run_cmd(["git", "remote", "add", "origin", REMOTE_SSH], cwd=tmp_path)
         run_cmd(["git", "add", "-A"], cwd=tmp_path)
-        run_cmd(["git", "commit", "-m", "Deploy Cinco Identity Generator 2.5 WebAssembly Emulator to GitHub Pages"], cwd=tmp_path)
+        run_cmd(["git", "commit", "-m", "Deploy Cinco Identity Generator 2.5 (Emulator, Web Installer, Firmware) to GitHub Pages"], cwd=tmp_path)
         
         print("Pushing gh-pages to origin...")
         run_cmd(["git", "push", "-f", "origin", "gh-pages"], cwd=tmp_path)

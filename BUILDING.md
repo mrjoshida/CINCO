@@ -102,7 +102,7 @@ python3 -m http.server -d build/emu 8790     # open http://localhost:8790/
 Emscripten compiles it to WebAssembly (`build/emu/felucca.wasm`, with `index.html`, `worklet.js` and the font in `fonts/`). The page
 keeps the flash's storage sectors (projects, user presets, settings) in the browser. Not emulated: USB (audio,
 MIDI out, the editor, updates), TRS MIDI and the user sample slots. A build of it is on the site:
-<https://hugelton.github.io/Felucca/webapp/try/>.
+<https://mrjoshida.github.io/CINCO/>.
 
 ## Tests
 
@@ -131,12 +131,12 @@ does the same for the cost files.
 ## Install
 
 Use the web installer in Chrome or Edge:
-<https://hugelton.github.io/Felucca/webapp/installer/>. It installs the released package.
+<https://mrjoshida.github.io/CINCO/installer/>. It installs the released package.
 
 From the command line (needs `pip3 install mido python-rtmidi`):
 
 ```
-python3 tools/fm1_install.py build/felucca.fwsc
+python3 tools/fm1_install.py build/cinco.fwsc
 python3 tools/fm1_install.py --info          # identity of the connected FM-1
 ```
 
