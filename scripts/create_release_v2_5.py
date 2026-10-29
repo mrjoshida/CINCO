@@ -20,7 +20,7 @@ NOTES = """### Cinco Identity Generator 2.5™ (Celery Man Edition)
 Official release for **The Firmware Hub** and the M-VAVE FM-1 synthesizer hardware platform.
 
 #### Key Features:
-- **Unique Package Identity:** `FM-1_433` (4d3d3d3)
+- **Unique Package Identity:** `FM-1_555` (Cinco 5)
 - **Rotoscoped Dancers:** Celery Man, Oyster, Tayne, and Flarhgunnstow
 - **DSP Engine:** 4d3d3d3 cascades, Nude Tayne bitcrush, fixed-point DSP
 - **LPC-10 Speech Synthesis:** Real-time Paul Rudd voice lines

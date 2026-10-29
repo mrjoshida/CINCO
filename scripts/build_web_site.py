@@ -5,7 +5,7 @@
 Build script for Cinco Web Site:
 1. Builds the WebAssembly emulator in build/emu/
 2. Bundles the Cinco web installer into build/installer/index.html
-3. Copies firmware binary to build/firmware/cinco.fwsc (and verifies product ID FM-1_433)
+3. Copies firmware binary to build/firmware/cinco.fwsc (and verifies product ID FM-1_555)
    Also maintains backwards-compatible copies/symlinks (cinco.fwsc, felucca.fwsc)
 4. Prepares unified build/site/ staging directory for GitHub Pages CI
 """
@@ -25,7 +25,7 @@ INSTALLER_DIR = BUILD_DIR / "installer"
 FIRMWARE_DIR = BUILD_DIR / "firmware"
 SITE_DIR = BUILD_DIR / "site"
 
-EXPECTED_PRODUCT_ID = "FM-1_433"
+EXPECTED_PRODUCT_ID = "FM-1_555"
 BLOCKS, BLK, KEEP = 20, 0x30, 0x2F
 
 
