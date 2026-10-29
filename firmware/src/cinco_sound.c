@@ -257,44 +257,70 @@ void cinco_sound_init(void)
 void cinco_audio_block(int32_t *out, uint32_t n)
 {
     /* 1. Macro updates on Track 0 */
+    /* When NSFW mode is OFF, Knob 2 (perf.tone) sweeps filter cutoff across full musical spectrum */
+    if (!perf.nude) {
+        switch (perf.source) {
+        case SRC_CELERY: {
+            int32_t cut = 10 + ((int32_t)perf.tone * 117) / 127;
+            if (cut > 127) cut = 127;
+            if (cut < 0) cut = 0;
+            trk[0].p[P_E4] = (int16_t)cut;
+            break;
+        }
+        case SRC_OYSTER: {
+            int32_t dcw = 5 + ((int32_t)perf.tone * 122) / 127;
+            if (dcw > 127) dcw = 127;
+            if (dcw < 0) dcw = 0;
+            trk[0].p[P_E2] = (int16_t)dcw;
+            break;
+        }
+        case SRC_TAYNE: {
+            int32_t mlvl = -64 + ((int32_t)perf.tone * 127) / 127;
+            if (mlvl > 63) mlvl = 63;
+            if (mlvl < -64) mlvl = -64;
+            trk[0].p[P_E2] = (int16_t)mlvl;
+            break;
+        }
+        case SRC_TALK: {
+            int32_t vowel = ((int32_t)perf.tone * 127) / 127;
+            if (vowel > 127) vowel = 127;
+            if (vowel < 0) vowel = 0;
+            trk[0].p[P_E0] = (int16_t)vowel;
+            break;
+        }
+        default:
+            break;
+        }
+    }
+
+    /* 4d3d3d3: Analog drive & delay send on Track 0 */
+    trk[0].p[P_DIST] = (int16_t)(((int32_t)perf.k4d * 60) / 127);
+    trk[0].p[P_DLY] = (int16_t)(((int32_t)perf.k4d * 50) / 127);
+
+    /* 4d3d3d3: Unison detune, resonance, chorus, and voice modulations */
     switch (perf.source) {
     case SRC_CELERY: {
-        /* K1 (4d3d3d3) modulates filter cutoff, resonance, chorus upwards */
-        /* K2 (Tone) modulates filter cutoff */
-        int32_t cut = 25 + ((int32_t)perf.tone * 55) / 127 + ((int32_t)perf.k4d * 45) / 127;
-        if (cut > 127) cut = 127;
-        int32_t res = 25 + ((int32_t)perf.k4d * 85) / 127;
-        if (res > 127) res = 127;
-        int32_t chor = ((int32_t)perf.k4d * 85) / 127;
-        trk[0].p[P_E4] = (int16_t)cut;
-        trk[0].p[P_E5] = (int16_t)res;
-        trk[0].p[P_CHOR] = (int16_t)chor;
+        trk[0].p[P_E1] = (int16_t)(16 + ((int32_t)perf.k4d * 90) / 127);
+        trk[0].p[P_E5] = (int16_t)(30 + ((int32_t)perf.k4d * 85) / 127);
+        trk[0].p[P_CHOR] = (int16_t)(((int32_t)perf.k4d * 115) / 127);
         break;
     }
     case SRC_OYSTER: {
-        int32_t dcw = 20 + ((int32_t)perf.tone * 70) / 127 + ((int32_t)perf.k4d * 37) / 127;
-        if (dcw > 127) dcw = 127;
         int32_t chor = 76 + ((int32_t)perf.k4d * 40) / 127;
         if (chor > 127) chor = 127;
-        trk[0].p[P_E2] = (int16_t)dcw;
         trk[0].p[P_CHOR] = (int16_t)chor;
         break;
     }
     case SRC_TAYNE: {
-        int32_t mlvl = -40 + ((int32_t)perf.tone * 70) / 127 + ((int32_t)perf.k4d * 30) / 127;
-        if (mlvl > 63) mlvl = 63;
-        if (mlvl < -64) mlvl = -64;
-        int32_t chor = ((int32_t)perf.k4d * 80) / 127;
-        trk[0].p[P_E2] = (int16_t)mlvl;
+        int32_t chor = ((int32_t)perf.k4d * 115) / 127;
         trk[0].p[P_CHOR] = (int16_t)chor;
         break;
     }
     case SRC_TALK: {
-        trk[0].p[P_E0] = (int16_t)perf.tone;
         int32_t buzz = 30 + ((int32_t)perf.k4d * 80) / 127;
         if (buzz > 127) buzz = 127;
         trk[0].p[P_E4] = (int16_t)buzz;
-        trk[0].p[P_CHOR] = (int16_t)(((int32_t)perf.k4d * 60) / 127);
+        trk[0].p[P_CHOR] = (int16_t)(((int32_t)perf.k4d * 115) / 127);
         break;
     }
     default:

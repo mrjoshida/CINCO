@@ -358,7 +358,7 @@ static void ui_input(void)
 
     if (d_k1) {
         uint8_t old_k4d = perf.k4d;
-        int32_t v = (int32_t)perf.k4d + d_k1;
+        int32_t v = (int32_t)perf.k4d + d_k1 * 2;
         if (v < 0) v = 0;
         if (v > 127) v = 127;
         perf.k4d = (uint8_t)v;

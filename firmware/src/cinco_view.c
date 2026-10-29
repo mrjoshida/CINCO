@@ -553,7 +553,7 @@ static inline uint32_t cinco_get_layout_state(int32_t nwindows)
     s |= (uint32_t)(perf.screensaver & 1u);
     s |= (uint32_t)(perf.boss_mode & 1u) << 1;
     s |= (uint32_t)(perf.view_mode & 1u) << 2;
-    s |= (uint32_t)(nwindows & 0x0Fu) << 3;
+    s |= (uint32_t)((nwindows - 1) & 0x0Fu) << 3;
     s |= (uint32_t)(perf.source & 0x03u) << 7;
     s |= (uint32_t)(perf.nude & 1u) << 9;
     s |= (uint32_t)(perf.wobble & 1u) << 10;
@@ -918,10 +918,8 @@ static void cinco_view_render(void)
     }
 
     /* 4d3d3d3 Window Cascades */
-    int32_t nwindows = 1;
-    if (perf.k4d >= 96) nwindows = 8;
-    else if (perf.k4d >= 64) nwindows = 4;
-    else if (perf.k4d >= 32) nwindows = 2;
+    int32_t nwindows = 1 + ((int32_t)perf.k4d * 15) / 120;
+    if (nwindows > 16) nwindows = 16;
 
     int32_t tx = 4;
     int32_t ty = 168;
@@ -944,12 +942,12 @@ static void cinco_view_render(void)
 
         /* 2. 4d3d3d3 Window Cascades */
         for (int32_t i = 0; i < nwindows; i++) {
-            int32_t ox = 4 + i * 8;
-            int32_t oy = 4 + i * 8;
-            int32_t ww = 232 - (nwindows - 1) * 8;
-            int32_t wh = 160 - (nwindows - 1) * 8;
-            if (ww < 160) ww = 160;
-            if (wh < 120) wh = 120;
+            int32_t ox = 4 + i * 3;
+            int32_t oy = 4 + i * 3;
+            int32_t ww = 232 - (nwindows - 1) * 3;
+            int32_t wh = 160 - (nwindows - 1) * 3;
+            if (ww < 175) ww = 175;
+            if (wh < 115) wh = 115;
 
             cinco_draw_window_chrome(ox, oy, ww, wh, title);
 
@@ -995,12 +993,12 @@ static void cinco_view_render(void)
     }
 
     /* Incremental / Dirty-Rect Rendering Path (0 ms overhead when static) */
-    int32_t ox = 4 + (nwindows - 1) * 8;
-    int32_t oy = 4 + (nwindows - 1) * 8;
-    int32_t ww = 232 - (nwindows - 1) * 8;
-    int32_t wh = 160 - (nwindows - 1) * 8;
-    if (ww < 160) ww = 160;
-    if (wh < 120) wh = 120;
+    int32_t ox = 4 + (nwindows - 1) * 3;
+    int32_t oy = 4 + (nwindows - 1) * 3;
+    int32_t ww = 232 - (nwindows - 1) * 3;
+    int32_t wh = 160 - (nwindows - 1) * 3;
+    if (ww < 175) ww = 175;
+    if (wh < 115) wh = 115;
 
     uint8_t any_overlay = (perf.nsfw_popup_t > 0 || perf.error_popup_t > 0 || perf.receipt_t > 0 || perf.diag > 0);
 
