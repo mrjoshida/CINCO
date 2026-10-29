@@ -153,7 +153,8 @@ static void cinco_draw_string(int32_t x, int32_t y, const char *s, uint16_t colo
 }
 
 /* ----------------------------------------------- RLE Sprite Blitting --- */
-/* Unpacks and blits a 4-bit RLE frame directly into the display canvas */
+/* Unpacks and blits a 4-bit RLE frame directly into the off-screen RAM buffer cv_px,
+ * then sends the entire sprite bounding box to the ST7789 display with ONE single lcd_blit DMA burst. */
 static void cinco_blit_sprite(const cinco_anim_t *a, uint32_t frame_idx,
                              int32_t dst_x, int32_t dst_y, uint32_t mosaic_block)
 {
@@ -161,96 +162,131 @@ static void cinco_blit_sprite(const cinco_anim_t *a, uint32_t frame_idx,
         return;
 
     /* Apply kinetics horizontal displacement */
+    int32_t shift_x = 0;
     if (perf.wobble) {
         if (perf.source == SRC_OYSTER) {
-            dst_x += (perf.frame_idx & 1) ? 3 : -3;
+            shift_x = (perf.frame_idx & 1) ? 3 : -3;
         } else if (perf.source == SRC_CELERY || perf.source == SRC_TALK) {
-            dst_x += (perf.frame_idx & 1) ? 2 : -2;
+            shift_x = (perf.frame_idx & 1) ? 2 : -2;
         }
     } else if (perf.flail) {
         if (perf.source == SRC_OYSTER || perf.source == SRC_CELERY || perf.source == SRC_TALK) {
-            dst_x += ((int32_t)(perf.frame_idx % 3) - 1) * 4;
+            shift_x = ((int32_t)(perf.frame_idx % 3) - 1) * 4;
         }
     }
-        
-    uint32_t rle_pos = a->frame_off[frame_idx];
-    const uint8_t *rle = a->rle;
-    const uint16_t *pal = a->pal;
-    
+    dst_x += shift_x;
+
     int32_t w = a->w;
     int32_t h = a->h;
+
+    /* Clamp dst coordinates to display boundaries */
+    if (dst_x < 0) dst_x = 0;
+    if (dst_y < 0) dst_y = 0;
+    if (dst_x + w > 240) dst_x = 240 - w;
+    if (dst_y + h > 240) dst_y = 240 - h;
+
+    uint32_t total_px = (uint32_t)w * (uint32_t)h;
+    if (total_px > CV_MAX)
+        return;
+
+    /* Wait for any previous DMA transfer using cv_px to finish */
+    lcd_sync();
+
+    /* Clear the sprite bounding box in cv_px to byte-swapped C_WHITE */
+    uint16_t white_swapped = swap16(C_WHITE);
+    for (uint32_t i = 0; i < total_px; i++) {
+        cv_px[i] = white_swapped;
+    }
+
+    /* Pre-swap palette to ST7789 byte order */
+    uint16_t pal_swapped[16];
+    for (uint32_t i = 0; i < 16; i++) {
+        pal_swapped[i] = swap16(a->pal[i]);
+    }
+
+    uint32_t rle_pos = a->frame_off[frame_idx];
+    const uint8_t *rle = a->rle;
+
+    /* Unpack RLE runs into cv_px in RAM (< 0.1 ms in CPU) */
     int32_t px = 0;
     int32_t py = 0;
-    
-    if (mosaic_block <= 1) {
-        /* Standard 1:1 pixel rendering */
-        while (py < h) {
-            uint8_t b = rle[rle_pos++];
-            uint32_t run = (b >> 4) + 1u;
-            uint32_t col_idx = b & 0x0Fu;
-            uint16_t color = pal[col_idx];
-            
-            /* Color 0 is canvas white */
-            while (run--) {
-                if (col_idx != 0 && (dst_x + px >= 0 && dst_x + px < 240) &&
-                    (dst_y + py >= 0 && dst_y + py < 240)) {
-                    lcd_fill(dst_x + px, dst_y + py, 1, 1, color);
-                }
-                px++;
-                if (px >= w) {
-                    px = 0;
-                    py++;
-                    if (py >= h)
-                        break;
-                }
+    while (py < h) {
+        uint8_t b = rle[rle_pos++];
+        uint32_t run = (b >> 4) + 1u;
+        uint32_t col_idx = b & 0x0Fu;
+        uint16_t color = pal_swapped[col_idx];
+
+        while (run--) {
+            if (col_idx != 0) {
+                cv_px[py * w + px] = color;
             }
-        }
-    } else {
-        /* Mosaic / Pixel Censorship Decimation (Nude Tayne mode) */
-        uint32_t m = mosaic_block;
-        while (py < h) {
-            uint8_t b = rle[rle_pos++];
-            uint32_t run = (b >> 4) + 1u;
-            uint32_t col_idx = b & 0x0Fu;
-            uint16_t color = pal[col_idx];
-            
-            while (run--) {
-                /* Quantize to mosaic block grid */
-                if (col_idx != 0 && (px % m == 0) && (py % m == 0)) {
-                    int32_t bx = dst_x + px;
-                    int32_t by = dst_y + py;
-                    lcd_fill(bx, by, m, m, color);
-                }
-                px++;
-                if (px >= w) {
-                    px = 0;
-                    py++;
-                    if (py >= h)
-                        break;
-                }
+            px++;
+            if (px >= w) {
+                px = 0;
+                py++;
+                if (py >= h)
+                    break;
             }
         }
     }
 
     /* Small pixel bowler hat on Oyster's head when Hat Wobble is active */
     if (perf.wobble && perf.source == SRC_OYSTER) {
-        int32_t hx = dst_x + 71;
-        int32_t hy = dst_y + 6;
-        if (mosaic_block <= 1) {
-            lcd_fill(hx + 5, hy, 12, 1, C_BLACK);
-            lcd_fill(hx + 3, hy + 1, 16, 2, C_BLACK);
-            lcd_fill(hx + 2, hy + 3, 18, 4, C_BLACK);
-            lcd_fill(hx + 2, hy + 7, 18, 1, C_RED);
-            lcd_fill(hx, hy + 8, 22, 2, C_BLACK);
-            lcd_fill(hx - 1, hy + 7, 1, 1, C_BLACK);
-            lcd_fill(hx + 22, hy + 7, 1, 1, C_BLACK);
-        } else {
-            uint32_t m = mosaic_block;
-            int32_t qhx = (hx / (int32_t)m) * (int32_t)m;
-            int32_t qhy = (hy / (int32_t)m) * (int32_t)m;
-            lcd_fill(qhx, qhy, m * 2, m, C_BLACK);
+        int32_t rx = 71;
+        int32_t ry = 6;
+        uint16_t black_sw = swap16(C_BLACK);
+        uint16_t red_sw = swap16(C_RED);
+
+        for (int32_t c = 0; c < 12; c++) cv_px[(ry) * w + (rx + 5 + c)] = black_sw;
+        for (int32_t r = 0; r < 2; r++)
+            for (int32_t c = 0; c < 16; c++) cv_px[(ry + 1 + r) * w + (rx + 3 + c)] = black_sw;
+        for (int32_t r = 0; r < 4; r++)
+            for (int32_t c = 0; c < 18; c++) cv_px[(ry + 3 + r) * w + (rx + 2 + c)] = black_sw;
+        for (int32_t c = 0; c < 18; c++) cv_px[(ry + 7) * w + (rx + 2 + c)] = red_sw;
+        for (int32_t r = 0; r < 2; r++)
+            for (int32_t c = 0; c < 22; c++) cv_px[(ry + 8 + r) * w + (rx + c)] = black_sw;
+        cv_px[(ry + 7) * w + (rx - 1)] = black_sw;
+        cv_px[(ry + 7) * w + (rx + 22)] = black_sw;
+    }
+
+    /* Mosaic decimation in cv_px (Nude Tayne / NSFW modes) */
+    if (mosaic_block > 1) {
+        uint32_t m = mosaic_block;
+        for (int32_t by = 0; by < h; by += (int32_t)m) {
+            int32_t bh = ((by + (int32_t)m) <= h) ? (int32_t)m : (h - by);
+            for (int32_t bx = 0; bx < w; bx += (int32_t)m) {
+                int32_t bw = ((bx + (int32_t)m) <= w) ? (int32_t)m : (w - bx);
+                /* Sample block color from top-left or center */
+                uint16_t block_color = cv_px[by * w + bx];
+                if (block_color == white_swapped) {
+                    int32_t cx = bx + bw / 2;
+                    int32_t cy = by + bh / 2;
+                    if (cv_px[cy * w + cx] != white_swapped) {
+                        block_color = cv_px[cy * w + cx];
+                    }
+                }
+                for (int32_t r = 0; r < bh; r++) {
+                    uint16_t *row = &cv_px[(by + r) * w + bx];
+                    for (int32_t c = 0; c < bw; c++) {
+                        row[c] = block_color;
+                    }
+                }
+            }
         }
     }
+
+    /* Clear margins if displaced to prevent kinetics trails on white canvas */
+    if (shift_x != 0) {
+        if (dst_x >= 6) {
+            lcd_fill((uint32_t)(dst_x - 6), (uint32_t)dst_y, 6, (uint32_t)h, C_WHITE);
+        }
+        if (dst_x + w + 6 <= 240) {
+            lcd_fill((uint32_t)(dst_x + w), (uint32_t)dst_y, 6, (uint32_t)h, C_WHITE);
+        }
+    }
+
+    /* Send the entire sprite frame to the ST7789 display with ONE single DMA burst */
+    lcd_blit((uint32_t)dst_x, (uint32_t)dst_y, (uint32_t)w, (uint32_t)h, cv_px);
 }
 
 #endif /* CINCO_GFX_C */

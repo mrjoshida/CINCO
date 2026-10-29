@@ -409,6 +409,236 @@ static void cinco_draw_coffee_mug(int32_t x, int32_t y, uint8_t level)
     }
 }
 
+/* ----------------------------------------------- Dirty State Tracking --- */
+static uint8_t view_initialized = 0;
+static uint8_t last_rendered_frame = 255;
+static uint8_t last_rendered_cursor = 255;
+static uint32_t last_rendered_state = 0xFFFFFFFFu;
+static char last_rendered_term[3][32];
+static uint32_t last_rendered_taskbar = 0xFFFFFFFFu;
+static uint8_t last_rendered_defrag_step = 255;
+static uint32_t last_rendered_defrag_prog = 0xFFFFFFFFu;
+
+static inline uint32_t cinco_get_layout_state(int32_t nwindows)
+{
+    uint32_t s = 0;
+    s |= (uint32_t)(perf.screensaver & 1u);
+    s |= (uint32_t)(perf.boss_mode & 1u) << 1;
+    s |= (uint32_t)(perf.view_mode & 1u) << 2;
+    s |= (uint32_t)(nwindows & 0x0Fu) << 3;
+    s |= (uint32_t)(perf.source & 0x03u) << 7;
+    s |= (uint32_t)(perf.nude & 1u) << 9;
+    s |= (uint32_t)(perf.wobble & 1u) << 10;
+    s |= (uint32_t)(perf.flail & 1u) << 11;
+    s |= (uint32_t)(perf.nsfw_popup_t > 0 ? 1u : 0u) << 12;
+    s |= (uint32_t)(perf.receipt_t > 0 ? 1u : 0u) << 13;
+    s |= (uint32_t)(perf.diag > 0 ? 1u : 0u) << 14;
+    s |= (uint32_t)(perf.error_popup_t > 0 ? 1u : 0u) << 15;
+    s |= (uint32_t)(perf.mosaic & 0x7Fu) << 16;
+    return s;
+}
+
+static inline uint32_t cinco_get_taskbar_state(void)
+{
+    uint32_t s = 0;
+    s |= (uint32_t)(song.octave & 0x0Fu);
+    s |= (uint32_t)(perf.env_mode & 0x03u) << 4;
+    s |= (uint32_t)(perf.scale_mode & 0x07u) << 6;
+    s |= (uint32_t)(perf.tempo & 0x01FFu) << 9;
+    s |= (uint32_t)(perf.groove & 1u) << 18;
+    s |= (uint32_t)(perf.rec & 1u) << 19;
+    s |= (uint32_t)(perf.coffee_level & 0x0Fu) << 20;
+    s |= (uint32_t)(perf.nude & 1u) << 24;
+    s |= (uint32_t)(perf.wobble & 1u) << 25;
+    s |= (uint32_t)(perf.flail & 1u) << 26;
+    return s;
+}
+
+static void cinco_draw_terminal_chrome(int32_t tx, int32_t ty, int32_t tw, int32_t th)
+{
+    lcd_fill((uint32_t)tx, (uint32_t)ty, (uint32_t)tw, (uint32_t)th, C_BLACK);
+    /* 3D Sunken border */
+    lcd_fill((uint32_t)tx, (uint32_t)ty, (uint32_t)tw, 1, C_BORDER_DARK);
+    lcd_fill((uint32_t)tx, (uint32_t)ty, 1, (uint32_t)th, C_BORDER_DARK);
+    lcd_fill((uint32_t)tx, (uint32_t)(ty + th - 1), (uint32_t)tw, 1, C_WHITE);
+    lcd_fill((uint32_t)(tx + tw - 1), (uint32_t)ty, 1, (uint32_t)th, C_WHITE);
+
+    /* Terminal title bar */
+    lcd_fill((uint32_t)(tx + 2), (uint32_t)(ty + 2), (uint32_t)(tw - 4), 12, C_BORDER_DARK);
+    cinco_draw_string(tx + 6, ty + 4, "Paul's COMPUTER", C_WHITE);
+}
+
+static void cinco_draw_terminal_text(int32_t tx, int32_t ty, int32_t tw, uint8_t cursor_on)
+{
+    /* Clear text lines area */
+    lcd_fill((uint32_t)(tx + 2), (uint32_t)(ty + 16), (uint32_t)(tw - 4), 38, C_BLACK);
+    cinco_draw_string(tx + 6, ty + 17, perf.term_line[0], C_WHITE);
+    cinco_draw_string(tx + 6, ty + 29, perf.term_line[1], C_WHITE);
+    cinco_draw_string(tx + 6, ty + 41, perf.term_line[2], C_WHITE);
+
+    if (cursor_on) {
+        uint32_t len = 0;
+        while (perf.term_line[2][len]) len++;
+        cinco_draw_char(tx + 6 + (int32_t)len * 6, ty + 41, '_', C_WHITE);
+    }
+}
+
+static void cinco_draw_taskbar(void)
+{
+    /* 4. Desktop Status Indicators Taskbar */
+    lcd_fill(0, 227, 240, 13, C_WIN_FACE);
+    lcd_fill(0, 227, 240, 1, C_WHITE);
+    lcd_fill(0, 239, 240, 1, C_BORDER_DARK);
+
+    int32_t bx = 2;
+
+    /* Active Octave indicator: [OCT: +0] (or -1, +1, etc.) */
+    char oct_buf[10];
+    oct_buf[0] = '['; oct_buf[1] = 'O'; oct_buf[2] = 'C'; oct_buf[3] = 'T'; oct_buf[4] = ':'; oct_buf[5] = ' ';
+    if (song.octave < 0) {
+        oct_buf[6] = '-';
+        oct_buf[7] = (char)('0' - song.octave);
+    } else {
+        oct_buf[6] = '+';
+        oct_buf[7] = (char)('0' + song.octave);
+    }
+    oct_buf[8] = ']';
+    oct_buf[9] = '\0';
+    cinco_draw_string(bx, 230, oct_buf, C_BLACK);
+    bx += 56;
+
+    /* Active Envelope: [BRASS], [PAD], [PLUCK], [BASS] */
+    static const char *const env_badges[4] = { "[BRASS]", "[PAD]", "[PLUCK]", "[BASS]" };
+    const char *env_str = env_badges[perf.env_mode % 4u];
+    cinco_draw_string(bx, 230, env_str, C_BLACK);
+    uint32_t elen = 0; while (env_str[elen]) elen++;
+    bx += (int32_t)(elen * 6u) + 2;
+
+    /* Active Scale: [CHR], [MIN], [MAJ], [PNT], [BLU] */
+    static const char *const scl_badges[5] = { "[CHR]", "[MIN]", "[MAJ]", "[PNT]", "[BLU]" };
+    const char *scl_str = scl_badges[perf.scale_mode % 5u];
+    cinco_draw_string(bx, 230, scl_str, C_BLACK);
+    uint32_t slen = 0; while (scl_str[slen]) slen++;
+    bx += (int32_t)(slen * 6u) + 2;
+
+    /* Active Tempo: [XXXBPM] */
+    char bpm_badge[12];
+    snprintf(bpm_badge, sizeof(bpm_badge), "[%uBPM]", (unsigned)perf.tempo);
+    cinco_draw_string(bx, 230, bpm_badge, C_PROG_BLUE);
+    uint32_t blen = 0; while (bpm_badge[blen]) blen++;
+    bx += (int32_t)(blen * 6u) + 2;
+
+    /* Active Modifiers */
+    if (perf.nude && bx + 36 <= 240) {
+        cinco_draw_string(bx, 230, "[NSFW]", C_RED);
+        bx += 38;
+    }
+    if (perf.wobble && bx + 30 <= 240) {
+        cinco_draw_string(bx, 230, "[WOB]", C_GREEN);
+        bx += 32;
+    }
+    if (perf.flail && bx + 42 <= 240) {
+        cinco_draw_string(bx, 230, "[FLARH]", C_AMBER);
+        bx += 44;
+    }
+    if (perf.groove && bx + 36 <= 240) {
+        cinco_draw_string(bx, 230, "[PLAY]", C_GREEN);
+        bx += 38;
+    }
+    if (perf.rec && bx + 30 <= 240) {
+        cinco_draw_string(bx, 230, "[REC]", C_RED);
+        bx += 32;
+    }
+
+    /* Coffee mug indicator on desktop taskbar next to terminal at (216, 222, 18, 14) */
+    if (bx <= 214) {
+        cinco_draw_coffee_mug(216, 222, perf.coffee_level);
+    }
+}
+
+static void cinco_draw_overlays(void)
+{
+    /* 5. Overlays: NSFW Protocol Warning Dialog */
+    if (perf.nsfw_popup_t > 0) {
+        int32_t dx = 20, dy = 48, dw = 200, dh = 76;
+        lcd_fill((uint32_t)dx, (uint32_t)dy, (uint32_t)dw, (uint32_t)dh, C_WIN_FACE);
+        lcd_fill((uint32_t)dx, (uint32_t)dy, (uint32_t)dw, 1, C_WHITE);
+        lcd_fill((uint32_t)dx, (uint32_t)dy, 1, (uint32_t)dh, C_WHITE);
+        lcd_fill((uint32_t)dx, (uint32_t)(dy + dh - 1), (uint32_t)dw, 1, C_BORDER_DARK);
+        lcd_fill((uint32_t)(dx + dw - 1), (uint32_t)dy, 1, (uint32_t)dh, C_BORDER_DARK);
+
+        /* Dialog blue title banner */
+        lcd_fill((uint32_t)(dx + 3), (uint32_t)(dy + 3), (uint32_t)(dw - 6), 14, C_PROG_BLUE);
+        cinco_draw_string(dx + 6, dy + 6, "SECURITY PROTOCOL", C_WHITE);
+
+        cinco_draw_string(dx + 8, dy + 24, "THIS IS NOT SUITABLE", C_BLACK);
+        cinco_draw_string(dx + 8, dy + 36, "FOR WORK. ARE YOU SURE?", C_BLACK);
+
+        /* [YES] button */
+        lcd_fill((uint32_t)(dx + dw - 60), (uint32_t)(dy + 48), 50, 18, C_WIN_FACE);
+        lcd_fill((uint32_t)(dx + dw - 60), (uint32_t)(dy + 48), 50, 1, C_WHITE);
+        lcd_fill((uint32_t)(dx + dw - 60), (uint32_t)(dy + 48), 1, 18, C_WHITE);
+        lcd_fill((uint32_t)(dx + dw - 60), (uint32_t)(dy + 48 + 17), 50, 1, C_BORDER_DARK);
+        lcd_fill((uint32_t)(dx + dw - 60 + 49), (uint32_t)(dy + 48), 1, 18, C_BORDER_DARK);
+        cinco_draw_string(dx + dw - 48, dy + 53, "[YES]", C_BLACK);
+    }
+
+    /* 6. Overlays: Oyster Smiling Receipt */
+    if (perf.receipt_t > 0) {
+        int32_t rx = 30, ry = 24, rw = 180, rh = 116;
+        lcd_fill((uint32_t)rx, (uint32_t)ry, (uint32_t)rw, (uint32_t)rh, C_WHITE);
+        /* 3D bevel */
+        lcd_fill((uint32_t)(rx + 1), (uint32_t)(ry + 1), (uint32_t)(rw - 2), 1, C_BORDER_MID);
+        lcd_fill((uint32_t)(rx + 1), (uint32_t)(ry + 1), 1, (uint32_t)(rh - 2), C_BORDER_MID);
+        lcd_fill((uint32_t)(rx + 1), (uint32_t)(ry + rh - 2), (uint32_t)(rw - 2), 1, C_BORDER_DARK);
+        lcd_fill((uint32_t)(rx + rw - 2), (uint32_t)(ry + 1), 1, (uint32_t)(rh - 2), C_BORDER_DARK);
+        /* 1px black border: left, right, bottom */
+        lcd_fill((uint32_t)rx, (uint32_t)ry, 1, (uint32_t)rh, C_BLACK);
+        lcd_fill((uint32_t)(rx + rw - 1), (uint32_t)ry, 1, (uint32_t)rh, C_BLACK);
+        lcd_fill((uint32_t)rx, (uint32_t)(ry + rh - 1), (uint32_t)rw, 1, C_BLACK);
+        /* Perforated top border: 2px dashed segments */
+        for (int32_t px = rx; px < rx + rw; px += 4) {
+            lcd_fill((uint32_t)px, (uint32_t)ry, 2, 1, C_BLACK);
+        }
+        /* Receipt printout text */
+        cinco_draw_string(40, 32, "*** CINCO PRINTOUT ***", C_BLACK);
+        cinco_draw_string(40, 44, "OYSTER SMILING ( ^ _ ^ )", C_BLACK);
+        cinco_draw_string(40, 60, "CODE: 4d3d3d3", C_BLACK);
+        cinco_draw_string(40, 72, "STATUS: VERIFIED & SAVED", C_BLACK);
+        cinco_draw_string(40, 84, "FLASH: 0xFC000 COMMITTED", C_BLACK);
+        cinco_draw_string(40, 100, "[ OK ]  CINCO OS 2.5", C_BLACK);
+    }
+
+    /* 7. Overlays: Diagnostic Overlay */
+    if (perf.diag > 0) {
+        int32_t dx = 16, dy = 20, dw = 208, dh = 120;
+        /* Green-on-black retro diagnostic HUD box with 3D bevel */
+        lcd_fill((uint32_t)dx, (uint32_t)dy, (uint32_t)dw, (uint32_t)dh, C_BLACK);
+        lcd_fill((uint32_t)dx, (uint32_t)dy, (uint32_t)dw, 1, C_WHITE);
+        lcd_fill((uint32_t)dx, (uint32_t)dy, 1, (uint32_t)dh, C_WHITE);
+        lcd_fill((uint32_t)dx, (uint32_t)(dy + dh - 1), (uint32_t)dw, 1, C_BORDER_DARK);
+        lcd_fill((uint32_t)(dx + dw - 1), (uint32_t)dy, 1, (uint32_t)dh, C_BORDER_DARK);
+        lcd_fill((uint32_t)(dx + 1), (uint32_t)(dy + 1), (uint32_t)(dw - 2), 1, C_BORDER_MID);
+        lcd_fill((uint32_t)(dx + 1), (uint32_t)(dy + 1), 1, (uint32_t)(dh - 2), C_BORDER_MID);
+
+        /* HUD Title & line */
+        cinco_draw_string(dx + 26, dy + 10, "=== SYSTEM DIAGNOSTICS ===", C_GREEN);
+        lcd_fill((uint32_t)(dx + 6), (uint32_t)(dy + 22), (uint32_t)(dw - 12), 1, C_GREEN);
+
+        /* Retro diagnostic lines */
+        cinco_draw_string(dx + 12, dy + 28, "CPU: JieLi AC7916 120MHz", C_GREEN);
+        cinco_draw_string(dx + 12, dy + 44, "RAM: 56.8KB / 73.7KB (23% Free)", C_GREEN);
+        cinco_draw_string(dx + 12, dy + 60, "AUDIO: 44.1kHz 32-bit Q15", C_GREEN);
+        cinco_draw_string(dx + 12, dy + 76, "DANCER: 118px 4-bit RLE OK", C_GREEN);
+        cinco_draw_string(dx + 12, dy + 92, "GROOVE: 16-Step Sequencer", C_GREEN);
+    }
+
+    /* 8. Overlays: Cinco System Alert Dialog */
+    if (perf.error_popup_t > 0) {
+        cinco_draw_error_popup();
+    }
+}
+
 /* Compose the complete Cinco screen frame */
 static void cinco_view_render(void)
 {
@@ -416,17 +646,16 @@ static void cinco_view_render(void)
      * If screensaver active, render screensaver and return */
     if (perf.screensaver) {
         cinco_draw_screensaver();
+        view_initialized = 0;
         return;
     }
 
     /* If boss mode spreadsheet active, render spreadsheet and return */
     if (perf.boss_mode) {
         cinco_draw_boss_key();
+        view_initialized = 0;
         return;
     }
-
-    /* 1. Desktop background */
-    lcd_fill(0, 0, 240, 240, C_DESKTOP);
 
     /* Determine active animation and window title */
     const cinco_anim_t *anim = &cinco_anim_celery;
@@ -525,212 +754,131 @@ static void cinco_view_render(void)
         perf.frame_idx = 0;
     }
 
-    /* 2. 4d3d3d3 Window Cascades */
+    /* 4d3d3d3 Window Cascades */
     int32_t nwindows = 1;
     if (perf.k4d >= 96) nwindows = 8;
     else if (perf.k4d >= 64) nwindows = 4;
     else if (perf.k4d >= 32) nwindows = 2;
 
-    int32_t i;
-    for (i = 0; i < nwindows; i++) {
-        int32_t ox = 4 + i * 8;
-        int32_t oy = 4 + i * 8;
-        int32_t ww = 232 - (nwindows - 1) * 8;
-        int32_t wh = 160 - (nwindows - 1) * 8;
-        if (ww < 160) ww = 160;
-        if (wh < 120) wh = 120;
-        
-        cinco_draw_window_chrome(ox, oy, ww, wh, title);
-        
-        /* Only draw content on topmost window */
-        if (i == nwindows - 1) {
-            if (perf.view_mode == 1) {
-                cinco_draw_defrag_content(ox, oy, ww, wh);
-            } else {
-                int32_t cx = ox + 4 + (ww - 8 - anim->w) / 2;
-                int32_t cy = oy + 21 + (wh - 25 - anim->h) / 2;
-                cinco_blit_sprite(anim, perf.frame_idx, cx, cy, mosaic);
-            }
-        }
-    }
-
-    /* 3. Paul's COMPUTER Terminal */
     int32_t tx = 4;
     int32_t ty = 168;
     int32_t tw = 232;
     int32_t th = 57;
 
-    lcd_fill(tx, ty, tw, th, C_BLACK);
-    /* 3D Sunken border */
-    lcd_fill(tx, ty, tw, 1, C_BORDER_DARK);
-    lcd_fill(tx, ty, 1, th, C_BORDER_DARK);
-    lcd_fill(tx, ty + th - 1, tw, 1, C_WHITE);
-    lcd_fill(tx + tw - 1, ty, 1, th, C_WHITE);
+    uint8_t cursor_on = (uint8_t)((fm1_ms / 500u) & 1u);
+    uint32_t current_state = cinco_get_layout_state(nwindows);
+    uint32_t cur_taskbar = cinco_get_taskbar_state();
 
-    /* Terminal title bar */
-    lcd_fill(tx + 2, ty + 2, tw - 4, 12, C_BORDER_DARK);
-    cinco_draw_string(tx + 6, ty + 4, "Paul's COMPUTER", C_WHITE);
+    uint8_t force_full_redraw = (!view_initialized || ui.force || current_state != last_rendered_state);
 
-    /* Terminal lines */
-    cinco_draw_string(tx + 6, ty + 17, perf.term_line[0], C_WHITE);
-    cinco_draw_string(tx + 6, ty + 29, perf.term_line[1], C_WHITE);
-    cinco_draw_string(tx + 6, ty + 41, perf.term_line[2], C_WHITE);
+    if (force_full_redraw) {
+        last_rendered_state = current_state;
+        view_initialized = 1;
+        ui.force = 0;
 
-    /* Blinking cursor */
-    if ((fm1_ms / 500u) & 1u) {
+        /* 1. Desktop background */
+        lcd_fill(0, 0, 240, 240, C_DESKTOP);
+
+        /* 2. 4d3d3d3 Window Cascades */
+        for (int32_t i = 0; i < nwindows; i++) {
+            int32_t ox = 4 + i * 8;
+            int32_t oy = 4 + i * 8;
+            int32_t ww = 232 - (nwindows - 1) * 8;
+            int32_t wh = 160 - (nwindows - 1) * 8;
+            if (ww < 160) ww = 160;
+            if (wh < 120) wh = 120;
+
+            cinco_draw_window_chrome(ox, oy, ww, wh, title);
+
+            /* Only draw content on topmost window */
+            if (i == nwindows - 1) {
+                if (perf.view_mode == 1) {
+                    cinco_draw_defrag_content(ox, oy, ww, wh);
+                    uint32_t bpm = perf.tempo ? perf.tempo : 120u;
+                    uint32_t ms_per_step = 15000u / bpm;
+                    if (ms_per_step == 0) ms_per_step = 1;
+                    last_rendered_defrag_step = perf.groove ? cinco_groove_get_step() : (uint8_t)((fm1_ms / ms_per_step) & 15u);
+                    last_rendered_defrag_prog = 50u + ((fm1_ms * bpm / 1200u) % 49u);
+                } else {
+                    int32_t cx = ox + 4 + (ww - 8 - anim->w) / 2;
+                    int32_t cy = oy + 21 + (wh - 25 - anim->h) / 2;
+                    cinco_blit_sprite(anim, perf.frame_idx, cx, cy, mosaic);
+                    last_rendered_frame = perf.frame_idx;
+                }
+            }
+        }
+
+        /* 3. Paul's COMPUTER Terminal */
+        cinco_draw_terminal_chrome(tx, ty, tw, th);
+        cinco_draw_terminal_text(tx, ty, tw, cursor_on);
+        memcpy(last_rendered_term, perf.term_line, sizeof(last_rendered_term));
+        last_rendered_cursor = cursor_on;
+
+        /* 4. Desktop Status Indicators Taskbar */
+        cinco_draw_taskbar();
+        last_rendered_taskbar = cur_taskbar;
+
+        /* 5..8 Overlays */
+        cinco_draw_overlays();
+        return;
+    }
+
+    /* Incremental / Dirty-Rect Rendering Path (0 ms overhead when static) */
+    int32_t ox = 4 + (nwindows - 1) * 8;
+    int32_t oy = 4 + (nwindows - 1) * 8;
+    int32_t ww = 232 - (nwindows - 1) * 8;
+    int32_t wh = 160 - (nwindows - 1) * 8;
+    if (ww < 160) ww = 160;
+    if (wh < 120) wh = 120;
+
+    /* A. Window Content Update */
+    if (perf.view_mode == 1) {
+        uint32_t bpm = perf.tempo ? perf.tempo : 120u;
+        uint32_t ms_per_step = 15000u / bpm;
+        if (ms_per_step == 0) ms_per_step = 1;
+        uint8_t step = perf.groove ? cinco_groove_get_step() : (uint8_t)((fm1_ms / ms_per_step) & 15u);
+        uint32_t progress = 50u + ((fm1_ms * bpm / 1200u) % 49u);
+        if (step != last_rendered_defrag_step || progress != last_rendered_defrag_prog) {
+            cinco_draw_defrag_content(ox, oy, ww, wh);
+            last_rendered_defrag_step = step;
+            last_rendered_defrag_prog = progress;
+        }
+    } else {
+        if (perf.frame_idx != last_rendered_frame) {
+            int32_t cx = ox + 4 + (ww - 8 - anim->w) / 2;
+            int32_t cy = oy + 21 + (wh - 25 - anim->h) / 2;
+            cinco_blit_sprite(anim, perf.frame_idx, cx, cy, mosaic);
+            last_rendered_frame = perf.frame_idx;
+
+            if (perf.nsfw_popup_t > 0 || perf.receipt_t > 0 || perf.diag > 0 || perf.error_popup_t > 0) {
+                cinco_draw_overlays();
+            }
+        }
+    }
+
+    /* B. Terminal text update */
+    uint8_t term_dirty = (memcmp(last_rendered_term, perf.term_line, sizeof(last_rendered_term)) != 0);
+    if (term_dirty) {
+        cinco_draw_terminal_text(tx, ty, tw, cursor_on);
+        memcpy(last_rendered_term, perf.term_line, sizeof(last_rendered_term));
+        last_rendered_cursor = cursor_on;
+    } else if (cursor_on != last_rendered_cursor) {
+        /* C. Blinking cursor toggle: ONLY fill the 6x8 cursor rectangle */
         uint32_t len = 0;
         while (perf.term_line[2][len]) len++;
-        cinco_draw_char(tx + 6 + len * 6, ty + 41, '_', C_WHITE);
-    }
-
-    /* 4. Desktop Status Indicators Taskbar */
-    lcd_fill(0, 227, 240, 13, C_WIN_FACE);
-    lcd_fill(0, 227, 240, 1, C_WHITE);
-    lcd_fill(0, 239, 240, 1, C_BORDER_DARK);
-
-    int32_t bx = 2;
-
-    /* Active Octave indicator: [OCT: +0] (or -1, +1, etc.) */
-    char oct_buf[10];
-    oct_buf[0] = '['; oct_buf[1] = 'O'; oct_buf[2] = 'C'; oct_buf[3] = 'T'; oct_buf[4] = ':'; oct_buf[5] = ' ';
-    if (song.octave < 0) {
-        oct_buf[6] = '-';
-        oct_buf[7] = (char)('0' - song.octave);
-    } else {
-        oct_buf[6] = '+';
-        oct_buf[7] = (char)('0' + song.octave);
-    }
-    oct_buf[8] = ']';
-    oct_buf[9] = '\0';
-    cinco_draw_string(bx, 230, oct_buf, C_BLACK);
-    bx += 56;
-
-    /* Active Envelope: [BRASS], [PAD], [PLUCK], [BASS] */
-    static const char *const env_badges[4] = { "[BRASS]", "[PAD]", "[PLUCK]", "[BASS]" };
-    const char *env_str = env_badges[perf.env_mode % 4u];
-    cinco_draw_string(bx, 230, env_str, C_BLACK);
-    uint32_t elen = 0; while (env_str[elen]) elen++;
-    bx += (int32_t)(elen * 6u) + 2;
-
-    /* Active Scale: [CHR], [MIN], [MAJ], [PNT], [BLU] */
-    static const char *const scl_badges[5] = { "[CHR]", "[MIN]", "[MAJ]", "[PNT]", "[BLU]" };
-    const char *scl_str = scl_badges[perf.scale_mode % 5u];
-    cinco_draw_string(bx, 230, scl_str, C_BLACK);
-    uint32_t slen = 0; while (scl_str[slen]) slen++;
-    bx += (int32_t)(slen * 6u) + 2;
-
-    /* Active Tempo: [XXXBPM] */
-    char bpm_badge[12];
-    snprintf(bpm_badge, sizeof(bpm_badge), "[%uBPM]", (unsigned)perf.tempo);
-    cinco_draw_string(bx, 230, bpm_badge, C_PROG_BLUE);
-    uint32_t blen = 0; while (bpm_badge[blen]) blen++;
-    bx += (int32_t)(blen * 6u) + 2;
-
-    /* Active Modifiers */
-    if (perf.nude && bx + 36 <= 240) {
-        cinco_draw_string(bx, 230, "[NSFW]", C_RED);
-        bx += 38;
-    }
-    if (perf.wobble && bx + 30 <= 240) {
-        cinco_draw_string(bx, 230, "[WOB]", C_GREEN);
-        bx += 32;
-    }
-    if (perf.flail && bx + 42 <= 240) {
-        cinco_draw_string(bx, 230, "[FLARH]", C_AMBER);
-        bx += 44;
-    }
-    if (perf.groove && bx + 36 <= 240) {
-        cinco_draw_string(bx, 230, "[PLAY]", C_GREEN);
-        bx += 38;
-    }
-    if (perf.rec && bx + 30 <= 240) {
-        cinco_draw_string(bx, 230, "[REC]", C_RED);
-        bx += 32;
-    }
-
-    /* Coffee mug indicator on desktop taskbar next to terminal at (216, 222, 18, 14) */
-    if (bx <= 214) {
-        cinco_draw_coffee_mug(216, 222, perf.coffee_level);
-    }
-
-    /* 5. Overlays: NSFW Protocol Warning Dialog */
-    if (perf.nsfw_popup_t > 0) {
-        int32_t dx = 20, dy = 48, dw = 200, dh = 76;
-        lcd_fill(dx, dy, dw, dh, C_WIN_FACE);
-        lcd_fill(dx, dy, dw, 1, C_WHITE);
-        lcd_fill(dx, dy, 1, dh, C_WHITE);
-        lcd_fill(dx, dy + dh - 1, dw, 1, C_BORDER_DARK);
-        lcd_fill(dx + dw - 1, dy, 1, dh, C_BORDER_DARK);
-
-        /* Dialog blue title banner */
-        lcd_fill(dx + 3, dy + 3, dw - 6, 14, C_PROG_BLUE);
-        cinco_draw_string(dx + 6, dy + 6, "SECURITY PROTOCOL", C_WHITE);
-
-        cinco_draw_string(dx + 8, dy + 24, "THIS IS NOT SUITABLE", C_BLACK);
-        cinco_draw_string(dx + 8, dy + 36, "FOR WORK. ARE YOU SURE?", C_BLACK);
-
-        /* [YES] button */
-        lcd_fill(dx + dw - 60, dy + 48, 50, 18, C_WIN_FACE);
-        lcd_fill(dx + dw - 60, dy + 48, 50, 1, C_WHITE);
-        lcd_fill(dx + dw - 60, dy + 48, 1, 18, C_WHITE);
-        lcd_fill(dx + dw - 60, dy + 48 + 17, 50, 1, C_BORDER_DARK);
-        lcd_fill(dx + dw - 60 + 49, dy + 48, 1, 18, C_BORDER_DARK);
-        cinco_draw_string(dx + dw - 48, dy + 53, "[YES]", C_BLACK);
-    }
-
-    /* 6. Overlays: Oyster Smiling Receipt */
-    if (perf.receipt_t > 0) {
-        int32_t rx = 30, ry = 24, rw = 180, rh = 116;
-        lcd_fill(rx, ry, rw, rh, C_WHITE);
-        /* 3D bevel */
-        lcd_fill(rx + 1, ry + 1, rw - 2, 1, C_BORDER_MID);
-        lcd_fill(rx + 1, ry + 1, 1, rh - 2, C_BORDER_MID);
-        lcd_fill(rx + 1, ry + rh - 2, rw - 2, 1, C_BORDER_DARK);
-        lcd_fill(rx + rw - 2, ry + 1, 1, rh - 2, C_BORDER_DARK);
-        /* 1px black border: left, right, bottom */
-        lcd_fill(rx, ry, 1, rh, C_BLACK);
-        lcd_fill(rx + rw - 1, ry, 1, rh, C_BLACK);
-        lcd_fill(rx, ry + rh - 1, rw, 1, C_BLACK);
-        /* Perforated top border: 2px dashed segments */
-        for (int32_t px = rx; px < rx + rw; px += 4) {
-            lcd_fill(px, ry, 2, 1, C_BLACK);
+        int32_t cur_x = tx + 6 + (int32_t)len * 6;
+        int32_t cur_y = ty + 41;
+        lcd_fill((uint32_t)cur_x, (uint32_t)cur_y, 6, 8, C_BLACK);
+        if (cursor_on) {
+            cinco_draw_char(cur_x, cur_y, '_', C_WHITE);
         }
-        /* Receipt printout text */
-        cinco_draw_string(40, 32, "*** CINCO PRINTOUT ***", C_BLACK);
-        cinco_draw_string(40, 44, "OYSTER SMILING ( ^ _ ^ )", C_BLACK);
-        cinco_draw_string(40, 60, "CODE: 4d3d3d3", C_BLACK);
-        cinco_draw_string(40, 72, "STATUS: VERIFIED & SAVED", C_BLACK);
-        cinco_draw_string(40, 84, "FLASH: 0xFC000 COMMITTED", C_BLACK);
-        cinco_draw_string(40, 100, "[ OK ]  CINCO OS 2.5", C_BLACK);
+        last_rendered_cursor = cursor_on;
     }
 
-    /* 7. Overlays: Diagnostic Overlay */
-    if (perf.diag > 0) {
-        int32_t dx = 16, dy = 20, dw = 208, dh = 120;
-        /* Green-on-black retro diagnostic HUD box with 3D bevel */
-        lcd_fill(dx, dy, dw, dh, C_BLACK);
-        lcd_fill(dx, dy, dw, 1, C_WHITE);
-        lcd_fill(dx, dy, 1, dh, C_WHITE);
-        lcd_fill(dx, dy + dh - 1, dw, 1, C_BORDER_DARK);
-        lcd_fill(dx + dw - 1, dy, 1, dh, C_BORDER_DARK);
-        lcd_fill(dx + 1, dy + 1, dw - 2, 1, C_BORDER_MID);
-        lcd_fill(dx + 1, dy + 1, 1, dh - 2, C_BORDER_MID);
-
-        /* HUD Title & line */
-        cinco_draw_string(dx + 26, dy + 10, "=== SYSTEM DIAGNOSTICS ===", C_GREEN);
-        lcd_fill(dx + 6, dy + 22, dw - 12, 1, C_GREEN);
-
-        /* Retro diagnostic lines */
-        cinco_draw_string(dx + 12, dy + 28, "CPU: JieLi AC7916 120MHz", C_GREEN);
-        cinco_draw_string(dx + 12, dy + 44, "RAM: 56.8KB / 73.7KB (23% Free)", C_GREEN);
-        cinco_draw_string(dx + 12, dy + 60, "AUDIO: 44.1kHz 32-bit Q15", C_GREEN);
-        cinco_draw_string(dx + 12, dy + 76, "DANCER: 118px 4-bit RLE OK", C_GREEN);
-        cinco_draw_string(dx + 12, dy + 92, "GROOVE: 16-Step Sequencer", C_GREEN);
-    }
-
-    /* 8. Overlays: Cinco System Alert Dialog */
-    if (perf.error_popup_t > 0) {
-        cinco_draw_error_popup();
+    /* D. Taskbar badges update */
+    if (cur_taskbar != last_rendered_taskbar) {
+        cinco_draw_taskbar();
+        last_rendered_taskbar = cur_taskbar;
     }
 }
 
