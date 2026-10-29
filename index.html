@@ -1,0 +1,1596 @@
+<!doctype html>
+<!-- SPDX-License-Identifier: GPL-3.0-only
+     CINCO OS 2.5 Enterprise Synthesizer Workstation
+     Cinco Business Systems, Inc. [v2.5] (Celery Man Edition)
+     Portions derived from Felucca by Leo Kuroshita (@kurogedelic), Hügelton Instruments (GPL-3.0) -->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>CINCO OS 2.5 — Cinco Identity Generator</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 16 16%22%3E%3Crect width=%2216%22 height=%2216%22 fill=%22%23000080%22/%3E%3Crect x=%223%22 y=%222%22 width=%2210%22 height=%224%22 fill=%22%23fff%22/%3E%3Crect x=%223%22 y=%228%22 width=%2210%22 height=%226%22 fill=%22%23c0c0c0%22/%3E%3Ctext x=%224%22 y=%2213%22 font-family=%22monospace%22 font-size=%226%22 font-weight=%22bold%22 fill=%22%23000080%22%3E5%3C/text%3E%3C/svg%3E">
+<meta name="description" content="CINCO OS 2.5 (Celery Man Edition) enterprise synthesizer workstation running directly in your browser via WebAssembly.">
+<style>
+/* DotGothic16 for hardware knob labels */
+@font-face { font-family: "DotGothic16"; src: url("fonts/DotGothic16-subset.woff") format("woff"); font-display: swap; }
+
+:root {
+  --win-bg: #008080;
+  --win-gray: #c0c0c0;
+  --win-light: #ffffff;
+  --win-lighter: #dfdfdf;
+  --win-dark: #808080;
+  --win-darker: #0a0a0a;
+  --win-blue: #000080;
+  --win-blue-light: #1084d0;
+  --body: #1d1d1f; --tray: #141415; --part: #2a2a2d; --edge: #3a3a3e; --label: #d6d6d8;
+  --lit: #fff4d6; --green: #5fe08a; color-scheme: light;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  padding: 12px 10px 40px;
+  background-color: var(--win-bg);
+  color: #000000;
+  font-family: "MS Sans Serif", Tahoma, "Segoe UI", Arial, sans-serif;
+  font-size: 11px;
+  line-height: 1.4;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
+  user-select: none;
+}
+
+a { color: inherit; text-decoration: none; }
+a:hover { text-decoration: underline; }
+
+/* Desktop Icons on Teal Canvas */
+.desktop-icons {
+  position: fixed;
+  top: 14px;
+  left: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  z-index: 5;
+}
+
+.desktop-icon {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 68px;
+  text-align: center;
+  cursor: pointer;
+  text-decoration: none;
+  color: #ffffff;
+}
+
+.desktop-icon:focus, .desktop-icon:hover {
+  text-decoration: none;
+}
+
+.desktop-icon .icon-img {
+  width: 32px;
+  height: 32px;
+  margin-bottom: 4px;
+  filter: drop-shadow(1px 1px 0 rgba(0,0,0,0.8));
+}
+
+.desktop-icon .icon-lbl {
+  font-size: 11px;
+  padding: 1px 3px;
+  background: transparent;
+  color: #ffffff;
+  text-shadow: 1px 1px 1px #000;
+  border-radius: 2px;
+  line-height: 1.2;
+}
+
+.desktop-icon:focus .icon-lbl, .desktop-icon:active .icon-lbl {
+  background: var(--win-blue);
+  outline: 1px dotted #ffff80;
+}
+
+@media (max-width: 1080px) {
+  .desktop-icons { display: none; }
+}
+
+/* 3D Bevel Utilities */
+.bevel-raised {
+  border-top: 2px solid var(--win-light);
+  border-left: 2px solid var(--win-light);
+  border-right: 2px solid var(--win-darker);
+  border-bottom: 2px solid var(--win-darker);
+  box-shadow: inset 1px 1px 0 var(--win-lighter), inset -1px -1px 0 var(--win-dark);
+}
+
+.bevel-sunken {
+  border-top: 2px solid var(--win-dark);
+  border-left: 2px solid var(--win-dark);
+  border-right: 2px solid var(--win-light);
+  border-bottom: 2px solid var(--win-light);
+  box-shadow: inset 1px 1px 0 var(--win-darker), inset -1px -1px 0 var(--win-lighter);
+}
+
+/* Main Application Window Frame */
+.win-window {
+  width: 100%;
+  max-width: 1040px;
+  background-color: var(--win-gray);
+  position: relative;
+  z-index: 10;
+  display: flex;
+  flex-direction: column;
+}
+
+.win-titlebar {
+  height: 22px;
+  background: linear-gradient(90deg, var(--win-blue), var(--win-blue-light));
+  color: #ffffff;
+  padding: 2px 4px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-weight: bold;
+  font-size: 11px;
+  cursor: default;
+}
+
+.win-titlebar-left {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.win-title-icon {
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
+}
+
+.win-controls {
+  display: flex;
+  gap: 2px;
+  flex-shrink: 0;
+}
+
+.win-btn {
+  width: 16px;
+  height: 14px;
+  background: var(--win-gray);
+  border-top: 1px solid var(--win-light);
+  border-left: 1px solid var(--win-light);
+  border-right: 1px solid var(--win-darker);
+  border-bottom: 1px solid var(--win-darker);
+  box-shadow: inset 1px 1px 0 var(--win-lighter), inset -1px -1px 0 var(--win-dark);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  padding: 0;
+  font-family: monospace;
+  font-size: 9px;
+  font-weight: bold;
+  color: #000000;
+  line-height: 1;
+}
+
+.win-btn:active {
+  border-top: 1px solid var(--win-darker);
+  border-left: 1px solid var(--win-darker);
+  border-right: 1px solid var(--win-light);
+  border-bottom: 1px solid var(--win-light);
+  box-shadow: none;
+  padding-top: 1px;
+  padding-left: 1px;
+}
+
+/* Menu Bar */
+.win-menubar {
+  display: flex;
+  background: var(--win-gray);
+  padding: 2px 6px;
+  border-bottom: 1px solid var(--win-dark);
+  position: relative;
+}
+
+.menu-item {
+  position: relative;
+  padding: 2px 7px;
+  cursor: pointer;
+  color: #000000;
+}
+
+.menu-item:hover, .menu-item.active {
+  background: var(--win-blue);
+  color: #ffffff;
+}
+
+.menu-dropdown {
+  display: none;
+  position: absolute;
+  top: 100%;
+  left: 0;
+  background: var(--win-gray);
+  min-width: 190px;
+  border-top: 2px solid var(--win-light);
+  border-left: 2px solid var(--win-light);
+  border-right: 2px solid var(--win-darker);
+  border-bottom: 2px solid var(--win-darker);
+  box-shadow: 2px 2px 5px rgba(0,0,0,0.4);
+  padding: 2px 0;
+  z-index: 100;
+}
+
+.menu-item.active .menu-dropdown {
+  display: block;
+}
+
+.dropdown-item {
+  padding: 4px 14px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  color: #000000;
+  font-weight: normal;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.dropdown-item:hover {
+  background: var(--win-blue);
+  color: #ffffff;
+}
+
+.dropdown-divider {
+  height: 1px;
+  background: var(--win-dark);
+  border-bottom: 1px solid var(--win-light);
+  margin: 3px 2px;
+}
+
+.dropdown-shortcut {
+  font-size: 10px;
+  color: #666;
+  margin-left: 16px;
+}
+
+.dropdown-item:hover .dropdown-shortcut {
+  color: #dfdfdf;
+}
+
+/* Window Content Client Area */
+.win-content {
+  padding: 6px;
+  background: var(--win-gray);
+}
+
+.client-inset {
+  background: #101012;
+  border-top: 2px solid var(--win-dark);
+  border-left: 2px solid var(--win-dark);
+  border-right: 2px solid var(--win-light);
+  border-bottom: 2px solid var(--win-light);
+  box-shadow: inset 1px 1px 0 var(--win-darker), inset -1px -1px 0 var(--win-lighter);
+  position: relative;
+  overflow: hidden;
+}
+
+/* Device Simulator SVG/Canvas */
+.device {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 1000 / 624;
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-touch-callout: none;
+  touch-action: manipulation;
+}
+
+.device svg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+
+.device canvas {
+  position: absolute;
+  image-rendering: crisp-edges;
+  image-rendering: pixelated;
+  background: #000;
+}
+
+.hit {
+  position: absolute;
+  touch-action: none;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  border-radius: 10px;
+}
+
+.hit.knob {
+  cursor: ns-resize;
+  border-radius: 50%;
+}
+
+.hit:focus-visible {
+  outline: 2px solid var(--lit);
+  outline-offset: 2px;
+}
+
+.face { transition: fill .05s; }
+.dim .face.btn { fill: #3a3934; }
+.lit .face.btn { fill: var(--lit); }
+.lit text { fill: #1d1d1f; }
+.green .face.btn { fill: var(--green); }
+.green text { fill: #0d2414; }
+.face.key { fill: #0c0c0d; stroke: var(--edge); stroke-width: 1.5; }
+.slit { fill: #3a3a3c; transition: fill .05s; }
+.dim .slit { fill: #77777b; }
+.lit .slit { fill: #ececee; filter: drop-shadow(0 0 3px rgba(255, 255, 255, .6)); }
+
+@keyframes breath-btn { 0%, 100% { fill: #3a3934; } 50% { fill: #d8cfb6; } }
+@keyframes breath-slit { 0%, 100% { fill: #3a3a3c; } 50% { fill: #c8c8ca; } }
+@keyframes breath-btn-lo { 0%, 100% { fill: #3a3934; } 50% { fill: #aca592; } }
+@keyframes breath-slit-lo { 0%, 100% { fill: #3a3a3c; } 50% { fill: #a1a1a3; } }
+.breath .face.btn { animation: breath-btn 1.13s ease-in-out infinite; }
+.breath .slit { animation: breath-slit 1.13s ease-in-out infinite; }
+.dimlo .breath .face.btn { animation-name: breath-btn-lo; }
+.dimlo .breath .slit { animation-name: breath-slit-lo; }
+@media (prefers-reduced-motion: reduce) {
+  .breath .face.btn, .breath .slit { animation: none; }
+  .breath .face.btn { fill: #aca592; }
+  .breath .slit { fill: #a1a1a3; }
+}
+
+.mid .slit { fill: #9a9a9e; }
+.dimlo .mid .slit { fill: #8a8a8e; }
+.held .face { stroke: var(--lit); stroke-width: 3; }
+.latched .face { stroke: #79b8ff; stroke-width: 3; }
+
+.start {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-content: center;
+  justify-items: center;
+  gap: 12px;
+  background: rgba(0, 0, 0, .6);
+  border-radius: 4% / 6%;
+}
+
+.start[hidden] { display: none; }
+
+.start button {
+  font-family: "MS Sans Serif", Tahoma, Arial, sans-serif;
+  font-size: 14px;
+  font-weight: bold;
+  padding: 8px 24px;
+  background: var(--win-gray);
+  color: #000;
+  border-top: 2px solid var(--win-light);
+  border-left: 2px solid var(--win-light);
+  border-right: 2px solid var(--win-darker);
+  border-bottom: 2px solid var(--win-darker);
+  box-shadow: inset 1px 1px 0 var(--win-lighter), inset -1px -1px 0 var(--win-dark);
+  cursor: pointer;
+}
+
+.start button:active {
+  border-top: 2px solid var(--win-darker);
+  border-left: 2px solid var(--win-darker);
+  border-right: 2px solid var(--win-light);
+  border-bottom: 2px solid var(--win-light);
+  box-shadow: none;
+  padding-top: 9px;
+  padding-left: 25px;
+}
+
+.start button:disabled { opacity: .5; cursor: progress; }
+.start p { margin: 0; max-width: 32em; text-align: center; color: #fff; text-shadow: 1px 1px 1px #000; }
+
+/* Keyboard Instructions Bar */
+.keys-bar {
+  margin-top: 4px;
+  padding: 3px 6px;
+  background: var(--win-gray);
+  border-top: 1px solid var(--win-dark);
+  border-left: 1px solid var(--win-dark);
+  border-right: 1px solid var(--win-light);
+  border-bottom: 1px solid var(--win-light);
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  font-size: 10px;
+  color: #222;
+}
+
+.keys-bar span { white-space: nowrap; }
+.keys-bar select { font-family: inherit; font-size: 10px; }
+
+kbd {
+  font-family: monospace;
+  font-size: 10px;
+  font-weight: bold;
+  background: #ffffff;
+  border-top: 1px solid var(--win-light);
+  border-left: 1px solid var(--win-light);
+  border-right: 1px solid var(--win-darker);
+  border-bottom: 1px solid var(--win-darker);
+  padding: 0 4px;
+  color: #000;
+}
+
+/* Sunken Window Status Bar */
+.win-statusbar {
+  display: flex;
+  gap: 3px;
+  padding: 3px 4px 1px;
+  background: var(--win-gray);
+  border-top: 1px solid var(--win-light);
+}
+
+.status-panel {
+  padding: 2px 6px;
+  background: var(--win-gray);
+  border-top: 1px solid var(--win-dark);
+  border-left: 1px solid var(--win-dark);
+  border-right: 1px solid var(--win-light);
+  border-bottom: 1px solid var(--win-light);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-size: 10px;
+  color: #333;
+}
+
+.status-panel.main-panel { flex: 1; }
+
+/* Bottom Windows 98 Taskbar */
+.win-taskbar {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 28px;
+  background: var(--win-gray);
+  border-top: 2px solid var(--win-light);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 2px 3px;
+  z-index: 1000;
+  box-shadow: 0 -1px 0 var(--win-dark);
+}
+
+.taskbar-left {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  flex: 1;
+}
+
+.start-btn {
+  height: 22px;
+  background: var(--win-gray);
+  border-top: 2px solid var(--win-light);
+  border-left: 2px solid var(--win-light);
+  border-right: 2px solid var(--win-darker);
+  border-bottom: 2px solid var(--win-darker);
+  box-shadow: inset 1px 1px 0 var(--win-lighter), inset -1px -1px 0 var(--win-dark);
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 0 6px;
+  font-family: inherit;
+  font-size: 11px;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.start-btn:active, .start-btn.pressed {
+  border-top: 2px solid var(--win-darker);
+  border-left: 2px solid var(--win-darker);
+  border-right: 2px solid var(--win-light);
+  border-bottom: 2px solid var(--win-light);
+  box-shadow: none;
+  padding-top: 1px;
+  padding-left: 7px;
+}
+
+.start-logo {
+  width: 14px;
+  height: 14px;
+}
+
+.task-pill {
+  height: 22px;
+  max-width: 220px;
+  background: var(--win-gray);
+  border-top: 2px solid var(--win-darker);
+  border-left: 2px solid var(--win-darker);
+  border-right: 2px solid var(--win-light);
+  border-bottom: 2px solid var(--win-light);
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 0 8px;
+  font-size: 11px;
+  font-weight: bold;
+  cursor: pointer;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  background-color: #dcdcdc;
+  box-shadow: inset 1px 1px 0 var(--win-dark);
+}
+
+.task-pill.inactive {
+  background-color: var(--win-gray);
+  border-top: 2px solid var(--win-light);
+  border-left: 2px solid var(--win-light);
+  border-right: 2px solid var(--win-darker);
+  border-bottom: 2px solid var(--win-darker);
+  box-shadow: inset 1px 1px 0 var(--win-lighter), inset -1px -1px 0 var(--win-dark);
+  font-weight: normal;
+}
+
+.systray {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  height: 22px;
+  padding: 0 6px;
+  background: var(--win-gray);
+  border-top: 1px solid var(--win-dark);
+  border-left: 1px solid var(--win-dark);
+  border-right: 1px solid var(--win-light);
+  border-bottom: 1px solid var(--win-light);
+  font-size: 11px;
+  color: #000;
+}
+
+/* Start Menu */
+.start-menu {
+  display: none;
+  position: fixed;
+  bottom: 28px;
+  left: 2px;
+  width: 195px;
+  background: var(--win-gray);
+  border-top: 2px solid var(--win-light);
+  border-left: 2px solid var(--win-light);
+  border-right: 2px solid var(--win-darker);
+  border-bottom: 2px solid var(--win-darker);
+  box-shadow: 2px 2px 10px rgba(0,0,0,0.5);
+  z-index: 2000;
+  display: flex;
+}
+
+.start-menu:not(.open) {
+  display: none;
+}
+
+.start-menu-side {
+  width: 24px;
+  background: linear-gradient(180deg, #000080, #1084d0);
+  writing-mode: vertical-rl;
+  transform: rotate(180deg);
+  color: #ffffff;
+  font-weight: bold;
+  font-size: 13px;
+  letter-spacing: 2px;
+  padding: 8px 3px;
+  text-shadow: 1px 1px 0 #000;
+}
+
+.start-menu-side span {
+  font-weight: 900;
+  color: #dfdfdf;
+}
+
+.start-menu-items {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  padding: 3px 0;
+}
+
+.start-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 5px 10px;
+  cursor: pointer;
+  color: #000;
+  font-size: 11px;
+}
+
+.start-item:hover {
+  background: var(--win-blue);
+  color: #fff;
+}
+
+.start-item-icon {
+  width: 16px;
+  height: 16px;
+}
+
+.start-divider {
+  height: 1px;
+  background: var(--win-dark);
+  border-bottom: 1px solid var(--win-light);
+  margin: 3px 2px;
+}
+
+/* Modal Dialog for "About CINCO OS 2.5" */
+.modal-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.4);
+  z-index: 5000;
+  align-items: center;
+  justify-content: center;
+}
+
+.modal-overlay.open {
+  display: flex;
+}
+
+.modal-dialog {
+  width: 360px;
+  background: var(--win-gray);
+  border-top: 2px solid var(--win-light);
+  border-left: 2px solid var(--win-light);
+  border-right: 2px solid var(--win-darker);
+  border-bottom: 2px solid var(--win-darker);
+  box-shadow: 2px 2px 10px rgba(0,0,0,0.6);
+  padding: 3px;
+}
+
+.modal-body {
+  padding: 16px 14px 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.modal-header-row {
+  display: flex;
+  gap: 14px;
+  align-items: center;
+}
+
+.modal-logo {
+  width: 44px;
+  height: 44px;
+  flex-shrink: 0;
+}
+
+.modal-info h3 {
+  margin: 0 0 4px;
+  font-size: 13px;
+  color: var(--win-blue);
+}
+
+.modal-info p {
+  margin: 0;
+  font-size: 11px;
+  color: #333;
+}
+
+.modal-box {
+  background: #ffffff;
+  padding: 8px 10px;
+  border-top: 1px solid var(--win-dark);
+  border-left: 1px solid var(--win-dark);
+  border-right: 1px solid var(--win-light);
+  border-bottom: 1px solid var(--win-light);
+  font-size: 11px;
+  line-height: 1.4;
+}
+
+.modal-btn-row {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 6px;
+}
+
+.dialog-btn {
+  min-width: 72px;
+  padding: 4px 14px;
+  background: var(--win-gray);
+  border-top: 2px solid var(--win-light);
+  border-left: 2px solid var(--win-light);
+  border-right: 2px solid var(--win-darker);
+  border-bottom: 2px solid var(--win-darker);
+  box-shadow: inset 1px 1px 0 var(--win-lighter), inset -1px -1px 0 var(--win-dark);
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 11px;
+  font-weight: bold;
+}
+
+.dialog-btn:active {
+  border-top: 2px solid var(--win-darker);
+  border-left: 2px solid var(--win-darker);
+  border-right: 2px solid var(--win-light);
+  border-bottom: 2px solid var(--win-light);
+  box-shadow: none;
+  padding-top: 5px;
+  padding-left: 15px;
+}
+</style>
+</head>
+<body>
+
+<!-- Windows 98 Desktop Icons -->
+<div class="desktop-icons">
+  <div class="desktop-icon" id="d-mycomp" tabindex="0">
+    <svg class="icon-img" viewBox="0 0 32 32">
+      <rect x="3" y="3" width="26" height="19" rx="1" fill="#c0c0c0" stroke="#000" stroke-width="1.5"/>
+      <rect x="5" y="5" width="22" height="15" fill="#008080"/>
+      <path d="M12 22 L8 28 L24 28 L20 22 Z" fill="#808080" stroke="#000" stroke-width="1.5"/>
+      <rect x="7" y="27" width="18" height="2" fill="#dfdfdf"/>
+    </svg>
+    <span class="icon-lbl">My Computer</span>
+  </div>
+
+  <a class="desktop-icon" href="installer/" id="d-installer" tabindex="0">
+    <svg class="icon-img" viewBox="0 0 32 32">
+      <rect x="4" y="2" width="24" height="28" rx="2" fill="#000080" stroke="#000" stroke-width="1.5"/>
+      <rect x="8" y="4" width="16" height="8" fill="#ffffff"/>
+      <rect x="18" y="6" width="4" height="5" fill="#808080"/>
+      <rect x="8" y="16" width="16" height="10" fill="#c0c0c0" stroke="#000" stroke-width="1"/>
+      <text x="11" y="24" font-family="monospace" font-size="9" font-weight="bold" fill="#000080">5</text>
+    </svg>
+    <span class="icon-lbl">Setup Wizard</span>
+  </a>
+
+  <a class="desktop-icon" href="https://github.com/mrjoshida/CINCO/blob/main/docs/cinco/MANUAL.md" target="_blank" id="d-manual" tabindex="0">
+    <svg class="icon-img" viewBox="0 0 32 32">
+      <path d="M6 3 L22 3 L27 8 L27 29 L6 29 Z" fill="#ffffff" stroke="#000" stroke-width="1.5"/>
+      <path d="M22 3 L22 8 L27 8 Z" fill="#c0c0c0" stroke="#000" stroke-width="1"/>
+      <line x1="9" y1="12" x2="23" y2="12" stroke="#000" stroke-width="1.5"/>
+      <line x1="9" y1="16" x2="23" y2="16" stroke="#000" stroke-width="1.5"/>
+      <line x1="9" y1="20" x2="23" y2="20" stroke="#000" stroke-width="1.5"/>
+      <line x1="9" y1="24" x2="18" y2="24" stroke="#000" stroke-width="1.5"/>
+    </svg>
+    <span class="icon-lbl">CINCO Manual</span>
+  </a>
+
+  <div class="desktop-icon" id="d-defrag" tabindex="0">
+    <svg class="icon-img" viewBox="0 0 32 32">
+      <rect x="3" y="4" width="26" height="24" fill="#c0c0c0" stroke="#000" stroke-width="1.5"/>
+      <rect x="6" y="7" width="5" height="5" fill="#000080"/>
+      <rect x="13" y="7" width="5" height="5" fill="#000080"/>
+      <rect x="20" y="7" width="5" height="5" fill="#ffffff"/>
+      <rect x="6" y="14" width="5" height="5" fill="#008000"/>
+      <rect x="13" y="14" width="5" height="5" fill="#ff0000"/>
+      <rect x="20" y="14" width="5" height="5" fill="#008000"/>
+      <rect x="6" y="21" width="5" height="5" fill="#ffffff"/>
+      <rect x="13" y="21" width="5" height="5" fill="#000080"/>
+      <rect x="20" y="21" width="5" height="5" fill="#000080"/>
+    </svg>
+    <span class="icon-lbl">Disk Defrag</span>
+  </div>
+
+  <div class="desktop-icon" id="d-recycle" tabindex="0">
+    <svg class="icon-img" viewBox="0 0 32 32">
+      <path d="M7 8 L25 8 L23 28 L9 28 Z" fill="#c0c0c0" stroke="#000" stroke-width="1.5"/>
+      <line x1="5" y1="8" x2="27" y2="8" stroke="#000" stroke-width="2"/>
+      <rect x="12" y="5" width="8" height="3" fill="#808080" stroke="#000" stroke-width="1"/>
+      <line x1="12" y1="12" x2="12" y2="24" stroke="#808080" stroke-width="1.5"/>
+      <line x1="16" y1="12" x2="16" y2="24" stroke="#808080" stroke-width="1.5"/>
+      <line x1="20" y1="12" x2="20" y2="24" stroke="#808080" stroke-width="1.5"/>
+    </svg>
+    <span class="icon-lbl">Recycle Bin</span>
+  </div>
+</div>
+
+<!-- Main Application Window -->
+<main class="win-window bevel-raised" id="main-win">
+  <!-- Titlebar -->
+  <div class="win-titlebar" id="win-drag-bar">
+    <div class="win-titlebar-left">
+      <svg class="win-title-icon" viewBox="0 0 16 16">
+        <rect width="16" height="16" fill="#000080"/>
+        <rect x="3" y="2" width="10" height="4" fill="#fff"/>
+        <rect x="3" y="8" width="10" height="6" fill="#c0c0c0"/>
+        <text x="4" y="13" font-family="monospace" font-size="6" font-weight="bold" fill="#000080">5</text>
+      </svg>
+      <span>Cinco Identity Generator 2.5™ - [CINCO OS 2.5]</span>
+    </div>
+    <div class="win-controls">
+      <button class="win-btn" id="btn-win-min" title="Minimize">_</button>
+      <button class="win-btn" id="btn-win-max" title="Maximize">口</button>
+      <button class="win-btn" id="btn-win-close" title="Close">×</button>
+    </div>
+  </div>
+
+  <!-- Menu Bar -->
+  <nav class="win-menubar">
+    <div class="menu-item" tabindex="0">
+      <span><u>F</u>ile</span>
+      <div class="menu-dropdown">
+        <div class="dropdown-item" id="m-switch-on"><span><u>P</u>ower Switch</span><span class="dropdown-shortcut">Ctrl+O</span></div>
+        <div class="dropdown-item" id="m-restart"><span><u>R</u>eset Terminal</span><span class="dropdown-shortcut">Ctrl+R</span></div>
+        <div class="dropdown-divider"></div>
+        <a class="dropdown-item" href="installer/"><span><u>F</u>lash Hardware...</span></a>
+        <div class="dropdown-divider"></div>
+        <div class="dropdown-item" id="m-exit"><span>E<u>x</u>it</span><span class="dropdown-shortcut">Alt+F4</span></div>
+      </div>
+    </div>
+
+    <div class="menu-item" tabindex="0">
+      <span><u>D</u>ancers</span>
+      <div class="menu-dropdown">
+        <div class="dropdown-item" id="m-celery"><span><u>C</u>elery Man (Default)</span></div>
+        <div class="dropdown-item" id="m-oyster"><span><u>O</u>yster Smiling</span></div>
+        <div class="dropdown-item" id="m-tayne"><span><u>T</u>ayne (BETA)</span></div>
+        <div class="dropdown-item" id="m-speech"><span><u>S</u>peech Synthesizer</span></div>
+      </div>
+    </div>
+
+    <div class="menu-item" tabindex="0">
+      <span><u>K</u>inetics</span>
+      <div class="menu-dropdown">
+        <div class="dropdown-item" id="m-wobble"><span><u>H</u>at Wobble (LFO)</span><span class="dropdown-shortcut">4</span></div>
+        <div class="dropdown-item" id="m-flail"><span><u>F</u>larhgunnstow (ARP)</span><span class="dropdown-shortcut">9</span></div>
+        <div class="dropdown-item" id="m-nude"><span><u>N</u>ude Tayne Mode (FX)</span><span class="dropdown-shortcut">1</span></div>
+        <div class="dropdown-divider"></div>
+        <div class="dropdown-item" id="m-k4d"><span>Kick up the <u>4</u>d3d3d3</span><span class="dropdown-shortcut">K1</span></div>
+      </div>
+    </div>
+
+    <div class="menu-item" tabindex="0">
+      <span><u>T</u>ools</span>
+      <div class="menu-dropdown">
+        <div class="dropdown-item" id="m-defrag"><span>Disk <u>D</u>efragmenter</span><span class="dropdown-shortcut">SEQ</span></div>
+        <div class="dropdown-item" id="m-boss"><span>Lotus 1-2-3 <u>B</u>oss Key</span><span class="dropdown-shortcut">EDIT</span></div>
+        <div class="dropdown-item" id="m-screensaver"><span>After Dark <u>S</u>creensaver</span></div>
+      </div>
+    </div>
+
+    <div class="menu-item" tabindex="0">
+      <span><u>H</u>elp</span>
+      <div class="menu-dropdown">
+        <a class="dropdown-item" href="https://github.com/mrjoshida/CINCO/blob/main/docs/cinco/MANUAL.md" target="_blank"><span>CINCO 2.5 <u>M</u>anual</span></a>
+        <a class="dropdown-item" href="https://github.com/mrjoshida/CINCO" target="_blank"><span>GitHub <u>R</u>epository</span></a>
+        <div class="dropdown-divider"></div>
+        <div class="dropdown-item" id="m-about"><span><u>A</u>bout CINCO OS 2.5...</span></div>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Client Inset Area -->
+  <div class="win-content">
+    <div class="client-inset">
+      <div class="device" id="device">
+        <svg id="panel" viewBox="0 0 1000 624" aria-hidden="true"></svg>
+        <canvas id="screen" width="240" height="240" role="img" aria-label="The screen"></canvas>
+        <div class="start" id="start"><button id="go" type="button">Switch on</button><p id="status" hidden></p></div>
+      </div>
+    </div>
+
+    <!-- Shortcut Keys Bar -->
+    <div class="keys-bar">
+      <span><kbd>Z</kbd>–<kbd>'</kbd> <kbd>Q</kbd>–<kbd>O</kbd> Synthesizer Keys</span>
+      <span><kbd>1</kbd>–<kbd>=</kbd> FX … REC</span>
+      <span><kbd>[</kbd> <kbd>]</kbd> Octave</span>
+      <span><kbd>↑</kbd> <kbd>↓</kbd> Select</span>
+      <span><kbd>←</kbd> <kbd>→</kbd> Algo</span>
+      <span><kbd>Shift</kbd>-click holds a button</span>
+      <span id="midiknobs" hidden><label><input type="checkbox" id="knobson"> MIDI CC 20–27 turn knobs</label>
+      <select id="knobmode" aria-label="How the controller sends CC 20–26" hidden>
+        <option value="abs">absolute</option>
+        <option value="bin">relative 64±n</option>
+        <option value="twos">relative 2's complement</option>
+        <option value="sign">relative sign bit</option>
+      </select></span>
+    </div>
+  </div>
+
+  <!-- Sunken Status Bar -->
+  <footer class="win-statusbar">
+    <div class="status-panel main-panel" id="status-main">Ready - Click 'Switch on' to initialize CINCO OS 2.5</div>
+    <div class="status-panel">User: Paul (Managing Director)</div>
+    <div class="status-panel">OS: CINCO OS 2.5</div>
+    <div class="status-panel">Bus: ST7789 12MHz SPI</div>
+    <div class="status-panel">DSP: 4d3d3d3</div>
+  </footer>
+</main>
+
+<!-- Bottom Taskbar -->
+<footer class="win-taskbar">
+  <div class="taskbar-left">
+    <button class="start-btn" id="start-btn">
+      <svg class="start-logo" viewBox="0 0 16 16">
+        <rect width="16" height="16" fill="#000080"/>
+        <rect x="3" y="2" width="10" height="4" fill="#fff"/>
+        <rect x="3" y="8" width="10" height="6" fill="#c0c0c0"/>
+        <text x="4" y="13" font-family="monospace" font-size="6" font-weight="bold" fill="#000080">5</text>
+      </svg>
+      <span>Start</span>
+    </button>
+
+    <div class="task-pill" id="task-pill-main">
+      <svg width="14" height="14" viewBox="0 0 16 16">
+        <rect width="16" height="16" fill="#000080"/>
+        <text x="4" y="12" font-family="monospace" font-size="9" font-weight="bold" fill="#fff">5</text>
+      </svg>
+      <span>Cinco Identity Generator 2.5™</span>
+    </div>
+
+    <a class="task-pill inactive" href="installer/">
+      <svg width="14" height="14" viewBox="0 0 16 16">
+        <rect width="16" height="16" fill="#808080"/>
+        <text x="4" y="12" font-family="monospace" font-size="9" font-weight="bold" fill="#fff">💾</text>
+      </svg>
+      <span>Setup Wizard</span>
+    </a>
+  </div>
+
+  <div class="systray">
+    <span title="Audio Worklet 44.1 kHz">🔊</span>
+    <span title="MIDI Controller Active">🎛️</span>
+    <span id="systray-clock">12:00 PM</span>
+  </div>
+</footer>
+
+<!-- Start Menu -->
+<div class="start-menu" id="start-menu">
+  <div class="start-menu-side">
+    <span>CINCO</span> OS 2.5
+  </div>
+  <div class="start-menu-items">
+    <div class="start-item" id="sm-app">
+      <span class="start-item-icon">🎛️</span>
+      <span><b>Identity Generator 2.5</b></span>
+    </div>
+    <a class="start-item" href="installer/">
+      <span class="start-item-icon">💾</span>
+      <span>Hardware Setup Wizard</span>
+    </a>
+    <div class="start-item" id="sm-defrag">
+      <span class="start-item-icon">📊</span>
+      <span>Disk Defragmenter</span>
+    </div>
+    <a class="start-item" href="https://github.com/mrjoshida/CINCO/blob/main/docs/cinco/MANUAL.md" target="_blank">
+      <span class="start-item-icon">📖</span>
+      <span>System Manual</span>
+    </a>
+    <div class="start-divider"></div>
+    <div class="start-item" id="sm-about">
+      <span class="start-item-icon">ℹ️</span>
+      <span>About CINCO OS...</span>
+    </div>
+    <div class="start-divider"></div>
+    <div class="start-item" id="sm-shutdown">
+      <span class="start-item-icon">⭕</span>
+      <span>Shut <u>D</u>own...</span>
+    </div>
+  </div>
+</div>
+
+<!-- About Modal Dialog -->
+<div class="modal-overlay" id="about-modal">
+  <div class="modal-dialog bevel-raised">
+    <div class="win-titlebar">
+      <span>About CINCO OS 2.5</span>
+      <button class="win-btn" id="modal-close">×</button>
+    </div>
+    <div class="modal-body">
+      <div class="modal-header-row">
+        <svg class="modal-logo" viewBox="0 0 32 32">
+          <rect width="32" height="32" rx="4" fill="#000080"/>
+          <rect x="6" y="4" width="20" height="8" fill="#fff"/>
+          <rect x="6" y="16" width="20" height="12" fill="#c0c0c0"/>
+          <text x="8" y="26" font-family="monospace" font-size="14" font-weight="bold" fill="#000080">5</text>
+        </svg>
+        <div class="modal-info">
+          <h3>Cinco Identity Generator 2.5™</h3>
+          <p>CINCO OS 2.5 Enterprise Workstation Platform</p>
+          <p>Version v2.5 (preview)</p>
+        </div>
+      </div>
+
+      <div class="modal-box">
+        <b>Cinco Business Systems, Inc.</b><br>
+        Portions derived from Felucca by Leo Kuroshita, Hügelton Instruments (GPL-3.0).<br><br>
+        <b>Licensed to:</b><br>
+        &nbsp;&nbsp;Paul (Senior Managing Director)<br>
+        &nbsp;&nbsp;Department of Identity Operations<br><br>
+        <b>Hardware Memory Available:</b> 73,728 Bytes SRAM<br>
+        <b>Dynamic Heap:</b> 301,984 Bytes DRAM<br>
+        <b>Display Bus:</b> 12 MHz SPI ST7789
+      </div>
+
+      <div class="modal-btn-row">
+        <button class="dialog-btn" id="modal-ok">OK</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script type="module">
+import { midiKnob, KNOB_MODES } from "./worklet.js";
+const NS = "http://www.w3.org/2000/svg";
+// panel.c's labels (bit = label) and encoder roles
+const B = { FX: 0, SCL: 1, ENV: 2, LFO: 3, EDIT: 4, GLO: 5, HOME: 6, SAVE: 7, ARP: 8, SEQ: 9, PLAY: 10, REC: 11, "OCT-": 12, "OCT+": 13 };
+const EN = { SELECT: 0, ALGORITHM: 1, PRESETS: 2, "KNOB 1": 3, "KNOB 2": 4, "KNOB 3": 5, "KNOB 4": 6 };
+const PLAY_GREEN = 14;
+// the 27 keys F3..G5: key k = k semitones above F3
+const WHITE = [0, 2, 4, 6, 7, 9, 11, 12, 14, 16, 18, 19, 21, 23, 24, 26];
+const BLACK = [1, 3, 5, 8, 10, 13, 15, 17, 20, 22, 25];
+const BLACK_AFTER = [0, 1, 2, 4, 5, 7, 8, 9, 11, 12, 14];      // the white key each black one follows
+const STORE = "felucca-emu-flash", KNOBS_ON = "felucca-emu-knobs", KNOB_MODE = "felucca-emu-knobmode";
+
+// ------------------------------------------------------------------ the panel
+// Two drawings of the same controls: WIDE after the FM-1's own layout, TALL for a phone held upright (the
+// screen larger, the keys across the whole width). Rebuilt when the orientation changes; the state stays.
+const ROW1 = ["FX", "SCL", "ENV", "LFO", "EDIT", "GLO"], ROW2 = ["HOME", "SAVE", "ARP", "SEQ", "PLAY", "REC"];
+const KNOBS = ["MASTER", "SELECT", "PRESETS", "ALGORITHM", "KNOB 1", "KNOB 2", "KNOB 3", "KNOB 4"];
+const KNOB_SUBS = { "KNOB 1": "4d3d3d3", "KNOB 2": "TONE", "KNOB 3": "TEMPO", "KNOB 4": "MIX" };
+const LAYOUTS = {
+  wide: {
+    w: 1000, h: 624, screen: [292, 44, 256],
+    knobs: [[105, 100, 24], [215, 100, 24], [105, 205, 24], [215, 205, 24], [610, 100, 22], [714, 100, 22], [818, 100, 22], [922, 100, 22]],
+    trays: [[50, 250, 220, 50], [568, 160, 400, 140]],
+    oct: [[60, 258, 90, 34], [170, 258, 90, 34]],
+    grid: [582, 174, 54, 48, 63, 62], keybed: [36, 332, 928, 256],
+  },
+  tall: {
+    w: 600, h: 1070, screen: [130, 104, 340],
+    knobs: [[66, 64, 24], [186, 64, 24], [414, 64, 24], [534, 64, 24], [90, 512, 26], [230, 512, 26], [370, 512, 26], [510, 512, 26]],
+    trays: [[14, 572, 572, 146], [150, 728, 300, 62]],
+    oct: [[164, 737, 128, 44], [308, 737, 128, 44]],
+    grid: [24, 582, 86, 60, 94, 70], keybed: [14, 800, 572, 256],
+  },
+};
+const svg = document.getElementById("panel"), device = document.getElementById("device"), canvas = document.getElementById("screen");
+function el(tag, attrs, parent = svg) {
+  const e = document.createElementNS(NS, tag);
+  for (const [k, v] of Object.entries(attrs)) e.setAttribute(k, v);
+  parent.appendChild(e);
+  return e;
+}
+const SANS = "-apple-system, 'Helvetica Neue', Arial, sans-serif", DOT = "'DotGothic16', " + SANS;
+function label(parent, x, y, s, size, font = SANS, ink = "var(--label)") {
+  const t = el("text", { x, y, "text-anchor": "middle", "font-family": font,
+                         "font-size": size, "font-weight": 600, fill: ink, "letter-spacing": ".04em" }, parent);
+  t.textContent = s;
+  return t;
+}
+const KEYNAMES = ["F", "F♯", "G", "G♯", "A", "A♯", "B", "C", "C♯", "D", "D♯", "E"];
+const keyName = (k) => KEYNAMES[k % 12] + (3 + Math.floor((k + 5) / 12));
+
+let node = null, btnMask = 0, keyMask = 0, latched = 0, masterValue = 700, lastLeds = [0, 0, 0, 0, 0], layout = null;
+const angle = Object.fromEntries(KNOBS.map((n) => [n, 0]));
+angle.MASTER = -135 + 270 * masterValue / 1023;
+const knobs = [], buttons = [], keys = [];
+const btnBy = new Map(), keyBy = new Map();                   // pointer / key code -> label bit or key
+const send = (m) => { if (node) node.port.postMessage(m); };
+
+function build(name) {
+  const L = LAYOUTS[name];
+  layout = name;
+  svg.innerHTML = "";
+  svg.setAttribute("viewBox", `0 0 ${L.w} ${L.h}`);
+  device.style.aspectRatio = `${L.w} / ${L.h}`;
+  for (const d of device.querySelectorAll(".hit")) d.remove();
+  knobs.length = buttons.length = keys.length = 0;
+  el("rect", { x: 4, y: 4, width: L.w - 8, height: L.h - 8, rx: 40, fill: "var(--body)" });
+  for (const [x, y, w, h] of L.trays) el("rect", { x, y, width: w, height: h, rx: 14, fill: "var(--tray)" });
+  const [sx, sy, ss] = L.screen;
+  el("rect", { x: sx, y: sy, width: ss, height: ss, rx: 18, fill: "#0b0b0c" });
+  const inset = ss / 32;                                         // the 240 x 240 panel inside its bezel
+  Object.assign(canvas.style, { left: `${(sx + inset) / L.w * 100}%`, top: `${(sy + inset) / L.h * 100}%`,
+                                width: `${(ss - 2 * inset) / L.w * 100}%`, height: `${(ss - 2 * inset) / L.h * 100}%` });
+  KNOBS.forEach((n, i) => {
+    const [x, y, r] = L.knobs[i], g = el("g", {});
+    el("circle", { cx: x, cy: y, r: r + 5, fill: "var(--tray)" }, g);
+    el("circle", { cx: x, cy: y, r, fill: "var(--part)", stroke: "var(--edge)", "stroke-width": 2 }, g);
+    const ind = n === "MASTER" ? el("line", { x1: x, y1: y - r + 5, x2: x, y2: y - r + 14, stroke: "var(--label)", "stroke-width": 3, "stroke-linecap": "round" }, g) : null;
+    label(g, x, y - r - 12, n, 16, DOT);
+    const sub = KNOB_SUBS[n];
+    if (sub) label(g, x, y + r + 16, sub, 12, DOT);
+    el("circle", { cx: x, cy: y, r: r + 12, fill: "transparent" }, g);
+    const fullName = sub ? `${n} (${sub})` : n;
+    knobs.push({ g, ind, x, y, name: fullName, key: n, role: n === "MASTER" ? "master" : EN[n] });
+  });
+  const button = ([x, y, w, h], n, sub) => {
+    const g = el("g", {});
+    el("rect", { x, y, width: w, height: h, rx: 8, fill: "var(--part)", stroke: "var(--edge)", "stroke-width": 1.5, class: "face btn" }, g);
+    const ink = n === "REC" ? "#ff453a" : undefined;
+    if (sub) { label(g, x + w / 2, y + h / 2 - 2, n, 10.8, SANS, ink); label(g, x + w / 2, y + h / 2 + 11, sub, 9.9); }
+    else label(g, x + w / 2, y + h / 2 + 4.5, n, 12.6, SANS, ink);
+    buttons.push({ g, bit: B[n], name: sub ? `${n} / ${sub}` : n });
+  };
+  button(L.oct[0], "OCT-");
+  button(L.oct[1], "OCT+");
+  const [gx, gy, gw, gh, dx, dy] = L.grid;
+  for (let i = 0; i < 6; i++) {
+    button([gx + i * dx, gy, gw, gh], ROW1[i]);
+    button([gx + i * dx, gy + dy, gw, gh], ROW2[i], ROW2[i] === "PLAY" ? "STOP" : "");
+  }
+  const [x0, y0, w, h] = L.keybed;
+  el("rect", { x: x0, y: y0, width: w, height: h, rx: 18, fill: "var(--tray)" });
+  // the keys: two rows of the same black keys, each with a slit down its middle that lights
+  const pitch = (w - 24) / 16, kw = pitch * 0.78, kh = h * 0.425, sw = Math.max(3, kw * 0.14);
+  const key = (cx, cy, k) => {
+    const g = el("g", {}), y = cy - kh / 2;
+    el("rect", { x: cx - kw / 2, y, width: kw, height: kh, rx: kw / 2, class: "face key" }, g);
+    el("rect", { x: cx - sw / 2, y: y + kw * 0.4, width: sw, height: kh - kw * 0.8, rx: sw / 2, class: "slit" }, g);
+    el("rect", { x: cx - pitch / 2, y: cy - h * 0.24, width: pitch, height: h * 0.48, fill: "transparent" }, g);   // its target
+    keys[k] = { g, name: keyName(k) };
+  };
+  WHITE.forEach((k, i) => key(x0 + 12 + (i + 0.5) * pitch, y0 + h * 0.75, k));
+  BLACK_AFTER.forEach((a, j) => key(x0 + 12 + (a + 1) * pitch, y0 + h * 0.25, BLACK[j]));
+  // HTML targets over the drawing (pointer-events: none): touch-action and pointer capture work on them everywhere
+  const hit = (c, cls, role) => {
+    const b = c.g.getBBox(), d = document.createElement("div");
+    d.className = "hit" + (cls ? " " + cls : "");
+    Object.assign(d.style, { left: `${b.x / L.w * 100}%`, top: `${b.y / L.h * 100}%`,
+                             width: `${b.width / L.w * 100}%`, height: `${b.height / L.h * 100}%` });
+    d.setAttribute("role", role);
+    d.setAttribute("aria-label", c.name);
+    d.title = c.name;
+    d.tabIndex = 0;
+    d.addEventListener("touchstart", (e) => e.preventDefault(), { passive: false });
+    d.addEventListener("contextmenu", (e) => e.preventDefault());
+    device.insertBefore(d, document.getElementById("start"));
+    c.hit = d;
+  };
+  knobs.forEach((k) => { hit(k, "knob", "slider"); bindKnob(k); drawKnob(k); });
+  buttons.forEach((b) => { hit(b, "", "button"); bindButton(b); });
+  keys.forEach((k, i) => { hit(k, "", "button"); bindKey(k, i); });
+  syncButtons(true);
+  syncKeys(true);
+  drawLights(lastLeds);
+}
+
+// ------------------------------------------------------------------ input
+function syncButtons(redraw) {
+  let m = latched;
+  for (const b of btnBy.values()) m |= 1 << b;
+  if (m !== btnMask) { btnMask = m; send({ type: "buttons", mask: m }); }
+  else if (!redraw) return;
+  for (const b of buttons) {
+    const on = !!(m & (1 << b.bit));
+    b.g.classList.toggle("held", on);
+    b.g.classList.toggle("latched", !!(latched & (1 << b.bit)));
+    b.hit.setAttribute("aria-pressed", on);
+  }
+}
+function syncKeys(redraw) {
+  let m = 0;
+  for (const k of keyBy.values()) m |= 1 << k;
+  if (m !== keyMask) { keyMask = m; send({ type: "keys", mask: m }); }
+  else if (!redraw) return;
+  keys.forEach((k, i) => k.g.classList.toggle("held", !!(m & (1 << i))));
+}
+function bindButton(b) {
+  b.hit.addEventListener("pointerdown", (e) => {
+    e.preventDefault();
+    if (e.shiftKey || e.button === 2) { latched ^= 1 << b.bit; syncButtons(true); return; }
+    if (latched & (1 << b.bit)) { latched &= ~(1 << b.bit); syncButtons(true); return; }
+    b.hit.setPointerCapture(e.pointerId);
+    btnBy.set("p" + e.pointerId, b.bit);
+    syncButtons();
+  });
+  b.hit.addEventListener("keydown", (e) => {
+    if ((e.key === "Enter" || e.key === " ") && !e.repeat) { btnBy.set("f" + b.bit, b.bit); syncButtons(); e.preventDefault(); e.stopPropagation(); }
+  });
+  b.hit.addEventListener("keyup", () => { if (btnBy.delete("f" + b.bit)) syncButtons(); });
+}
+function bindKey(k, i) {
+  k.hit.addEventListener("pointerdown", (e) => {
+    e.preventDefault();
+    k.hit.setPointerCapture(e.pointerId);
+    keyBy.set("p" + e.pointerId, i);
+    syncKeys();
+  });
+}
+function release(e) {
+  const id = "p" + e.pointerId;
+  if (btnBy.delete(id)) syncButtons();
+  if (keyBy.delete(id)) syncKeys();
+}
+for (const t of ["pointerup", "pointercancel", "lostpointercapture"]) device.addEventListener(t, release);
+
+function drawKnob(k) { if (k.ind) k.ind.setAttribute("transform", `rotate(${angle[k.key || k.name]} ${k.x} ${k.y})`); }
+function setMaster(v) {
+  masterValue = Math.max(0, Math.min(1023, v));
+  angle.MASTER = -135 + 270 * masterValue / 1023;
+  send({ type: "master", value: masterValue });
+}
+function turn(k, n) {
+  if (!n) return;
+  if (k.role === "master") setMaster(masterValue + n * 16);
+  else {
+    const id = k.key || k.name;
+    angle[id] = (angle[id] + n * 18) % 360;            // 20 detents a turn
+    send({ type: "enc", role: k.role, n });
+  }
+  drawKnob(k);
+}
+function bindKnob(k) {
+  let drag = null, wheel = 0;
+  k.hit.addEventListener("pointerdown", (e) => {
+    e.preventDefault();
+    k.hit.setPointerCapture(e.pointerId);
+    drag = { x: e.clientX, y: e.clientY, acc: 0 };
+  });
+  k.hit.addEventListener("pointermove", (e) => {
+    if (!drag) return;
+    const dx = e.clientX - drag.x, dy = drag.y - e.clientY;   // up or right: clockwise
+    drag.acc += Math.abs(dx) > Math.abs(dy) ? dx : dy;          // the larger of the two
+    drag.x = e.clientX;
+    drag.y = e.clientY;
+    const step = k.role === "master" ? 3 : 8, n = Math.trunc(drag.acc / step);
+    if (n) { drag.acc -= n * step; turn(k, n); }
+  });
+  const end = () => { drag = null; };
+  k.hit.addEventListener("pointerup", end);
+  k.hit.addEventListener("pointercancel", end);
+  k.hit.addEventListener("wheel", (e) => {
+    e.preventDefault();
+    const dy = e.deltaMode === 1 ? e.deltaY * 33 : e.deltaY;
+    if (Math.abs(dy) >= 50) { turn(k, dy < 0 ? 1 : -1); wheel = 0; return; }   // a wheel notch: one detent
+    wheel -= dy;                                                                   // a trackpad: by distance
+    const n = Math.trunc(wheel / 25);
+    if (n) { wheel -= n * 25; turn(k, n); }
+  }, { passive: false });
+  k.hit.addEventListener("keydown", (e) => {
+    const d = { ArrowUp: 1, ArrowRight: 1, ArrowDown: -1, ArrowLeft: -1 }[e.key];
+    if (d) { turn(k, d); e.preventDefault(); e.stopPropagation(); }
+  });
+}
+const tall = matchMedia("(orientation: portrait) and (max-width: 700px)");
+build(tall.matches ? "tall" : "wide");
+tall.addEventListener("change", () => build(tall.matches ? "tall" : "wide"));
+document.fonts?.load("16px DotGothic16").then(() => build(layout), () => {});   // the labels' width: the hit areas
+
+// the computer keyboard, every key one control: F3..A#4 on the Z (white) and A (black) rows, B4..G5 on Q..O
+// in semitones, the twelve buttons on the number row in the panel's order (held while the key is), [ ] OCT
+const KEYMAP = {};
+["KeyZ", "KeyX", "KeyC", "KeyV", "KeyB", "KeyN", "KeyM", "Comma", "Period", "Slash"].forEach((c, i) => KEYMAP[c] = { key: WHITE[i] });
+[["KeyS", 1], ["KeyD", 3], ["KeyF", 5], ["KeyH", 8], ["KeyJ", 10], ["KeyL", 13], ["Semicolon", 15], ["Quote", 17]].forEach(([c, k]) => KEYMAP[c] = { key: k });
+["KeyQ", "KeyW", "KeyE", "KeyR", "KeyT", "KeyY", "KeyU", "KeyI", "KeyO"].forEach((c, i) => KEYMAP[c] = { key: 18 + i });
+["Digit1", "Digit2", "Digit3", "Digit4", "Digit5", "Digit6", "Digit7", "Digit8", "Digit9", "Digit0", "Minus", "Equal"]
+  .forEach((c, i) => KEYMAP[c] = { btn: B[[...ROW1, ...ROW2][i]] });
+Object.assign(KEYMAP, { BracketLeft: { btn: B["OCT-"] }, BracketRight: { btn: B["OCT+"] } });
+const ARROWS = { ArrowUp: [EN.SELECT, 1], ArrowDown: [EN.SELECT, -1], ArrowRight: [EN.ALGORITHM, 1], ArrowLeft: [EN.ALGORITHM, -1] };
+addEventListener("keydown", (e) => {
+  if (!node || e.metaKey || e.ctrlKey || e.altKey || e.target.closest?.(".hit.knob")) return;
+  if (ARROWS[e.code]) { const [r, n] = ARROWS[e.code]; turn(knobs.find((k) => k.role === r), n); e.preventDefault(); return; }
+  const m = KEYMAP[e.code];
+  if (!m) return;
+  e.preventDefault();
+  if (e.repeat) return;
+  if (m.key !== undefined) { keyBy.set("k" + e.code, m.key); syncKeys(); }
+  else { btnBy.set("k" + e.code, m.btn); syncButtons(); }
+});
+addEventListener("keyup", (e) => {
+  const id = "k" + e.code;
+  if (keyBy.delete(id)) syncKeys();
+  if (btnBy.delete(id)) syncButtons();
+});
+addEventListener("blur", () => {
+  for (const id of [...btnBy.keys()]) if (id[0] !== "p") btnBy.delete(id);
+  for (const id of [...keyBy.keys()]) if (id[0] !== "p") keyBy.delete(id);
+  syncButtons();
+  syncKeys();
+});
+
+// ------------------------------------------------------------------ screen and lights
+const ctx = document.getElementById("screen").getContext("2d");
+const img = ctx.createImageData(240, 240);
+function drawScreen(fb) {
+  const d = img.data;
+  for (let i = 0; i < 240 * 240; i++) {
+    const v = fb[i], p = ((v >> 8) | (v << 8)) & 0xFFFF;          // the panel's byte order -> RGB565
+    d[i * 4] = ((p >> 11) & 31) * 255 / 31;
+    d[i * 4 + 1] = ((p >> 5) & 63) * 255 / 63;
+    d[i * 4 + 2] = (p & 31) * 255 / 31;
+    d[i * 4 + 3] = 255;
+  }
+  ctx.putImageData(img, 0, 0);
+}
+// the power-on sweep (hal/fm1_led_anim.h): a level per LED, lit frames /64 (| 128: the glow under them), drawn as the
+// LED's share of lit between its dark (or glowing) colour and the lit one, mixed in linear light
+const lin = (h) => [1, 3, 5].map((i) => (parseInt(h.slice(i, i + 2), 16) / 255) ** 2.2);
+const ANIM = { btn: [lin("#3a3934"), lin("#3a3934"), lin("#fff4d6")], slit: [lin("#3a3a3c"), lin("#77777b"), lin("#ececee")] };
+function animFill(kind, q) {
+  const [dark, glow, lit] = ANIM[kind], s = Math.min(q & 127, 64) / 64, base = q & 128 ? glow : dark;
+  const c = base.map((v, i) => Math.round(255 * (v + (lit[i] - v) * s) ** (1 / 2.2)));
+  return `rgb(${c.join(",")})`;
+}
+function drawAnim(anim) {
+  for (const b of buttons) b.g.querySelector(".face").style.fill = anim ? animFill("btn", anim[b.bit]) : "";
+  keys.forEach((k, i) => { k.g.querySelector(".slit").style.fill = anim ? animFill("slit", anim[14 + i]) : ""; });
+}
+function drawLights([litB, litK, dimB, dimK, dimLo = 0, brB = 0, brK = 0, midK = 0], anim = null) {
+  drawAnim(anim);
+  document.documentElement.classList.toggle("dimlo", !!dimLo);   // (the breath's lower peak)
+  for (const b of buttons) {
+    const bit = 1 << b.bit, green = b.bit === B.PLAY && (litB & (1 << PLAY_GREEN));
+    b.g.classList.toggle("lit", !!(litB & bit) && !green);
+    b.g.classList.toggle("green", !!green);
+    b.g.classList.toggle("dim", !!(dimB & bit));
+    b.g.classList.toggle("breath", !!(brB & bit));
+  }
+  keys.forEach((k, i) => {
+    k.g.classList.toggle("lit", !!(litK & (1 << i)));
+    k.g.classList.toggle("dim", !!(dimK & (1 << i)));
+    k.g.classList.toggle("breath", !!(brK & (1 << i)));
+    k.g.classList.toggle("mid", !!(midK & (1 << i)));
+  });
+}
+
+// ------------------------------------------------------------------ the flash, kept in this browser
+function loadFlash() {
+  try {
+    const raw = JSON.parse(localStorage.getItem(STORE) || "{}"), out = {};
+    for (const [off, b64] of Object.entries(raw)) out[off] = Uint8Array.from(atob(b64), (c) => c.charCodeAt(0));
+    return out;
+  } catch { return {}; }
+}
+function saveFlash(sectors) {
+  try {
+    const raw = {};
+    for (const [off, u8] of Object.entries(sectors)) {
+      let s = "";
+      for (let i = 0; i < u8.length; i += 4096) s += String.fromCharCode.apply(null, u8.subarray(i, i + 4096));
+      raw[off] = btoa(s);
+    }
+    localStorage.setItem(STORE, JSON.stringify(raw));
+    return true;
+  } catch { return false; }                                       // private mode, full: this session only
+}
+
+// ------------------------------------------------------------------ Web MIDI in (channel messages)
+// With the page's checkbox on, CC 20..27 turn the panel's knobs (worklet.js midiKnob), any channel, CC 20..26 sent
+// as the select says; off (the default), and the rest, go to the firmware
+const knobCC = [], knobBox = document.getElementById("knobson"), knobSelect = document.getElementById("knobmode");
+let knobsOn = false, knobMode = "abs";
+try {
+  knobsOn = localStorage.getItem(KNOBS_ON) === "1";
+  const m = localStorage.getItem(KNOB_MODE);
+  if (KNOB_MODES.includes(m)) knobMode = m;
+} catch {}
+knobBox.checked = knobsOn;
+knobSelect.hidden = !knobsOn;
+knobSelect.value = knobMode;
+knobBox.addEventListener("change", () => {
+  knobsOn = knobBox.checked;
+  knobSelect.hidden = !knobsOn;
+  knobCC.length = 0;
+  try { localStorage.setItem(KNOBS_ON, knobsOn ? "1" : "0"); } catch {}
+});
+knobSelect.addEventListener("change", () => {
+  knobMode = knobSelect.value;
+  knobCC.length = 0;                                              // absolute again: no jump on the first touch
+  try { localStorage.setItem(KNOB_MODE, knobMode); } catch {}
+});
+document.getElementById("midiknobs").hidden = !navigator.requestMIDIAccess;
+async function midiOn() {
+  if (!navigator.requestMIDIAccess) return;
+  try {
+    const access = await navigator.requestMIDIAccess();
+    const bind = () => {
+      for (const input of access.inputs.values()) {
+        input.onmidimessage = (e) => {
+          const d = e.data;
+          if (d.length < 2 || d[0] < 0x80 || d[0] >= 0xF0) return;
+          const k = knobsOn && (d[0] & 0xF0) === 0xB0 ? midiKnob(knobCC, d[1], d[2] || 0, knobMode) : null;
+          if (!k) send({ type: "midi", data: [d[0], d[1], d[2] || 0] });
+          else if (k.master !== undefined) { setMaster(k.master); drawKnob(knobs.find((x) => x.role === "master")); }
+          else turn(knobs.find((x) => x.role === k.role), k.n);
+        };
+      }
+    };
+    access.onstatechange = bind;
+    bind();
+  } catch { /* no permission: the panel only */ }
+}
+
+// ------------------------------------------------------------------ switching on
+const status = document.getElementById("status");
+const say = (t) => { status.textContent = t; status.hidden = !t; };
+async function switchOn() {
+  const go = document.getElementById("go");
+  go.disabled = true;
+  go.textContent = "Starting…";
+  try {
+    const ac = new AudioContext({ sampleRate: 44100, latencyHint: "interactive" });
+    const [wasm] = await Promise.all([
+      fetch("felucca.wasm").then((r) => { if (!r.ok) throw new Error(`felucca.wasm: ${r.status}`); return r.arrayBuffer(); }),
+      ac.audioWorklet.addModule("worklet.js")]);
+    node = new AudioWorkletNode(ac, "felucca", { numberOfInputs: 0, numberOfOutputs: 1, outputChannelCount: [2] });
+    node.connect(ac.destination);
+    let warned = false;
+    await new Promise((res, rej) => {
+      node.port.onmessage = (e) => {
+        const m = e.data;
+        if (m.type === "ready") res();
+        else if (m.type === "error") rej(new Error(m.message));
+        else if (m.type === "frame") {
+          if (m.fb) drawScreen(m.fb);
+          if (m.leds) drawLights(lastLeds = m.leds, m.anim);
+          if (m.sectors && !saveFlash(m.sectors) && !warned) {
+            warned = true;
+            console.warn("Felucca: this browser does not keep the saves; they last until the page closes.");
+          }
+        }
+      };
+      node.port.postMessage({ type: "load", wasm, sectors: loadFlash(), master: masterValue }, [wasm]);
+    });
+    await ac.resume();
+    document.getElementById("start").hidden = true;
+    go.textContent = "On";
+    if (ac.sampleRate !== 44100) console.warn(`Felucca: the browser plays at ${ac.sampleRate} Hz, the pitch is off by ${(1200 * Math.log2(ac.sampleRate / 44100)).toFixed(0)} cents.`);
+    syncButtons();
+    syncKeys();
+    send({ type: "visible", on: !document.hidden });
+    midiOn();
+  } catch (err) {
+    node = null;
+    go.disabled = false;
+    go.textContent = "Switch on";
+    say("Could not start: " + (err && err.message || err) + ". A current Chrome, Edge, Firefox or Safari should work.");
+  }
+}
+document.getElementById("go").addEventListener("click", switchOn);
+document.addEventListener("visibilitychange", () => send({ type: "visible", on: !document.hidden }));
+
+// ------------------------------------------------------------------ Windows 98 UI System
+// Live digital clock in systray
+function updateClock() {
+  const now = new Date();
+  let h = now.getHours();
+  const m = String(now.getMinutes()).padStart(2, "0");
+  const ampm = h >= 12 ? "PM" : "AM";
+  h = h % 12 || 12;
+  const clockEl = document.getElementById("systray-clock");
+  if (clockEl) clockEl.textContent = `${h}:${m} ${ampm}`;
+}
+setInterval(updateClock, 1000);
+updateClock();
+
+// Menu bar dropdowns
+document.querySelectorAll(".menu-item").forEach((item) => {
+  item.addEventListener("click", (e) => {
+    e.stopPropagation();
+    const wasActive = item.classList.contains("active");
+    document.querySelectorAll(".menu-item").forEach((i) => i.classList.remove("active"));
+    if (!wasActive) item.classList.add("active");
+  });
+});
+
+document.addEventListener("click", () => {
+  document.querySelectorAll(".menu-item").forEach((i) => i.classList.remove("active"));
+  const sm = document.getElementById("start-menu");
+  const sb = document.getElementById("start-btn");
+  if (sm) sm.classList.remove("open");
+  if (sb) sb.classList.remove("pressed");
+});
+
+// Start button toggle
+const startBtn = document.getElementById("start-btn");
+const startMenu = document.getElementById("start-menu");
+if (startBtn && startMenu) {
+  startBtn.addEventListener("click", (e) => {
+    e.stopPropagation();
+    const isOpen = startMenu.classList.toggle("open");
+    startBtn.classList.toggle("pressed", isOpen);
+  });
+}
+
+// Modal dialog handlers
+const aboutModal = document.getElementById("about-modal");
+const showAbout = () => { if (aboutModal) aboutModal.classList.add("open"); };
+const closeAbout = () => { if (aboutModal) aboutModal.classList.remove("open"); };
+
+document.getElementById("m-about")?.addEventListener("click", showAbout);
+document.getElementById("sm-about")?.addEventListener("click", showAbout);
+document.getElementById("modal-ok")?.addEventListener("click", closeAbout);
+document.getElementById("modal-close")?.addEventListener("click", closeAbout);
+
+// Interactive menu actions to hardware controls
+function pressBtn(name) {
+  const b = buttons.find((x) => x.name.startsWith(name) || x.name === name);
+  if (b) {
+    btnBy.set("ui", b.bit);
+    syncButtons();
+    setTimeout(() => { btnBy.delete("ui"); syncButtons(); }, 120);
+  }
+}
+
+function turnKnob(roleName, steps) {
+  const k = knobs.find((x) => x.role === EN[roleName] || x.key === roleName);
+  if (k) turn(k, steps);
+}
+
+document.getElementById("m-switch-on")?.addEventListener("click", () => {
+  const go = document.getElementById("go");
+  if (go && !go.disabled) go.click();
+});
+
+document.getElementById("m-restart")?.addEventListener("click", () => {
+  window.location.reload();
+});
+
+document.getElementById("m-exit")?.addEventListener("click", () => {
+  if (confirm("Shut down CINCO OS 2.5?")) window.location.href = "about:blank";
+});
+
+document.getElementById("sm-shutdown")?.addEventListener("click", () => {
+  if (confirm("Shut down CINCO OS 2.5?")) window.location.href = "about:blank";
+});
+
+// Menu shortcuts to synthesizer voices & modes
+document.getElementById("m-celery")?.addEventListener("click", () => { turnKnob("PRESETS", 1); });
+document.getElementById("m-oyster")?.addEventListener("click", () => { turnKnob("PRESETS", 1); });
+document.getElementById("m-tayne")?.addEventListener("click", () => { turnKnob("PRESETS", 1); });
+document.getElementById("m-wobble")?.addEventListener("click", () => pressBtn("LFO"));
+document.getElementById("m-flail")?.addEventListener("click", () => pressBtn("ARP"));
+document.getElementById("m-nude")?.addEventListener("click", () => pressBtn("FX"));
+document.getElementById("m-k4d")?.addEventListener("click", () => turnKnob("KNOB 1", 10));
+document.getElementById("m-defrag")?.addEventListener("click", () => pressBtn("SEQ"));
+document.getElementById("d-defrag")?.addEventListener("click", () => pressBtn("SEQ"));
+document.getElementById("sm-defrag")?.addEventListener("click", () => pressBtn("SEQ"));
+document.getElementById("m-boss")?.addEventListener("click", () => pressBtn("EDIT"));
+
+// Window controls
+document.getElementById("btn-win-min")?.addEventListener("click", () => {
+  const win = document.getElementById("main-win");
+  const pill = document.getElementById("task-pill-main");
+  if (win && pill) {
+    win.style.display = win.style.display === "none" ? "flex" : "none";
+    pill.classList.toggle("inactive", win.style.display === "none");
+  }
+});
+
+document.getElementById("task-pill-main")?.addEventListener("click", () => {
+  const win = document.getElementById("main-win");
+  const pill = document.getElementById("task-pill-main");
+  if (win && pill) {
+    win.style.display = "flex";
+    pill.classList.remove("inactive");
+  }
+});
+
+document.getElementById("btn-win-max")?.addEventListener("click", () => {
+  const win = document.getElementById("main-win");
+  if (!win) return;
+  if (win.style.maxWidth === "100%") {
+    win.style.maxWidth = "1040px";
+  } else {
+    win.style.maxWidth = "100%";
+  }
+});
+
+document.getElementById("btn-win-close")?.addEventListener("click", () => {
+  if (confirm("Shut down CINCO OS 2.5?")) window.location.href = "installer/";
+});
+
+</script>
+</body>
+</html>
