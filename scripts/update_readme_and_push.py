@@ -49,7 +49,7 @@ Part No. 04-4D3D3D3-925                              Retail Boxed Edition (1995)
 
 Are your enterprise personnel suffering from terminal mid-afternoon spreadsheet lethargy? Does your open-plan cubicle farm lack digitized kinetic charisma? 
 
-Welcome to **CINCO IDENTITY GENERATOR 2.5™**, the premier corporate identity synthesizing suite engineered by **Cinco Business Systems, Inc.** specifically for the **M-VAVE FM-1 Synthesizer Terminal**. Engineered to the exacting specifications of Cinco Executive Workstations, this custom firmware turns your pocket FM synthesizer into **Paul's Computer**: an interactive, high-performance musical instrument running **Paul's Computer OS 2.5**.
+Welcome to **CINCO IDENTITY GENERATOR 2.5™**, the premier corporate identity synthesizing suite engineered by **Cinco Business Systems, Inc.** specifically for the **M-VAVE FM-1 Synthesizer Terminal**. Engineered to the exacting specifications of Cinco Executive Workstations, this custom firmware turns your pocket FM synthesizer into **CINCO OS 2.5**: an interactive, high-performance musical workstation running the **Cinco Identity Generator 2.5** enterprise suite for executive user Paul.
 
 Unlike passive terminal monitors or static office tools, **Cinco 2.5 is an instrument first**. Every sequence protocol is mapped directly to hardware controls: identity routines are synthesizer voice models, `4d3d3d3` is an analog macro encoder, `Nude Tayne` crushes audio bit-depth and mosaic-censors pixels simultaneously, and the corporate computer voice sings speech synthesis directly from the 27-key capacitive keyboard.
 
@@ -89,7 +89,7 @@ Unlike passive terminal monitors or static office tools, **Cinco 2.5 is an instr
 
 ## VISUAL SCREENSHOT GALLERY
 
-### Desktop Operations (Paul's Computer OS 2.5)
+### Desktop Operations (CINCO OS 2.5)
 
 | [01: Idle Celery](docs/cinco/mock/01_idle_celery.png) | [02: 4d3d3d3 Engaged](docs/cinco/mock/02_4d3d3d3_engaged.png) | [03: Tayne BETA](docs/cinco/mock/03_tayne_beta.png) |
 |:---:|:---:|:---:|
@@ -122,7 +122,7 @@ The Cinco Identity Generator 2.5™ maps seamlessly onto the **M-VAVE FM-1** har
 
 ```
 +-------------------------------------------------------------------------+
-|                  PAUL'S COMPUTER 2.5 HARDWARE CONSOLE                   |
+|                  CINCO OS 2.5 HARDWARE CONSOLE                          |
 |                                                                         |
 |  [SELECT]           [ALGO]            [PRESET]            [OCT - / +]   |
 |  Sub-Menu Nav     Dance Variant     Select Character     Key Transpose   |
@@ -181,7 +181,7 @@ The Cinco Identity Generator 2.5™ maps seamlessly onto the **M-VAVE FM-1** har
    > *Note:* To return to factory M-VAVE firmware, select **Return to official V15** in the web tool, or hold `OCT-` + `OCT+` on boot for 5 seconds to enter hardware UBoot recovery.
 
 ### Option 2: WebAssembly Browser Emulator (No Hardware Required!)
-Experience Paul's Computer directly in your web browser:
+Experience CINCO OS 2.5 directly in your web browser:
 ```bash
 # Start the local WebAssembly emulator server
 python3 scripts/serve_emu.py
@@ -231,7 +231,7 @@ For in-depth architectural and developer documentation, consult the Cinco intern
 
 ## CORPORATE ERROR CODES & DIAGNOSTICS
 
-Should Paul's Computer encounter unexpected workplace friction, the terminal will post one of the following official Cinco status codes:
+Should CINCO OS 2.5 encounter unexpected workplace friction, the terminal will post one of the following official Cinco status codes:
 
 * **`ERR_0x4D3D3D3` (Charisma Overflow):** Knob 1 turned too quickly; desktop window cascade exceeded maximum cognitive capacity of supervisor.
 * **`ERR_0x0Y5T3R` (Printout Jam):** Continuous-feed tractor paper depleted or ink ribbon dried out during Oyster smiling rendering.
@@ -254,7 +254,7 @@ Need corporate technical assistance? Cinco engineers are standing by on the info
 
 ## CINCO LIMITED WARRANTY & LIABILITY DISCLAIMER
 
-**Cinco Business Systems, Inc.** warrants the magnetic media and firmware image against physical defects for a period of thirty (30) days from retail receipt. Cinco does **not** warrant that the operation of Paul's Computer will be uninterrupted or that Tayne will satisfy all office entertainment requirements.
+**Cinco Business Systems, Inc.** warrants the magnetic media and firmware image against physical defects for a period of thirty (30) days from retail receipt. Cinco does **not** warrant that the operation of CINCO OS 2.5 will be uninterrupted or that Tayne will satisfy all office entertainment requirements.
 
 Under no circumstances shall Cinco Corporation, Paul (Senior Managing Executive), or their respective subsidiaries be liable for disciplinary workplace action, involuntary toe-tapping, spontaneous hat wobbling, sudden flarhgunnstow outbreaks, or termination of employment resulting from unauthorized engagement of `Nude Tayne` during executive board meetings.
 

@@ -592,7 +592,7 @@ static void cinco_draw_terminal_chrome(int32_t tx, int32_t ty, int32_t tw, int32
 
     /* Terminal title bar */
     lcd_fill((uint32_t)(tx + 2), (uint32_t)(ty + 2), (uint32_t)(tw - 4), 12, C_BORDER_DARK);
-    cinco_draw_string(tx + 6, ty + 4, "Paul's COMPUTER", C_WHITE);
+    cinco_draw_string(tx + 6, ty + 4, "CINCO OS 2.5", C_WHITE);
 }
 
 static void cinco_draw_terminal_text(int32_t tx, int32_t ty, int32_t tw, uint8_t cursor_on)
@@ -977,7 +977,7 @@ static void cinco_view_render(void)
             }
         }
 
-        /* 3. Paul's COMPUTER Terminal */
+        /* 3. CINCO OS 2.5 Terminal */
         cinco_draw_terminal_chrome(tx, ty, tw, th);
         cinco_draw_terminal_text(tx, ty, tw, cursor_on);
         memcpy(last_rendered_term, perf.term_line, sizeof(last_rendered_term));

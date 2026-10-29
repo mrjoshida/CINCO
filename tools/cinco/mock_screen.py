@@ -77,7 +77,7 @@ def draw_window(draw, x, y, w, h, title="Celery Man", active=True):
 def draw_terminal(draw, x, y, w, h, lines=None):
     draw_bevel_rect(draw, x, y, w, h, fill=C_TERM_BG, sunken=True)
     draw.rectangle([x + 2, y + 2, x + w - 3, y + 13], fill=C_BORDER_DARK)
-    draw.text((x + 6, y + 3), "Paul's COMPUTER", fill=C_WIN_WHITE)
+    draw.text((x + 6, y + 3), "CINCO OS 2.5", fill=C_WIN_WHITE)
     
     if not lines:
         lines = ["> Good morning Paul.", "> What will your first sequence be?"]

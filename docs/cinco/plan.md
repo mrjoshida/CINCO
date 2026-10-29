@@ -1,6 +1,6 @@
 # CINCO 2.5 — Celery Man Custom Firmware for the M-VAVE FM-1
 
-Turn the FM-1 into **Paul's COMPUTER**: a **playable instrument** whose 240×240 screen delivers the complete "Cinco Identity Generator 2.5" enterprise workstation experience. The identity routines are not a pre-recorded sequence. Each one is a **performance control** you can grab at any time and stack with the others: characters are voices, 4d3d3d3 is a macro knob, Nude Tayne crushes the audio and pixelates the dancer at the same time, and a corporate computer voice talks back and can be played from the keys.
+Turn the FM-1 into an executive **CINCO OS 2.5** workstation: a **playable instrument** whose 240×240 screen delivers the complete "Cinco Identity Generator 2.5" enterprise experience for user Paul. The identity routines are not a pre-recorded sequence. Each one is a **performance control** you can grab at any time and stack with the others: characters are voices, 4d3d3d3 is a macro knob, Nude Tayne crushes the audio and pixelates the dancer at the same time, and a corporate computer voice talks back and can be played from the keys.
 
 **Base:** a fork of [hugelton/Felucca](https://github.com/hugelton/Felucca) (GPL-3.0). It already has a working hardware layer, the USB-MIDI flashing code, rescue mode, a Docker build that works on macOS, an Emscripten browser emulator, and host tests. We keep the hardware layer and a few synth engines, and replace the whole UI.
 
@@ -131,7 +131,7 @@ The layout is tightened from 4:3 TV to a square screen. Colors are sampled from 
 │ │           ~96×128, 16 colors)     │ │  4d3d3d3 adds windows cascaded 12px apart
 │ │                                   │ │
 │ └───────────────────────────────────┘ │
-│ ┌─ Paul's COMPUTER ─────────────────┐ │  sunken black terminal: reactions,
+│ ┌─ CINCO OS 2.5 ────────────────────┐ │  sunken black terminal: reactions,
 │ │ > 4d3d3d3 engaged._               │ │  knob values ("4d3d3d3: 87"),
 │ └───────────────────────────────────┘ │  phrase text in Talk mode
 └──────────────────────────────────────┘

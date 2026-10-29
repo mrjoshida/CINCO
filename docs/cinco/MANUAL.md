@@ -57,7 +57,7 @@ Welcome to the cutting edge of electronic office identity deployment. The **Cinc
 
 ```
 +-------------------------------------------------------------------------+
-|                  PAUL'S COMPUTER 2.5 HARDWARE CONSOLE                   |
+|                  CINCO OS 2.5 HARDWARE CONSOLE                          |
 |                                                                         |
 |  [SELECT]           [ALGO]            [PRESET]            [OCT - / +]   |
 |  Aux Nav         Dance Variant     Select Character     Key Transpose   |
@@ -98,7 +98,7 @@ To install or update the Cinco Identity Generator 2.5™ directly on your M-VAVE
 
 ## CHAPTER 3: THE CINCO 2.5 DESKTOP ENVIRONMENT
 
-The console display renders a faithful recreation of **Paul's Computer OS 2.5**:
+The console display renders a faithful recreation of **CINCO OS 2.5**:
 
 ```
 +-------------------------------------------------------------------------+
@@ -112,7 +112,7 @@ The console display renders a faithful recreation of **Paul's Computer OS 2.5**:
 | |                                                                     | |
 | +---------------------------------------------------------------------+ |
 | +---------------------------------------------------------------------+ |
-| | Paul's COMPUTER                                                     | |
+| | CINCO OS 2.5                                                        | |
 | | CINCO COMPUTER OS 2.5                                               | |
 | | SYSTEM READY                                                        | |
 | | > Celery Man loaded._                                   [OCT:+0] [U]| |
@@ -243,7 +243,7 @@ In addition to identity modulation, Cinco Corporation has supplied full workplac
 ### 1. The "Boss Key" Spreadsheet (`EDIT` Button)
 * **Function:** Instantly disguises your console as a 1992 **Lotus 1-2-3 Release 3.1** spreadsheet (`CELERY_CORP_Q3.WK1`).
 * **Audio Behavior:** All synthesizer audio and groove sequences continue playing unhindered, allowing the employee to compose music under the guise of accounting.
-* **Exit:** Tapping any keyboard key or encoder instantly restores Paul's Computer desktop.
+* **Exit:** Tapping any keyboard key or encoder instantly restores CINCO OS 2.5 desktop.
 
 ### 2. Cinco Disk Defragmenter (`SEQ` Button)
 * **Function:** Switches the display to an authentic 16×6 cluster defragmentation grid (modeled after Norton SpeedDisk and MS-DOS 6.22 Defrag).

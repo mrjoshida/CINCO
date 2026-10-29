@@ -47,8 +47,8 @@ To accommodate ST7789 SPI DMA strip rendering without a full 115 KB frame buffer
 |  +-------------------------------------------------------------+  |
 |  DESKTOP GAP (y: 168 to 172: 4px)                                  |
 |  +-------------------------------------------------------------+  |
-|  | "Paul's COMPUTER" TERMINAL (x: 4, y: 172, w: 232, h: 64)    |  |
-|  | Title: Paul's COMPUTER (h: 14px)                            |  |
+|  | "CINCO OS 2.5" TERMINAL (x: 4, y: 172, w: 232, h: 64)        |  |
+|  | Title: CINCO OS 2.5 (h: 14px)                               |  |
 |  | Black Screen: lines 1-3 (8px font, 10px pitch)             |  |
 |  | > 4d3d3d3 engaged._                                         |  |
 |  +-------------------------------------------------------------+  |
