@@ -54,17 +54,26 @@ body {
   padding: 10px 10px 40px;
   background-color: var(--win-bg);
   color: var(--win-text);
-  font-family: "MS Sans Serif", "Microsoft Sans Serif", Tahoma, Arial, sans-serif;
-  font-size: 11px;
+  font-family: Tahoma, "Segoe UI", -apple-system, BlinkMacSystemFont, Arial, sans-serif;
+  font-size: 12px;
   line-height: 1.4;
   min-height: 100vh;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: flex-start;
-  -webkit-font-smoothing: antialiased;
+  -webkit-font-smoothing: subpixel-antialiased;
+  -moz-osx-font-smoothing: auto;
+  text-rendering: optimizeLegibility;
   overflow-x: hidden;
   user-select: none;
+}
+
+button, input, select, textarea {
+  font-family: inherit;
+  -webkit-font-smoothing: subpixel-antialiased;
+  -moz-osx-font-smoothing: auto;
+  text-rendering: optimizeLegibility;
 }
 
 a { color: inherit; text-decoration: none; }
@@ -176,7 +185,7 @@ a:hover { text-decoration: underline; }
   align-items: center;
   justify-content: space-between;
   font-weight: bold;
-  font-size: 11px;
+  font-size: 12px;
   cursor: default;
 }
 
@@ -220,8 +229,8 @@ a:hover { text-decoration: underline; }
   justify-content: center;
   cursor: pointer;
   padding: 0;
-  font-family: monospace;
-  font-size: 9px;
+  font-family: inherit;
+  font-size: 11px;
   font-weight: bold;
   color: #000000;
   line-height: 1;
@@ -244,6 +253,7 @@ a:hover { text-decoration: underline; }
   padding: 2px 6px;
   border-bottom: 1px solid var(--win-dark);
   position: relative;
+  font-size: 12px;
 }
 
 .menu-item {
@@ -251,6 +261,7 @@ a:hover { text-decoration: underline; }
   padding: 2px 7px;
   cursor: pointer;
   color: #000000;
+  font-size: 12px;
 }
 
 .menu-item:hover, .menu-item.active {
@@ -272,6 +283,7 @@ a:hover { text-decoration: underline; }
   box-shadow: 2px 2px 5px rgba(0,0,0,0.4);
   padding: 2px 0;
   z-index: 1000;
+  font-size: 12px;
 }
 
 .menu-item.active .menu-dropdown {
@@ -285,6 +297,7 @@ a:hover { text-decoration: underline; }
   align-items: center;
   color: #000000;
   font-weight: normal;
+  font-size: 12px;
   cursor: pointer;
   white-space: nowrap;
 }
@@ -302,7 +315,7 @@ a:hover { text-decoration: underline; }
 }
 
 .dropdown-shortcut {
-  font-size: 10px;
+  font-size: 11px;
   color: #666;
   margin-left: 16px;
 }
@@ -345,6 +358,11 @@ a:hover { text-decoration: underline; }
   width: 100%;
   height: 100%;
   pointer-events: none;
+}
+
+.device svg text {
+  text-rendering: geometricPrecision;
+  -webkit-font-smoothing: antialiased;
 }
 
 .device canvas {
@@ -416,16 +434,16 @@ a:hover { text-decoration: underline; }
   align-items: center;
   justify-content: center;
   gap: 8px;
-  font-size: 10px;
+  font-size: 11px;
   color: #222;
 }
 
 .keys-bar span { white-space: nowrap; }
-.keys-bar select { font-family: inherit; font-size: 10px; }
+.keys-bar select { font-family: inherit; font-size: 11px; }
 
 kbd {
   font-family: monospace;
-  font-size: 10px;
+  font-size: 11px;
   font-weight: bold;
   background: #ffffff;
   border-top: 1px solid #ffffff;
@@ -444,6 +462,7 @@ kbd {
   gap: 4px;
   border-top: 1px solid var(--win-dark);
   font-size: 11px;
+  line-height: 1.3;
 }
 
 .status-panel {
@@ -630,7 +649,7 @@ kbd {
   padding: 5px 12px;
   cursor: pointer;
   color: #000000;
-  font-size: 11px;
+  font-size: 12px;
 }
 
 .start-item:hover {
@@ -679,12 +698,13 @@ kbd {
 
 .dialog-body {
   padding: 12px 14px;
-  font-size: 11px;
+  font-size: 12px;
+  line-height: 1.5;
 }
 
 .dialog-btn {
   font-family: inherit;
-  font-size: 11px;
+  font-size: 12px;
   min-width: 68px;
   padding: 3px 12px;
   background: var(--win-gray);
@@ -719,6 +739,7 @@ kbd {
   flex-direction: column;
   align-items: center;
   gap: 8px;
+  font-size: 11px;
 }
 
 .volume-popup.open { display: flex; }
@@ -762,7 +783,8 @@ kbd {
 .file-table {
   width: 100%;
   border-collapse: collapse;
-  font-size: 11px;
+  font-size: 12px;
+  line-height: 1.4;
 }
 .file-table th {
   background: var(--win-gray);
@@ -790,6 +812,8 @@ kbd {
   padding: 8px;
   margin-bottom: 10px;
   border: 1px solid #5fe08a;
+  font-size: 12px;
+  line-height: 1.5;
 }
 .tayne-buttons {
   display: grid;
@@ -825,7 +849,8 @@ kbd {
   width: 100%;
   border-collapse: collapse;
   font-family: monospace;
-  font-size: 11px;
+  font-size: 12px;
+  line-height: 1.4;
   background: #ffffff;
 }
 .lotus-table th, .lotus-table td {
@@ -855,6 +880,7 @@ kbd {
 .manual-toc-item {
   padding: 3px 6px;
   cursor: pointer;
+  font-size: 12px;
 }
 .manual-toc-item.selected {
   background: var(--win-blue);
@@ -866,6 +892,8 @@ kbd {
   border: 1px solid var(--win-dark);
   padding: 8px;
   overflow-y: auto;
+  font-size: 12px;
+  line-height: 1.5;
 }
 
 /* Shut Down & Fullscreen DOS / Power Screens */
@@ -875,7 +903,7 @@ kbd {
   inset: 0;
   background: #000000;
   color: #ff6600;
-  font-family: "MS Sans Serif", Arial, sans-serif;
+  font-family: Tahoma, "Segoe UI", -apple-system, BlinkMacSystemFont, Arial, sans-serif;
   font-size: 26px;
   font-weight: bold;
   text-align: center;
@@ -1091,7 +1119,7 @@ kbd {
   <div class="win-content">
     <div class="client-inset">
       <div class="device" id="device">
-        <svg id="panel" viewBox="0 0 1000 624" aria-hidden="true"></svg>
+        <svg id="panel" viewBox="0 0 1000 624" aria-hidden="true" text-rendering="geometricPrecision"></svg>
         <canvas id="screen" width="240" height="240" role="img" aria-label="The screen"></canvas>
         <div class="start" id="start" style="display:none;" hidden>
           <button id="go" style="display:none;" type="button">Switch on</button>
@@ -1219,7 +1247,7 @@ kbd {
   <div class="dialog-body">
     <div style="font-weight:bold;margin-bottom:4px;">Drive C: (Cinco 4D3D3D3 Partition)</div>
     <div id="defrag-cluster-grid" class="defrag-grid"></div>
-    <div style="display:flex;justify-content:space-between;margin:4px 0;font-size:10px;">
+    <div style="display:flex;justify-content:space-between;margin:4px 0;font-size:11px;">
       <span>■ Allocated</span><span>■ Free</span><span>■ 4d3d3d3 Fragmented</span><span>■ Unmovable</span>
     </div>
     <div style="margin:6px 0;display:flex;justify-content:space-between;align-items:center;">
@@ -1412,7 +1440,7 @@ kbd {
 
 <!-- Systray Volume Popup -->
 <div class="win-window bevel-raised volume-popup" id="volume-popup">
-  <div style="font-size:10px;font-weight:bold;">Volume</div>
+  <div style="font-size:11px;font-weight:bold;">Volume</div>
   <input type="range" class="vol-slider" id="master-vol-slider" min="0" max="1023" value="700">
   <button class="win-btn" id="vol-popup-close" style="width:100%;height:18px;">Close</button>
 </div>
@@ -1574,11 +1602,12 @@ function el(tag, attrs, parent = svg) {
   return e;
 }
 
-const SANS = "-apple-system, 'Helvetica Neue', Arial, sans-serif", DOT = "'DotGothic16', " + SANS;
+const SANS = "Tahoma, 'Segoe UI', -apple-system, BlinkMacSystemFont, Arial, sans-serif", DOT = "'DotGothic16', " + SANS;
 
 function label(parent, x, y, s, size, font = SANS, ink = "var(--label)") {
   const t = el("text", { x, y, "text-anchor": "middle", "font-family": font,
-                         "font-size": size, "font-weight": 600, fill: ink, "letter-spacing": ".04em" }, parent);
+                         "font-size": size, "font-weight": 600, fill: ink, "letter-spacing": ".04em",
+                         "text-rendering": "geometricPrecision" }, parent);
   t.textContent = s;
   return t;
 }
@@ -1598,6 +1627,7 @@ function build(name) {
   layout = name;
   svg.innerHTML = "";
   svg.setAttribute("viewBox", `0 0 ${L.w} ${L.h}`);
+  svg.setAttribute("text-rendering", "geometricPrecision");
   device.style.aspectRatio = `${L.w} / ${L.h}`;
   for (const d of device.querySelectorAll(".hit")) d.remove();
   knobs.length = buttons.length = keys.length = 0;
