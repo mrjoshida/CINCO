@@ -30,6 +30,7 @@ void isr_alnk0(void) {}
 static int32_t tap_blk[2 * CTL];
 static void uac_tap(const int32_t *out, uint32_t n) { memcpy(tap_blk, out, 8u * n); }
 static void uac_render_start(void) {}
+void cinco_audio_block(int32_t *out, uint32_t n) { (void)out; (void)n; }
 #include "../firmware/src/audio.c"
 
 static int bad;
