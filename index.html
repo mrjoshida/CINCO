@@ -1,6 +1,6 @@
 <!doctype html>
 <!-- SPDX-License-Identifier: GPL-3.0-only
-     CINCO OS 2.5 Enterprise Synthesizer Workstation
+     CINCO OS 2.5 Workstation — Enterprise Identity Generator
      Cinco Business Systems, Inc. [v2.5] (Celery Man Edition)
      Portions derived from Felucca by Leo Kuroshita (@kurogedelic), Hügelton Instruments (GPL-3.0) -->
 <html lang="en">
@@ -9,32 +9,29 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>CINCO OS 2.5 — Cinco Identity Generator</title>
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 16 16%22%3E%3Crect width=%2216%22 height=%2216%22 fill=%22%23000080%22/%3E%3Crect x=%223%22 y=%222%22 width=%2210%22 height=%224%22 fill=%22%23fff%22/%3E%3Crect x=%223%22 y=%228%22 width=%2210%22 height=%226%22 fill=%22%23c0c0c0%22/%3E%3Ctext x=%224%22 y=%2213%22 font-family=%22monospace%22 font-size=%226%22 font-weight=%22bold%22 fill=%22%23000080%22%3E5%3C/text%3E%3C/svg%3E">
-<meta name="description" content="CINCO OS 2.5 (Celery Man Edition) enterprise synthesizer workstation running directly in your browser via WebAssembly.">
+<meta name="description" content="CINCO OS 2.5 (Celery Man Edition) authentic Windows 98 workstation and synthesizer application running via WebAssembly and AudioWorklet.">
 <style>
-/* DotGothic16 for hardware knob labels */
-@font-face { font-family: "DotGothic16"; src: url("fonts/DotGothic16-subset.woff") format("woff"); font-display: swap; }
-
 :root {
   --win-bg: #008080;
   --win-gray: #c0c0c0;
   --win-light: #ffffff;
   --win-lighter: #dfdfdf;
   --win-dark: #808080;
-  --win-darker: #0a0a0a;
+  --win-darker: #000000;
   --win-blue: #000080;
   --win-blue-light: #1084d0;
-  --body: #1d1d1f; --tray: #141415; --part: #2a2a2d; --edge: #3a3a3e; --label: #d6d6d8;
-  --lit: #fff4d6; --green: #5fe08a; color-scheme: light;
+  --win-selection: #000080;
+  --win-text: #000000;
 }
 
 * { box-sizing: border-box; }
 
 body {
   margin: 0;
-  padding: 12px 10px 40px;
+  padding: 10px 10px 40px;
   background-color: var(--win-bg);
-  color: #000000;
-  font-family: "MS Sans Serif", Tahoma, "Segoe UI", Arial, sans-serif;
+  color: var(--win-text);
+  font-family: "MS Sans Serif", "Microsoft Sans Serif", Tahoma, Arial, sans-serif;
   font-size: 11px;
   line-height: 1.4;
   min-height: 100vh;
@@ -42,65 +39,15 @@ body {
   flex-direction: column;
   align-items: center;
   justify-content: flex-start;
-  -webkit-font-smoothing: antialiased;
+  -webkit-font-smoothing: none;
+  -moz-osx-font-smoothing: unset;
+  font-smooth: never;
+  text-rendering: geometricPrecision;
   overflow-x: hidden;
   user-select: none;
 }
 
 a { color: inherit; text-decoration: none; }
-a:hover { text-decoration: underline; }
-
-/* Desktop Icons on Teal Canvas */
-.desktop-icons {
-  position: fixed;
-  top: 14px;
-  left: 14px;
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-  z-index: 5;
-}
-
-.desktop-icon {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  width: 68px;
-  text-align: center;
-  cursor: pointer;
-  text-decoration: none;
-  color: #ffffff;
-}
-
-.desktop-icon:focus, .desktop-icon:hover {
-  text-decoration: none;
-}
-
-.desktop-icon .icon-img {
-  width: 32px;
-  height: 32px;
-  margin-bottom: 4px;
-  filter: drop-shadow(1px 1px 0 rgba(0,0,0,0.8));
-}
-
-.desktop-icon .icon-lbl {
-  font-size: 11px;
-  padding: 1px 3px;
-  background: transparent;
-  color: #ffffff;
-  text-shadow: 1px 1px 1px #000;
-  border-radius: 2px;
-  line-height: 1.2;
-}
-
-.desktop-icon:focus .icon-lbl, .desktop-icon:active .icon-lbl {
-  background: var(--win-blue);
-  outline: 1px dotted #ffff80;
-}
-
-@media (max-width: 1080px) {
-  .desktop-icons { display: none; }
-}
 
 /* 3D Bevel Utilities */
 .bevel-raised {
@@ -119,15 +66,79 @@ a:hover { text-decoration: underline; }
   box-shadow: inset 1px 1px 0 var(--win-darker), inset -1px -1px 0 var(--win-lighter);
 }
 
+.bevel-thin-raised {
+  border-top: 1px solid var(--win-light);
+  border-left: 1px solid var(--win-light);
+  border-right: 1px solid var(--win-darker);
+  border-bottom: 1px solid var(--win-darker);
+  box-shadow: inset 1px 1px 0 var(--win-lighter), inset -1px -1px 0 var(--win-dark);
+}
+
+.bevel-thin-sunken {
+  border-top: 1px solid var(--win-dark);
+  border-left: 1px solid var(--win-dark);
+  border-right: 1px solid var(--win-light);
+  border-bottom: 1px solid var(--win-light);
+  box-shadow: inset 1px 1px 0 var(--win-darker);
+}
+
+/* Desktop Icons on Teal Canvas */
+.desktop-icons {
+  position: fixed;
+  top: 14px;
+  left: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  z-index: 5;
+}
+
+.desktop-icon {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 72px;
+  text-align: center;
+  cursor: pointer;
+  color: #ffffff;
+}
+
+.desktop-icon .icon-img {
+  width: 32px;
+  height: 32px;
+  margin-bottom: 4px;
+  filter: drop-shadow(1px 1px 0 rgba(0,0,0,0.8));
+}
+
+.desktop-icon .icon-lbl {
+  font-size: 11px;
+  padding: 1px 3px;
+  background: transparent;
+  color: #ffffff;
+  text-shadow: 1px 1px 1px #000;
+  border-radius: 1px;
+  line-height: 1.2;
+}
+
+.desktop-icon:focus .icon-lbl, .desktop-icon:active .icon-lbl, .desktop-icon.selected .icon-lbl {
+  background: var(--win-selection);
+  outline: 1px dotted #ffff80;
+}
+
+@media (max-width: 1140px) {
+  .desktop-icons { display: none; }
+}
+
 /* Main Application Window Frame */
 .win-window {
   width: 100%;
-  max-width: 1040px;
+  max-width: 1060px;
   background-color: var(--win-gray);
   position: relative;
   z-index: 10;
   display: flex;
   flex-direction: column;
+  box-shadow: 3px 3px 12px rgba(0,0,0,0.4);
 }
 
 .win-titlebar {
@@ -199,7 +210,7 @@ a:hover { text-decoration: underline; }
 .win-menubar {
   display: flex;
   background: var(--win-gray);
-  padding: 2px 6px;
+  padding: 2px 4px;
   border-bottom: 1px solid var(--win-dark);
   position: relative;
 }
@@ -222,14 +233,14 @@ a:hover { text-decoration: underline; }
   top: 100%;
   left: 0;
   background: var(--win-gray);
-  min-width: 190px;
+  min-width: 200px;
   border-top: 2px solid var(--win-light);
   border-left: 2px solid var(--win-light);
   border-right: 2px solid var(--win-darker);
   border-bottom: 2px solid var(--win-darker);
-  box-shadow: 2px 2px 5px rgba(0,0,0,0.4);
+  box-shadow: 2px 2px 6px rgba(0,0,0,0.4);
   padding: 2px 0;
-  z-index: 100;
+  z-index: 1000;
 }
 
 .menu-item.active .menu-dropdown {
@@ -269,115 +280,176 @@ a:hover { text-decoration: underline; }
   color: #dfdfdf;
 }
 
-/* Window Content Client Area */
-.win-content {
-  padding: 6px;
+/* 1998 Flat 3D Toolbar Strip */
+.win-toolbar {
+  display: flex;
+  align-items: center;
+  padding: 3px 4px;
   background: var(--win-gray);
+  border-bottom: 1px solid var(--win-dark);
+  border-top: 1px solid var(--win-light);
+  gap: 2px;
+  flex-wrap: wrap;
 }
 
-.client-inset {
-  background: #101012;
-  border-top: 2px solid var(--win-dark);
-  border-left: 2px solid var(--win-dark);
-  border-right: 2px solid var(--win-light);
-  border-bottom: 2px solid var(--win-light);
-  box-shadow: inset 1px 1px 0 var(--win-darker), inset -1px -1px 0 var(--win-lighter);
+.toolbar-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  padding: 2px 5px;
+  background: transparent;
+  border: 1px solid transparent;
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 11px;
+  color: #000;
+  border-radius: 1px;
+  height: 24px;
+}
+
+.toolbar-btn:hover {
+  border-top: 1px solid var(--win-light);
+  border-left: 1px solid var(--win-light);
+  border-right: 1px solid var(--win-darker);
+  border-bottom: 1px solid var(--win-darker);
+  background: var(--win-gray);
+  box-shadow: inset 1px 1px 0 var(--win-lighter), inset -1px -1px 0 var(--win-dark);
+}
+
+.toolbar-btn:active, .toolbar-btn.pressed {
+  border-top: 1px solid var(--win-darker);
+  border-left: 1px solid var(--win-darker);
+  border-right: 1px solid var(--win-light);
+  border-bottom: 1px solid var(--win-light);
+  background: #dbdbdb;
+  box-shadow: inset 1px 1px 0 var(--win-dark);
+  padding-top: 3px;
+  padding-left: 6px;
+  padding-right: 4px;
+  padding-bottom: 1px;
+}
+
+.toolbar-separator {
+  width: 2px;
+  height: 20px;
+  margin: 0 3px;
+  border-left: 1px solid var(--win-dark);
+  border-right: 1px solid var(--win-light);
+}
+
+/* Application Client Area Layout */
+.win-client {
+  padding: 8px;
+  background: var(--win-gray);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.top-split-panes {
+  display: flex;
+  gap: 10px;
+}
+
+@media (max-width: 860px) {
+  .top-split-panes {
+    flex-direction: column;
+    align-items: center;
+  }
+}
+
+/* Left Pane: CRT / LCD Monitor Viewport */
+.crt-viewport-pane {
+  flex: 0 0 310px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.crt-housing {
+  background: linear-gradient(135deg, #dcdcd8 0%, #c4c4c0 100%);
+  border-top: 3px solid var(--win-light);
+  border-left: 3px solid var(--win-light);
+  border-right: 3px solid #404040;
+  border-bottom: 3px solid #404040;
+  box-shadow: inset 2px 2px 0 #f0f0ec, inset -2px -2px 0 var(--win-dark), 2px 2px 8px rgba(0,0,0,0.3);
+  padding: 10px;
+  border-radius: 4px;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.crt-top-vents {
+  width: 75%;
+  height: 4px;
+  background: repeating-linear-gradient(90deg, #707070 0, #707070 5px, transparent 5px, transparent 9px);
+  margin-bottom: 8px;
+}
+
+.crt-bezel {
+  background: #18181a;
+  border-top: 3px solid #000000;
+  border-left: 3px solid #000000;
+  border-right: 3px solid #707070;
+  border-bottom: 3px solid #707070;
+  box-shadow: inset 2px 2px 6px rgba(0,0,0,0.9);
+  padding: 6px;
+  border-radius: 6px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.crt-screen-well {
   position: relative;
+  width: 240px;
+  height: 240px;
+  background: #000000;
+  border-radius: 2px;
   overflow: hidden;
+  box-shadow: 0 0 10px rgba(0, 255, 128, 0.08);
 }
 
-/* Device Simulator SVG/Canvas */
-.device {
-  position: relative;
-  width: 100%;
-  aspect-ratio: 1000 / 624;
-  user-select: none;
-  -webkit-user-select: none;
-  -webkit-touch-callout: none;
-  touch-action: manipulation;
-}
-
-.device svg {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  pointer-events: none;
-}
-
-.device canvas {
-  position: absolute;
+#screen {
+  width: 240px;
+  height: 240px;
+  display: block;
   image-rendering: crisp-edges;
   image-rendering: pixelated;
-  background: #000;
+  background: #000000;
 }
 
-.hit {
-  position: absolute;
-  touch-action: none;
-  cursor: pointer;
-  -webkit-tap-highlight-color: transparent;
-  border-radius: 10px;
-}
-
-.hit.knob {
-  cursor: ns-resize;
-  border-radius: 50%;
-}
-
-.hit:focus-visible {
-  outline: 2px solid var(--lit);
-  outline-offset: 2px;
-}
-
-.face { transition: fill .05s; }
-.dim .face.btn { fill: #3a3934; }
-.lit .face.btn { fill: var(--lit); }
-.lit text { fill: #1d1d1f; }
-.green .face.btn { fill: var(--green); }
-.green text { fill: #0d2414; }
-.face.key { fill: #0c0c0d; stroke: var(--edge); stroke-width: 1.5; }
-.slit { fill: #3a3a3c; transition: fill .05s; }
-.dim .slit { fill: #77777b; }
-.lit .slit { fill: #ececee; filter: drop-shadow(0 0 3px rgba(255, 255, 255, .6)); }
-
-@keyframes breath-btn { 0%, 100% { fill: #3a3934; } 50% { fill: #d8cfb6; } }
-@keyframes breath-slit { 0%, 100% { fill: #3a3a3c; } 50% { fill: #c8c8ca; } }
-@keyframes breath-btn-lo { 0%, 100% { fill: #3a3934; } 50% { fill: #aca592; } }
-@keyframes breath-slit-lo { 0%, 100% { fill: #3a3a3c; } 50% { fill: #a1a1a3; } }
-.breath .face.btn { animation: breath-btn 1.13s ease-in-out infinite; }
-.breath .slit { animation: breath-slit 1.13s ease-in-out infinite; }
-.dimlo .breath .face.btn { animation-name: breath-btn-lo; }
-.dimlo .breath .slit { animation-name: breath-slit-lo; }
-@media (prefers-reduced-motion: reduce) {
-  .breath .face.btn, .breath .slit { animation: none; }
-  .breath .face.btn { fill: #aca592; }
-  .breath .slit { fill: #a1a1a3; }
-}
-
-.mid .slit { fill: #9a9a9e; }
-.dimlo .mid .slit { fill: #8a8a8e; }
-.held .face { stroke: var(--lit); stroke-width: 3; }
-.latched .face { stroke: #79b8ff; stroke-width: 3; }
-
-.start {
+.crt-scanlines {
   position: absolute;
   inset: 0;
-  display: grid;
-  place-content: center;
-  justify-items: center;
-  gap: 12px;
-  background: rgba(0, 0, 0, .6);
-  border-radius: 4% / 6%;
+  background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.02), rgba(0, 255, 0, 0.01), rgba(0, 0, 255, 0.02));
+  background-size: 100% 2px, 3px 100%;
+  pointer-events: none;
+  z-index: 5;
 }
 
-.start[hidden] { display: none; }
+.crt-start-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.7);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  z-index: 10;
+}
 
-.start button {
-  font-family: "MS Sans Serif", Tahoma, Arial, sans-serif;
-  font-size: 14px;
+.crt-start-overlay[hidden] { display: none; }
+
+.crt-power-btn {
+  font-family: inherit;
+  font-size: 13px;
   font-weight: bold;
-  padding: 8px 24px;
+  padding: 8px 20px;
   background: var(--win-gray);
   color: #000;
   border-top: 2px solid var(--win-light);
@@ -388,41 +460,546 @@ a:hover { text-decoration: underline; }
   cursor: pointer;
 }
 
-.start button:active {
+.crt-power-btn:active {
   border-top: 2px solid var(--win-darker);
   border-left: 2px solid var(--win-darker);
   border-right: 2px solid var(--win-light);
   border-bottom: 2px solid var(--win-light);
   box-shadow: none;
   padding-top: 9px;
-  padding-left: 25px;
+  padding-left: 21px;
 }
 
-.start button:disabled { opacity: .5; cursor: progress; }
-.start p { margin: 0; max-width: 32em; text-align: center; color: #fff; text-shadow: 1px 1px 1px #000; }
+.crt-power-btn:disabled { opacity: 0.6; cursor: progress; }
 
-/* Keyboard Instructions Bar */
-.keys-bar {
-  margin-top: 4px;
-  padding: 3px 6px;
+.crt-bottom-bar {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 8px;
+  padding: 0 2px;
+}
+
+.crt-badge {
+  font-size: 9px;
+  font-weight: bold;
+  color: #555555;
+  letter-spacing: 0.5px;
+}
+
+.crt-power-indicator {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 9px;
+  font-weight: bold;
+  color: #444;
+}
+
+.crt-led {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #b8860b;
+  border: 1px solid #443000;
+  transition: all 0.2s;
+}
+
+.crt-led.active {
+  background: #39ff14;
+  border-color: #0d4006;
+  box-shadow: 0 0 6px #39ff14;
+}
+
+.crt-btn-strip {
+  display: flex;
+  gap: 4px;
+  margin-top: 6px;
+  width: 100%;
+  justify-content: center;
+}
+
+.crt-mini-btn {
+  flex: 1;
+  font-family: inherit;
+  font-size: 10px;
+  font-weight: bold;
+  padding: 3px 4px;
   background: var(--win-gray);
+  border-top: 1px solid var(--win-light);
+  border-left: 1px solid var(--win-light);
+  border-right: 1px solid var(--win-darker);
+  border-bottom: 1px solid var(--win-darker);
+  box-shadow: inset 1px 1px 0 var(--win-lighter), inset -1px -1px 0 var(--win-dark);
+  cursor: pointer;
+  text-align: center;
+  white-space: nowrap;
+}
+
+.crt-mini-btn:active {
+  border-top: 1px solid var(--win-darker);
+  border-left: 1px solid var(--win-darker);
+  border-right: 1px solid var(--win-light);
+  border-bottom: 1px solid var(--win-light);
+  box-shadow: none;
+  padding-top: 4px;
+  padding-left: 5px;
+}
+
+/* CRT Degauss animation */
+@keyframes degauss {
+  0% { transform: scale(1) skew(0deg); filter: contrast(1); }
+  20% { transform: scale(1.03, 0.97) skew(3deg); filter: contrast(2) hue-rotate(90deg); }
+  40% { transform: scale(0.98, 1.02) skew(-2deg); filter: contrast(1.6) hue-rotate(-90deg); }
+  70% { transform: scale(1.01, 0.99) skew(1deg); filter: contrast(1.2); }
+  100% { transform: scale(1) skew(0deg); filter: contrast(1); }
+}
+
+.degauss-active {
+  animation: degauss 0.45s ease-out;
+}
+
+/* Right Pane: Identity & Kinetics Group Boxes */
+.controls-right-pane {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.win-groupbox {
+  border: 2px groove #ffffff;
+  padding: 8px 10px;
+  margin: 0;
+  background: var(--win-gray);
+}
+
+.win-groupbox legend {
+  padding: 0 4px;
+  font-weight: bold;
+  font-size: 11px;
+  color: var(--win-blue);
+}
+
+/* Trackbar Sliders */
+.slider-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.win-slider-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.win-slider-label {
+  width: 90px;
+  font-weight: bold;
+  font-size: 11px;
+  white-space: nowrap;
+}
+
+.win-slider-controls {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.win-trackbar {
+  flex: 1;
+  -webkit-appearance: none;
+  appearance: none;
+  height: 16px;
+  background: transparent;
+  cursor: pointer;
+  margin: 0;
+}
+
+.win-trackbar:focus {
+  outline: 1px dotted #000;
+}
+
+.win-trackbar::-webkit-slider-runnable-track {
+  width: 100%;
+  height: 4px;
+  background: var(--win-dark);
+  border-bottom: 1px solid var(--win-light);
+  border-right: 1px solid var(--win-light);
+  border-top: 1px solid var(--win-darker);
+  border-left: 1px solid var(--win-darker);
+}
+
+.win-trackbar::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  height: 18px;
+  width: 11px;
+  background: var(--win-gray);
+  border-top: 2px solid var(--win-light);
+  border-left: 2px solid var(--win-light);
+  border-right: 2px solid var(--win-darker);
+  border-bottom: 2px solid var(--win-darker);
+  box-shadow: inset 1px 1px 0 var(--win-lighter), inset -1px -1px 0 var(--win-dark);
+  cursor: pointer;
+  margin-top: -7px;
+}
+
+.win-trackbar::-moz-range-track {
+  width: 100%;
+  height: 4px;
+  background: var(--win-dark);
+  border-bottom: 1px solid var(--win-light);
+  border-right: 1px solid var(--win-light);
+  border-top: 1px solid var(--win-darker);
+  border-left: 1px solid var(--win-darker);
+}
+
+.win-trackbar::-moz-range-thumb {
+  height: 18px;
+  width: 11px;
+  background: var(--win-gray);
+  border-top: 2px solid var(--win-light);
+  border-left: 2px solid var(--win-light);
+  border-right: 2px solid var(--win-darker);
+  border-bottom: 2px solid var(--win-darker);
+  cursor: pointer;
+}
+
+.win-nudge-btn {
+  width: 18px;
+  height: 18px;
+  padding: 0;
+  font-size: 11px;
+  font-weight: bold;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--win-gray);
+  border-top: 1px solid var(--win-light);
+  border-left: 1px solid var(--win-light);
+  border-right: 1px solid var(--win-darker);
+  border-bottom: 1px solid var(--win-darker);
+  box-shadow: inset 1px 1px 0 var(--win-lighter), inset -1px -1px 0 var(--win-dark);
+  cursor: pointer;
+}
+
+.win-nudge-btn:active {
+  border-top: 1px solid var(--win-darker);
+  border-left: 1px solid var(--win-darker);
+  border-right: 1px solid var(--win-light);
+  border-bottom: 1px solid var(--win-light);
+  box-shadow: none;
+  padding-top: 1px;
+  padding-left: 1px;
+}
+
+.win-readout-badge {
+  min-width: 95px;
+  padding: 2px 4px;
+  background: #ffffff;
   border-top: 1px solid var(--win-dark);
   border-left: 1px solid var(--win-dark);
   border-right: 1px solid var(--win-light);
   border-bottom: 1px solid var(--win-light);
+  box-shadow: inset 1px 1px 0 var(--win-darker);
+  font-size: 10px;
+  font-family: monospace;
+  font-weight: bold;
+  text-align: center;
+  white-space: nowrap;
+}
+
+/* Identity Routines Radio & Button Layout */
+.identity-radio-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px;
+  margin-bottom: 10px;
+}
+
+.identity-radio-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.identity-radio-item input[type=radio] {
+  margin: 0;
+  cursor: pointer;
+}
+
+.identity-action-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px;
+}
+
+.win-action-btn {
+  padding: 5px 8px;
+  font-family: inherit;
+  font-size: 11px;
+  font-weight: bold;
+  background: var(--win-gray);
+  border-top: 2px solid var(--win-light);
+  border-left: 2px solid var(--win-light);
+  border-right: 2px solid var(--win-darker);
+  border-bottom: 2px solid var(--win-darker);
+  box-shadow: inset 1px 1px 0 var(--win-lighter), inset -1px -1px 0 var(--win-dark);
+  cursor: pointer;
+  text-align: center;
+  white-space: nowrap;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+}
+
+.win-action-btn:active, .win-action-btn.active {
+  border-top: 2px solid var(--win-darker);
+  border-left: 2px solid var(--win-darker);
+  border-right: 2px solid var(--win-light);
+  border-bottom: 2px solid var(--win-light);
+  box-shadow: none;
+  padding-top: 6px;
+  padding-left: 9px;
+  padding-right: 7px;
+  padding-bottom: 4px;
+}
+
+/* Bottom Virtual Synthesizer Section */
+.synth-bottom-section {
+  width: 100%;
+}
+
+.synth-header-bar {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  justify-content: center;
-  gap: 8px;
-  font-size: 10px;
-  color: #222;
+  justify-content: space-between;
+  gap: 6px;
+  margin-bottom: 6px;
+  padding: 4px 6px;
+  background: var(--win-gray);
+  border-top: 1px solid var(--win-light);
+  border-left: 1px solid var(--win-light);
+  border-right: 1px solid var(--win-darker);
+  border-bottom: 1px solid var(--win-darker);
 }
 
-.keys-bar span { white-space: nowrap; }
-.keys-bar select { font-family: inherit; font-size: 10px; }
+.octave-controls {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
 
-kbd {
+.synth-func-buttons {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  flex-wrap: wrap;
+}
+
+.synth-btn {
+  padding: 3px 7px;
+  font-family: inherit;
+  font-size: 11px;
+  font-weight: bold;
+  background: var(--win-gray);
+  border-top: 2px solid var(--win-light);
+  border-left: 2px solid var(--win-light);
+  border-right: 2px solid var(--win-darker);
+  border-bottom: 2px solid var(--win-darker);
+  box-shadow: inset 1px 1px 0 var(--win-lighter), inset -1px -1px 0 var(--win-dark);
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  white-space: nowrap;
+}
+
+.synth-btn:active, .synth-btn.active {
+  border-top: 2px solid var(--win-darker);
+  border-left: 2px solid var(--win-darker);
+  border-right: 2px solid var(--win-light);
+  border-bottom: 2px solid var(--win-light);
+  box-shadow: none;
+  padding-top: 4px;
+  padding-left: 8px;
+  padding-right: 6px;
+  padding-bottom: 2px;
+}
+
+.btn-led {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #505050;
+  border: 1px solid #202020;
+  display: inline-block;
+}
+
+.btn-led.lit {
+  background: #ffcc00;
+  box-shadow: 0 0 4px #ffcc00;
+}
+
+.btn-led.green {
+  background: #39ff14;
+  box-shadow: 0 0 5px #39ff14;
+}
+
+/* Full 2-Octave Piano Keyboard (27 Keys: F3..G5) */
+.piano-keybed-container {
+  position: relative;
+  width: 100%;
+  height: 116px;
+  background: #141416;
+  border-top: 2px solid var(--win-dark);
+  border-left: 2px solid var(--win-dark);
+  border-right: 2px solid var(--win-light);
+  border-bottom: 2px solid var(--win-light);
+  box-shadow: inset 1px 1px 0 var(--win-darker);
+  padding: 2px;
+  overflow: hidden;
+}
+
+.piano-keybed {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  display: flex;
+}
+
+.piano-key-white {
+  position: relative;
+  flex: 1;
+  height: 100%;
+  background: linear-gradient(180deg, #ffffff 0%, #eeeeee 80%, #dcdcdc 100%);
+  border-top: 1px solid #ffffff;
+  border-left: 1px solid #ffffff;
+  border-right: 1px solid #808080;
+  border-bottom: 3px solid #222222;
+  box-shadow: inset -1px -1px 0 #a0a0a0, inset 1px 1px 0 #ffffff;
+  border-radius: 0 0 3px 3px;
+  z-index: 1;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: center;
+  padding: 6px 1px 4px;
+}
+
+.piano-key-white:active, .piano-key-white.active {
+  background: linear-gradient(180deg, #e4e4e4 0%, #d4d4d4 80%, #c4c4c4 100%);
+  border-top: 2px solid #555555;
+  border-left: 2px solid #555555;
+  border-right: 1px solid #888888;
+  border-bottom: 1px solid #888888;
+  box-shadow: inset 1px 1px 2px rgba(0,0,0,0.4);
+  transform: translateY(2px);
+}
+
+.piano-key-black {
+  position: absolute;
+  top: 0;
+  height: 64%;
+  width: calc(100% / 16 * 0.65);
+  background: linear-gradient(180deg, #444444 0%, #202020 80%, #050505 100%);
+  border-top: 1px solid #666666;
+  border-left: 1px solid #555555;
+  border-right: 1px solid #000000;
+  border-bottom: 3px solid #000000;
+  box-shadow: inset 1px 1px 0 #777777, 2px 2px 4px rgba(0,0,0,0.6);
+  border-radius: 0 0 2px 2px;
+  z-index: 2;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: center;
+  padding: 5px 1px 3px;
+  color: #ffffff;
+}
+
+.piano-key-black:active, .piano-key-black.active {
+  background: linear-gradient(180deg, #222222 0%, #111111 80%, #000000 100%);
+  border-top: 2px solid #111111;
+  border-left: 2px solid #111111;
+  box-shadow: inset 1px 1px 2px #000000;
+  transform: translateY(2px);
+}
+
+.piano-slit {
+  width: 4px;
+  height: 18px;
+  background: #333333;
+  border-radius: 2px;
+  transition: background 0.05s, box-shadow 0.05s;
+}
+
+.piano-key-black .piano-slit {
+  background: #181818;
+  height: 12px;
+}
+
+.piano-key-white.lit .piano-slit, .piano-key-black.lit .piano-slit,
+.piano-key-white.active .piano-slit, .piano-key-black.active .piano-slit {
+  background: #fff4d6;
+  box-shadow: 0 0 6px #fff4d6;
+}
+
+.piano-key-white.cyan .piano-slit, .piano-key-black.cyan .piano-slit {
+  background: #5fe08a;
+  box-shadow: 0 0 6px #5fe08a;
+}
+
+.key-label-note {
+  font-size: 9px;
+  font-weight: bold;
+  line-height: 1;
+  color: #333333;
+}
+
+.piano-key-black .key-label-note {
+  color: #e0e0e0;
+  font-size: 8px;
+}
+
+.key-label-sc {
+  font-size: 8px;
+  font-family: monospace;
+  font-weight: bold;
+  color: #666666;
+  margin-top: 1px;
+}
+
+.piano-key-black .key-label-sc {
+  color: #ffff80;
+  font-size: 7px;
+}
+
+/* Shortcut Keys & MIDI Hint Bar */
+.synth-hints-bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 4px 6px;
+  background: var(--win-gray);
+  border-top: 1px solid var(--win-dark);
+  font-size: 10px;
+  color: #333;
+}
+
+.synth-hints-bar kbd {
   font-family: monospace;
   font-size: 10px;
   font-weight: bold;
@@ -431,7 +1008,7 @@ kbd {
   border-left: 1px solid var(--win-light);
   border-right: 1px solid var(--win-darker);
   border-bottom: 1px solid var(--win-darker);
-  padding: 0 4px;
+  padding: 0 3px;
   color: #000;
 }
 
@@ -455,7 +1032,7 @@ kbd {
   overflow: hidden;
   text-overflow: ellipsis;
   font-size: 10px;
-  color: #333;
+  color: #222;
 }
 
 .status-panel.main-panel { flex: 1; }
@@ -473,7 +1050,7 @@ kbd {
   align-items: center;
   justify-content: space-between;
   padding: 2px 3px;
-  z-index: 1000;
+  z-index: 2000;
   box-shadow: 0 -1px 0 var(--win-dark);
 }
 
@@ -564,20 +1141,24 @@ kbd {
   color: #000;
 }
 
+.systray-icon {
+  cursor: pointer;
+}
+
 /* Start Menu */
 .start-menu {
   display: none;
   position: fixed;
   bottom: 28px;
   left: 2px;
-  width: 195px;
+  width: 210px;
   background: var(--win-gray);
   border-top: 2px solid var(--win-light);
   border-left: 2px solid var(--win-light);
   border-right: 2px solid var(--win-darker);
   border-bottom: 2px solid var(--win-darker);
   box-shadow: 2px 2px 10px rgba(0,0,0,0.5);
-  z-index: 2000;
+  z-index: 3000;
   display: flex;
 }
 
@@ -586,7 +1167,7 @@ kbd {
 }
 
 .start-menu-side {
-  width: 24px;
+  width: 26px;
   background: linear-gradient(180deg, #000080, #1084d0);
   writing-mode: vertical-rl;
   transform: rotate(180deg);
@@ -628,6 +1209,9 @@ kbd {
 .start-item-icon {
   width: 16px;
   height: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .start-divider {
@@ -637,7 +1221,45 @@ kbd {
   margin: 3px 2px;
 }
 
-/* Modal Dialog for "About CINCO OS 2.5" */
+/* Master Volume Control Popup */
+.win-volume-popup {
+  display: none;
+  position: fixed;
+  bottom: 28px;
+  right: 50px;
+  width: 145px;
+  background: var(--win-gray);
+  border-top: 2px solid var(--win-light);
+  border-left: 2px solid var(--win-light);
+  border-right: 2px solid var(--win-darker);
+  border-bottom: 2px solid var(--win-darker);
+  box-shadow: 2px 2px 8px rgba(0,0,0,0.5);
+  z-index: 2500;
+  flex-direction: column;
+}
+
+.win-volume-popup.open {
+  display: flex;
+}
+
+.volume-popup-body {
+  padding: 10px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+
+.volume-vert-slider {
+  -webkit-appearance: slider-vertical;
+  appearance: slider-vertical;
+  writing-mode: bt-lr;
+  width: 24px;
+  height: 84px;
+  cursor: pointer;
+}
+
+/* Modals & Dialogs */
 .modal-overlay {
   display: none;
   position: fixed;
@@ -653,7 +1275,7 @@ kbd {
 }
 
 .modal-dialog {
-  width: 360px;
+  width: 380px;
   background: var(--win-gray);
   border-top: 2px solid var(--win-light);
   border-left: 2px solid var(--win-light);
@@ -664,51 +1286,10 @@ kbd {
 }
 
 .modal-body {
-  padding: 16px 14px 10px;
+  padding: 14px 12px 10px;
   display: flex;
   flex-direction: column;
   gap: 12px;
-}
-
-.modal-header-row {
-  display: flex;
-  gap: 14px;
-  align-items: center;
-}
-
-.modal-logo {
-  width: 44px;
-  height: 44px;
-  flex-shrink: 0;
-}
-
-.modal-info h3 {
-  margin: 0 0 4px;
-  font-size: 13px;
-  color: var(--win-blue);
-}
-
-.modal-info p {
-  margin: 0;
-  font-size: 11px;
-  color: #333;
-}
-
-.modal-box {
-  background: #ffffff;
-  padding: 8px 10px;
-  border-top: 1px solid var(--win-dark);
-  border-left: 1px solid var(--win-dark);
-  border-right: 1px solid var(--win-light);
-  border-bottom: 1px solid var(--win-light);
-  font-size: 11px;
-  line-height: 1.4;
-}
-
-.modal-btn-row {
-  display: flex;
-  justify-content: flex-end;
-  margin-top: 6px;
 }
 
 .dialog-btn {
@@ -735,6 +1316,42 @@ kbd {
   padding-top: 5px;
   padding-left: 15px;
 }
+
+.sysprop-tabs {
+  display: flex;
+  gap: 2px;
+  border-bottom: 1px solid var(--win-dark);
+  padding-left: 6px;
+  margin-top: 4px;
+}
+
+.sysprop-tab {
+  padding: 3px 8px;
+  background: var(--win-gray);
+  border-top: 2px solid var(--win-light);
+  border-left: 2px solid var(--win-light);
+  border-right: 2px solid var(--win-darker);
+  border-bottom: none;
+  font-weight: bold;
+  cursor: pointer;
+  margin-bottom: -1px;
+}
+
+.sysprop-tab.active {
+  border-bottom: 2px solid var(--win-gray);
+  padding-top: 4px;
+  z-index: 2;
+}
+
+.sysprop-tab-content {
+  border-left: 2px solid var(--win-light);
+  border-right: 2px solid var(--win-darker);
+  border-bottom: 2px solid var(--win-darker);
+  padding: 12px;
+  background: var(--win-gray);
+  font-size: 11px;
+  line-height: 1.4;
+}
 </style>
 </head>
 <body>
@@ -749,6 +1366,55 @@ kbd {
       <rect x="7" y="27" width="18" height="2" fill="#dfdfdf"/>
     </svg>
     <span class="icon-lbl">My Computer</span>
+  </div>
+
+  <div class="desktop-icon" id="d-app" tabindex="0">
+    <svg class="icon-img" viewBox="0 0 32 32">
+      <rect width="32" height="32" rx="2" fill="#000080" stroke="#000" stroke-width="1.5"/>
+      <rect x="4" y="4" width="24" height="8" fill="#ffffff"/>
+      <rect x="4" y="14" width="24" height="14" fill="#c0c0c0" stroke="#000" stroke-width="1"/>
+      <text x="10" y="25" font-family="monospace" font-size="12" font-weight="bold" fill="#000080">5</text>
+    </svg>
+    <span class="icon-lbl">Cinco Synth</span>
+  </div>
+
+  <div class="desktop-icon" id="d-tayne" tabindex="0">
+    <svg class="icon-img" viewBox="0 0 32 32">
+      <rect x="2" y="2" width="28" height="28" fill="#c0c0c0" stroke="#000" stroke-width="1.5"/>
+      <circle cx="16" cy="14" r="8" fill="#000080"/>
+      <rect x="8" y="22" width="16" height="5" fill="#808080"/>
+      <text x="11" y="17" font-family="monospace" font-size="8" font-weight="bold" fill="#ffffff">T</text>
+    </svg>
+    <span class="icon-lbl">Tayne Studio</span>
+  </div>
+
+  <div class="desktop-icon" id="d-defrag" tabindex="0">
+    <svg class="icon-img" viewBox="0 0 32 32">
+      <rect x="3" y="4" width="26" height="24" fill="#c0c0c0" stroke="#000" stroke-width="1.5"/>
+      <rect x="6" y="7" width="5" height="5" fill="#000080"/>
+      <rect x="13" y="7" width="5" height="5" fill="#000080"/>
+      <rect x="20" y="7" width="5" height="5" fill="#ffffff"/>
+      <rect x="6" y="14" width="5" height="5" fill="#008000"/>
+      <rect x="13" y="14" width="5" height="5" fill="#ff0000"/>
+      <rect x="20" y="14" width="5" height="5" fill="#008000"/>
+      <rect x="6" y="21" width="5" height="5" fill="#ffffff"/>
+      <rect x="13" y="21" width="5" height="5" fill="#000080"/>
+      <rect x="20" y="21" width="5" height="5" fill="#000080"/>
+    </svg>
+    <span class="icon-lbl">Cinco Defrag</span>
+  </div>
+
+  <div class="desktop-icon" id="d-boss" tabindex="0">
+    <svg class="icon-img" viewBox="0 0 32 32">
+      <rect x="3" y="3" width="26" height="26" fill="#ffffff" stroke="#000" stroke-width="1.5"/>
+      <rect x="3" y="3" width="26" height="6" fill="#000080"/>
+      <line x1="3" y1="13" x2="29" y2="13" stroke="#808080" stroke-width="1"/>
+      <line x1="3" y1="19" x2="29" y2="19" stroke="#808080" stroke-width="1"/>
+      <line x1="12" y1="9" x2="12" y2="29" stroke="#808080" stroke-width="1"/>
+      <line x1="20" y1="9" x2="20" y2="29" stroke="#808080" stroke-width="1"/>
+      <text x="5" y="8" font-family="sans-serif" font-size="5" fill="#fff">1-2-3</text>
+    </svg>
+    <span class="icon-lbl">Lotus 1-2-3</span>
   </div>
 
   <a class="desktop-icon" href="installer/" id="d-installer" tabindex="0">
@@ -774,22 +1440,6 @@ kbd {
     <span class="icon-lbl">CINCO Manual</span>
   </a>
 
-  <div class="desktop-icon" id="d-defrag" tabindex="0">
-    <svg class="icon-img" viewBox="0 0 32 32">
-      <rect x="3" y="4" width="26" height="24" fill="#c0c0c0" stroke="#000" stroke-width="1.5"/>
-      <rect x="6" y="7" width="5" height="5" fill="#000080"/>
-      <rect x="13" y="7" width="5" height="5" fill="#000080"/>
-      <rect x="20" y="7" width="5" height="5" fill="#ffffff"/>
-      <rect x="6" y="14" width="5" height="5" fill="#008000"/>
-      <rect x="13" y="14" width="5" height="5" fill="#ff0000"/>
-      <rect x="20" y="14" width="5" height="5" fill="#008000"/>
-      <rect x="6" y="21" width="5" height="5" fill="#ffffff"/>
-      <rect x="13" y="21" width="5" height="5" fill="#000080"/>
-      <rect x="20" y="21" width="5" height="5" fill="#000080"/>
-    </svg>
-    <span class="icon-lbl">Disk Defrag</span>
-  </div>
-
   <div class="desktop-icon" id="d-recycle" tabindex="0">
     <svg class="icon-img" viewBox="0 0 32 32">
       <path d="M7 8 L25 8 L23 28 L9 28 Z" fill="#c0c0c0" stroke="#000" stroke-width="1.5"/>
@@ -803,7 +1453,7 @@ kbd {
   </div>
 </div>
 
-<!-- Main Application Window -->
+<!-- Main Application Window: CINCO Identity Generator 2.5 -->
 <main class="win-window bevel-raised" id="main-win">
   <!-- Titlebar -->
   <div class="win-titlebar" id="win-drag-bar">
@@ -814,7 +1464,7 @@ kbd {
         <rect x="3" y="8" width="10" height="6" fill="#c0c0c0"/>
         <text x="4" y="13" font-family="monospace" font-size="6" font-weight="bold" fill="#000080">5</text>
       </svg>
-      <span>Cinco Identity Generator 2.5™ - [CINCO OS 2.5]</span>
+      <span>Cinco Identity Generator 2.5™ - [CINCO OS 2.5 Workstation]</span>
     </div>
     <div class="win-controls">
       <button class="win-btn" id="btn-win-min" title="Minimize">_</button>
@@ -864,6 +1514,8 @@ kbd {
         <div class="dropdown-item" id="m-defrag"><span>Disk <u>D</u>efragmenter</span><span class="dropdown-shortcut">SEQ</span></div>
         <div class="dropdown-item" id="m-boss"><span>Lotus 1-2-3 <u>B</u>oss Key</span><span class="dropdown-shortcut">EDIT</span></div>
         <div class="dropdown-item" id="m-screensaver"><span>After Dark <u>S</u>creensaver</span></div>
+        <div class="dropdown-divider"></div>
+        <div class="dropdown-item" id="m-sysprop"><span>System <u>P</u>roperties...</span></div>
       </div>
     </div>
 
@@ -878,45 +1530,243 @@ kbd {
     </div>
   </nav>
 
-  <!-- Client Inset Area -->
-  <div class="win-content">
-    <div class="client-inset">
-      <div class="device" id="device">
-        <svg id="panel" viewBox="0 0 1000 624" aria-hidden="true"></svg>
-        <canvas id="screen" width="240" height="240" role="img" aria-label="The screen"></canvas>
-        <div class="start" id="start"><button id="go" type="button">Switch on</button><p id="status" hidden></p></div>
-      </div>
-    </div>
-
-    <!-- Shortcut Keys Bar -->
-    <div class="keys-bar">
-      <span><kbd>Z</kbd>–<kbd>'</kbd> <kbd>Q</kbd>–<kbd>O</kbd> Synthesizer Keys</span>
-      <span><kbd>1</kbd>–<kbd>=</kbd> FX … REC</span>
-      <span><kbd>[</kbd> <kbd>]</kbd> Octave</span>
-      <span><kbd>↑</kbd> <kbd>↓</kbd> Select</span>
-      <span><kbd>←</kbd> <kbd>→</kbd> Algo</span>
-      <span><kbd>Shift</kbd>-click holds a button</span>
-      <span id="midiknobs" hidden><label><input type="checkbox" id="knobson"> MIDI CC 20–27 turn knobs</label>
-      <select id="knobmode" aria-label="How the controller sends CC 20–26" hidden>
-        <option value="abs">absolute</option>
-        <option value="bin">relative 64±n</option>
-        <option value="twos">relative 2's complement</option>
-        <option value="sign">relative sign bit</option>
-      </select></span>
-    </div>
+  <!-- Authentic 1998 Flat 3D Toolbar Strip -->
+  <div class="win-toolbar">
+    <button class="toolbar-btn" id="tb-power" title="Power On / Play Engine">
+      <span style="color:#008000;font-size:12px;">▶</span> Power / Play
+    </button>
+    <button class="toolbar-btn" id="tb-stop" title="Stop Playback">
+      <span style="color:#aa0000;font-size:11px;">■</span> Stop
+    </button>
+    <div class="toolbar-separator"></div>
+    <button class="toolbar-btn" id="tb-celery" title="Load Celery Man">🕺 Celery</button>
+    <button class="toolbar-btn" id="tb-oyster" title="Load Oyster Smiling">🦪 Oyster</button>
+    <button class="toolbar-btn" id="tb-tayne" title="Load Tayne (BETA)">🎩 Tayne</button>
+    <div class="toolbar-separator"></div>
+    <button class="toolbar-btn" id="tb-4d" title="Kick up the 4d3d3d3">⚡ 4d3d3d3</button>
+    <button class="toolbar-btn" id="tb-wobble" title="Hat Wobble (LFO)">🎩 Wobble</button>
+    <button class="toolbar-btn" id="tb-flarh" title="Flarhgunnstow (ARP)">🔥 Flarh</button>
+    <button class="toolbar-btn" id="tb-nude" title="Nude Tayne Mode (NSFW)">🔞 Nude</button>
+    <div class="toolbar-separator"></div>
+    <button class="toolbar-btn" id="tb-boss" title="Lotus 1-2-3 Boss Key">📊 Boss</button>
+    <button class="toolbar-btn" id="tb-defrag" title="Disk Defragmenter">💾 Defrag</button>
+    <button class="toolbar-btn" id="tb-receipt" title="Print Oyster Receipt">🖨️ Receipt</button>
   </div>
 
-  <!-- Sunken Status Bar -->
+  <!-- Application Content Area -->
+  <div class="win-client">
+    <!-- Top Split Panes: CRT Monitor on Left, Kinetics & Routines on Right -->
+    <div class="top-split-panes">
+      <!-- Left Pane: Sunken CRT Monitor Viewport -->
+      <section class="crt-viewport-pane">
+        <div class="crt-housing">
+          <div class="crt-top-vents"></div>
+          <div class="crt-bezel" id="crt-frame">
+            <div class="crt-screen-well">
+              <canvas id="screen" width="240" height="240" role="img" aria-label="CINCO OS 2.5 Screen Display"></canvas>
+              <div class="crt-scanlines"></div>
+              <div class="crt-start-overlay" id="start">
+                <button id="go" class="crt-power-btn" type="button">Switch on</button>
+                <p id="status" style="margin:0;max-width:200px;text-align:center;color:#fff;font-size:10px;text-shadow:1px 1px 1px #000;" hidden></p>
+              </div>
+            </div>
+            <div class="crt-bottom-bar">
+              <span class="crt-badge">CINCO MULTISYNC 15</span>
+              <div class="crt-power-indicator">
+                <span>POWER</span>
+                <div class="crt-led" id="crt-power-led" title="Power Standby"></div>
+              </div>
+            </div>
+          </div>
+          <div class="crt-btn-strip">
+            <button class="crt-mini-btn" id="btn-degauss" title="Degauss CRT Coil">⚡ Degauss</button>
+            <button class="crt-mini-btn" id="btn-fullscreen" title="Toggle Fullscreen">⛶ Fullscreen</button>
+            <button class="crt-mini-btn" id="btn-reset-crt" title="Reset View & Popups">↺ Reset</button>
+            <button class="crt-mini-btn" id="btn-snapshot" title="Save PNG Frame">📷 Snap</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- Right Pane: Identity & Kinetics Controls -->
+      <section class="controls-right-pane">
+        <!-- Sequence Kinetics Group Box -->
+        <fieldset class="win-groupbox">
+          <legend>Sequence Kinetics</legend>
+          <div class="slider-group">
+            <!-- 4d3d3d3 Macro Slider -->
+            <div class="win-slider-row">
+              <span class="win-slider-label">4d3d3d3 Macro:</span>
+              <div class="win-slider-controls">
+                <button class="win-nudge-btn" id="btn-macro-down">-</button>
+                <input type="range" class="win-trackbar" id="sl-macro" min="0" max="127" value="0" aria-label="4d3d3d3 Macro">
+                <button class="win-nudge-btn" id="btn-macro-up">+</button>
+              </div>
+              <span class="win-readout-badge" id="macro-badge">0% [READY]</span>
+            </div>
+
+            <!-- Tempo (BPM) Slider -->
+            <div class="win-slider-row">
+              <span class="win-slider-label">Tempo (BPM):</span>
+              <div class="win-slider-controls">
+                <button class="win-nudge-btn" id="btn-bpm-down">-</button>
+                <input type="range" class="win-trackbar" id="sl-bpm" min="80" max="160" value="120" aria-label="Tempo BPM">
+                <button class="win-nudge-btn" id="btn-bpm-up">+</button>
+              </div>
+              <span class="win-readout-badge" id="bpm-badge">120 BPM</span>
+            </div>
+
+            <!-- Filter Cutoff (Tone) Slider -->
+            <div class="win-slider-row">
+              <span class="win-slider-label">Filter Cutoff:</span>
+              <div class="win-slider-controls">
+                <button class="win-nudge-btn" id="btn-tone-down">-</button>
+                <input type="range" class="win-trackbar" id="sl-tone" min="0" max="127" value="64" aria-label="Filter Cutoff">
+                <button class="win-nudge-btn" id="btn-tone-up">+</button>
+              </div>
+              <span class="win-readout-badge" id="tone-badge">Tone: 64</span>
+            </div>
+
+            <!-- Resonance / Mix Slider -->
+            <div class="win-slider-row">
+              <span class="win-slider-label">Resonance / Mix:</span>
+              <div class="win-slider-controls">
+                <button class="win-nudge-btn" id="btn-mix-down">-</button>
+                <input type="range" class="win-trackbar" id="sl-mix" min="0" max="127" value="64" aria-label="Resonance Mix">
+                <button class="win-nudge-btn" id="btn-mix-up">+</button>
+              </div>
+              <span class="win-readout-badge" id="mix-badge">Mix: 64</span>
+            </div>
+          </div>
+        </fieldset>
+
+        <!-- Identity Routines Group Box -->
+        <fieldset class="win-groupbox">
+          <legend>Identity Routines</legend>
+          <!-- Radio Selectors -->
+          <div class="identity-radio-grid">
+            <label class="identity-radio-item">
+              <input type="radio" name="id-routine" id="rad-celery" value="0" checked>
+              <span>Celery Man</span>
+            </label>
+            <label class="identity-radio-item">
+              <input type="radio" name="id-routine" id="rad-oyster" value="1">
+              <span>Oyster Smiling</span>
+            </label>
+            <label class="identity-radio-item">
+              <input type="radio" name="id-routine" id="rad-tayne" value="2">
+              <span>Tayne Beta</span>
+            </label>
+            <label class="identity-radio-item">
+              <input type="radio" name="id-routine" id="rad-speech" value="3">
+              <span>Speech Synthesizer</span>
+            </label>
+          </div>
+
+          <!-- Routine Pushbuttons -->
+          <div class="identity-action-grid">
+            <button class="win-action-btn" id="btn-k4d">⚡ Kick Up 4d3d3d3</button>
+            <button class="win-action-btn" id="btn-wobble">🎩 Hat Wobble</button>
+            <button class="win-action-btn" id="btn-flail">🔥 Flarhgunnstow</button>
+            <button class="win-action-btn" id="btn-nude">🔞 Nude Tayne (NSFW)</button>
+            <button class="win-action-btn" id="btn-receipt">🖨️ Print Oyster Receipt</button>
+            <button class="win-action-btn" id="btn-coffee">☕ Coffee Break</button>
+          </div>
+        </fieldset>
+      </section>
+    </div>
+
+    <!-- Bottom Section: Authentic 90s Virtual Synthesizer Keyboard -->
+    <fieldset class="win-groupbox synth-bottom-section">
+      <legend>27-Key Capacitive Audio Synthesizer Interface</legend>
+
+      <!-- Function Buttons & Octave Controls -->
+      <div class="synth-header-bar">
+        <div class="octave-controls">
+          <button class="synth-btn" id="btn-oct-dn">◀ Octave -</button>
+          <span class="win-readout-badge" id="oct-badge" style="min-width:65px;">Octave: 0</span>
+          <button class="synth-btn" id="btn-oct-up">Octave + ▶</button>
+        </div>
+
+        <div class="synth-func-buttons">
+          <button class="synth-btn" id="btn-voice"><span class="btn-led" id="led-glo"></span> Voice</button>
+          <button class="synth-btn" id="btn-macro-mode"><span class="btn-led" id="led-scl"></span> Macro</button>
+          <button class="synth-btn" id="btn-arp"><span class="btn-led" id="led-arp"></span> Arp</button>
+          <button class="synth-btn" id="btn-fx"><span class="btn-led" id="led-fx"></span> FX</button>
+          <button class="synth-btn" id="btn-seq"><span class="btn-led" id="led-seq"></span> Seq</button>
+          <button class="synth-btn" id="btn-edit"><span class="btn-led" id="led-edit"></span> Edit</button>
+          <button class="synth-btn" id="btn-boss-mode">📊 Boss</button>
+          <button class="synth-btn" id="btn-play-stop"><span class="btn-led" id="led-play"></span> Play / Stop</button>
+        </div>
+      </div>
+
+      <!-- 2-Octave Piano Keyboard (27 Keys) -->
+      <div class="piano-keybed-container">
+        <div class="piano-keybed" id="piano-keybed">
+          <!-- 16 White Keys -->
+          <div class="piano-key-white" data-key="0" id="pk-0"><div class="piano-slit"></div><div><div class="key-label-note">F3</div><div class="key-label-sc">Z</div></div></div>
+          <div class="piano-key-white" data-key="2" id="pk-2"><div class="piano-slit"></div><div><div class="key-label-note">G3</div><div class="key-label-sc">X</div></div></div>
+          <div class="piano-key-white" data-key="4" id="pk-4"><div class="piano-slit"></div><div><div class="key-label-note">A3</div><div class="key-label-sc">C</div></div></div>
+          <div class="piano-key-white" data-key="6" id="pk-6"><div class="piano-slit"></div><div><div class="key-label-note">B3</div><div class="key-label-sc">V</div></div></div>
+          <div class="piano-key-white" data-key="7" id="pk-7"><div class="piano-slit"></div><div><div class="key-label-note">C4</div><div class="key-label-sc">B</div></div></div>
+          <div class="piano-key-white" data-key="9" id="pk-9"><div class="piano-slit"></div><div><div class="key-label-note">D4</div><div class="key-label-sc">N</div></div></div>
+          <div class="piano-key-white" data-key="11" id="pk-11"><div class="piano-slit"></div><div><div class="key-label-note">E4</div><div class="key-label-sc">M</div></div></div>
+          <div class="piano-key-white" data-key="12" id="pk-12"><div class="piano-slit"></div><div><div class="key-label-note">F4</div><div class="key-label-sc">,</div></div></div>
+          <div class="piano-key-white" data-key="14" id="pk-14"><div class="piano-slit"></div><div><div class="key-label-note">G4</div><div class="key-label-sc">.</div></div></div>
+          <div class="piano-key-white" data-key="16" id="pk-16"><div class="piano-slit"></div><div><div class="key-label-note">A4</div><div class="key-label-sc">/</div></div></div>
+          <div class="piano-key-white" data-key="18" id="pk-18"><div class="piano-slit"></div><div><div class="key-label-note">B4</div><div class="key-label-sc">Q</div></div></div>
+          <div class="piano-key-white" data-key="19" id="pk-19"><div class="piano-slit"></div><div><div class="key-label-note">C5</div><div class="key-label-sc">W</div></div></div>
+          <div class="piano-key-white" data-key="21" id="pk-21"><div class="piano-slit"></div><div><div class="key-label-note">D5</div><div class="key-label-sc">E</div></div></div>
+          <div class="piano-key-white" data-key="23" id="pk-23"><div class="piano-slit"></div><div><div class="key-label-note">E5</div><div class="key-label-sc">R</div></div></div>
+          <div class="piano-key-white" data-key="24" id="pk-24"><div class="piano-slit"></div><div><div class="key-label-note">F5</div><div class="key-label-sc">T</div></div></div>
+          <div class="piano-key-white" data-key="26" id="pk-26"><div class="piano-slit"></div><div><div class="key-label-note">G5</div><div class="key-label-sc">Y</div></div></div>
+
+          <!-- 11 Black Keys positioned across the cracks -->
+          <div class="piano-key-black" data-key="1" id="pk-1" style="left:calc(100% / 16 * 1 - (100% / 16 * 0.65) / 2);"><div class="piano-slit"></div><div><div class="key-label-note">F♯3</div><div class="key-label-sc">S</div></div></div>
+          <div class="piano-key-black" data-key="3" id="pk-3" style="left:calc(100% / 16 * 2 - (100% / 16 * 0.65) / 2);"><div class="piano-slit"></div><div><div class="key-label-note">G♯3</div><div class="key-label-sc">D</div></div></div>
+          <div class="piano-key-black" data-key="5" id="pk-5" style="left:calc(100% / 16 * 3 - (100% / 16 * 0.65) / 2);"><div class="piano-slit"></div><div><div class="key-label-note">A♯3</div><div class="key-label-sc">F</div></div></div>
+
+          <div class="piano-key-black" data-key="8" id="pk-8" style="left:calc(100% / 16 * 5 - (100% / 16 * 0.65) / 2);"><div class="piano-slit"></div><div><div class="key-label-note">C♯4</div><div class="key-label-sc">H</div></div></div>
+          <div class="piano-key-black" data-key="10" id="pk-10" style="left:calc(100% / 16 * 6 - (100% / 16 * 0.65) / 2);"><div class="piano-slit"></div><div><div class="key-label-note">D♯4</div><div class="key-label-sc">J</div></div></div>
+
+          <div class="piano-key-black" data-key="13" id="pk-13" style="left:calc(100% / 16 * 8 - (100% / 16 * 0.65) / 2);"><div class="piano-slit"></div><div><div class="key-label-note">F♯4</div><div class="key-label-sc">L</div></div></div>
+          <div class="piano-key-black" data-key="15" id="pk-15" style="left:calc(100% / 16 * 9 - (100% / 16 * 0.65) / 2);"><div class="piano-slit"></div><div><div class="key-label-note">G♯4</div><div class="key-label-sc">;</div></div></div>
+          <div class="piano-key-black" data-key="17" id="pk-17" style="left:calc(100% / 16 * 10 - (100% / 16 * 0.65) / 2);"><div class="piano-slit"></div><div><div class="key-label-note">A♯4</div><div class="key-label-sc">'</div></div></div>
+
+          <div class="piano-key-black" data-key="20" id="pk-20" style="left:calc(100% / 16 * 12 - (100% / 16 * 0.65) / 2);"><div class="piano-slit"></div><div><div class="key-label-note">C♯5</div><div class="key-label-sc">U</div></div></div>
+          <div class="piano-key-black" data-key="22" id="pk-22" style="left:calc(100% / 16 * 13 - (100% / 16 * 0.65) / 2);"><div class="piano-slit"></div><div><div class="key-label-note">D♯5</div><div class="key-label-sc">I</div></div></div>
+          <div class="piano-key-black" data-key="25" id="pk-25" style="left:calc(100% / 16 * 15 - (100% / 16 * 0.65) / 2);"><div class="piano-slit"></div><div><div class="key-label-note">F♯5</div><div class="key-label-sc">O</div></div></div>
+        </div>
+      </div>
+
+      <!-- Shortcut Keys Bar -->
+      <div class="synth-hints-bar">
+        <span><kbd>Z</kbd>–<kbd>'</kbd> Lower Octave Piano &nbsp; <kbd>Q</kbd>–<kbd>O</kbd> Upper Octave Piano</span>
+        <span><kbd>1</kbd>–<kbd>=</kbd> FX … REC</span>
+        <span><kbd>[</kbd> <kbd>]</kbd> Octave +/-</span>
+        <span id="midiknobs" hidden>
+          <label><input type="checkbox" id="knobson"> MIDI CC 20–27 turn knobs</label>
+          <select id="knobmode" aria-label="How the controller sends CC 20–26" hidden>
+            <option value="abs">absolute</option>
+            <option value="bin">relative 64±n</option>
+            <option value="twos">relative 2's complement</option>
+            <option value="sign">relative sign bit</option>
+          </select>
+        </span>
+      </div>
+    </fieldset>
+  </div>
+
+  <!-- Sunken Segmented Status Bar -->
   <footer class="win-statusbar">
     <div class="status-panel main-panel" id="status-main">Ready - Click 'Switch on' to initialize CINCO OS 2.5</div>
-    <div class="status-panel">User: Paul (Managing Director)</div>
-    <div class="status-panel">OS: CINCO OS 2.5</div>
-    <div class="status-panel">Bus: ST7789 12MHz SPI</div>
-    <div class="status-panel">DSP: 4d3d3d3</div>
+    <div class="status-panel" id="status-tempo">120 BPM</div>
+    <div class="status-panel" id="status-identity">CELERY MAN</div>
+    <div class="status-panel">DSP: 44.1kHz Q15</div>
+    <div class="status-panel" id="status-coffee">☕ 100%</div>
   </footer>
 </main>
 
-<!-- Bottom Taskbar -->
+<!-- Windows 98 Taskbar -->
 <footer class="win-taskbar">
   <div class="taskbar-left">
     <button class="start-btn" id="start-btn">
@@ -947,11 +1797,27 @@ kbd {
   </div>
 
   <div class="systray">
-    <span title="Audio Worklet 44.1 kHz">🔊</span>
-    <span title="MIDI Controller Active">🎛️</span>
+    <span class="systray-icon" id="systray-vol" title="Volume Control">🔊</span>
+    <span class="systray-icon" title="MIDI Controller Active">🎛️</span>
     <span id="systray-clock">12:00 PM</span>
   </div>
 </footer>
+
+<!-- Master Volume Control Popup Dialog -->
+<div class="win-volume-popup bevel-raised" id="volume-popup">
+  <div class="win-titlebar" style="height:18px;font-size:10px;">
+    <span>Volume</span>
+    <button class="win-btn" id="vol-popup-close" style="width:14px;height:12px;">×</button>
+  </div>
+  <div class="volume-popup-body">
+    <span style="font-size:10px;font-weight:bold;">Master</span>
+    <input type="range" class="volume-vert-slider" id="master-vol-slider" min="0" max="1023" value="700" orient="vertical">
+    <span id="master-vol-label" style="font-size:10px;font-family:monospace;font-weight:bold;">68%</span>
+    <label style="font-size:10px;display:flex;align-items:center;gap:4px;cursor:pointer;">
+      <input type="checkbox" id="master-mute-chk"> Mute
+    </label>
+  </div>
+</div>
 
 <!-- Start Menu -->
 <div class="start-menu" id="start-menu">
@@ -963,19 +1829,31 @@ kbd {
       <span class="start-item-icon">🎛️</span>
       <span><b>Identity Generator 2.5</b></span>
     </div>
-    <a class="start-item" href="installer/">
-      <span class="start-item-icon">💾</span>
-      <span>Hardware Setup Wizard</span>
-    </a>
+    <div class="start-item" id="sm-tayne">
+      <span class="start-item-icon">🎩</span>
+      <span>Tayne Studio 98</span>
+    </div>
     <div class="start-item" id="sm-defrag">
-      <span class="start-item-icon">📊</span>
+      <span class="start-item-icon">💾</span>
       <span>Disk Defragmenter</span>
     </div>
+    <div class="start-item" id="sm-boss">
+      <span class="start-item-icon">📊</span>
+      <span>Lotus 1-2-3 (Boss Key)</span>
+    </div>
+    <a class="start-item" href="installer/">
+      <span class="start-item-icon">💿</span>
+      <span>Hardware Setup Wizard</span>
+    </a>
     <a class="start-item" href="https://github.com/mrjoshida/CINCO/blob/main/docs/cinco/MANUAL.md" target="_blank">
       <span class="start-item-icon">📖</span>
       <span>System Manual</span>
     </a>
     <div class="start-divider"></div>
+    <div class="start-item" id="sm-sysprop">
+      <span class="start-item-icon">💻</span>
+      <span>System Properties...</span>
+    </div>
     <div class="start-item" id="sm-about">
       <span class="start-item-icon">ℹ️</span>
       <span>About CINCO OS...</span>
@@ -988,6 +1866,48 @@ kbd {
   </div>
 </div>
 
+<!-- System Properties Dialog (My Computer) -->
+<div class="modal-overlay" id="sysprop-modal">
+  <div class="modal-dialog bevel-raised" style="width:400px;">
+    <div class="win-titlebar">
+      <span>System Properties</span>
+      <button class="win-btn" id="sysprop-close">×</button>
+    </div>
+    <div class="sysprop-tabs">
+      <div class="sysprop-tab active" id="tab-gen">General</div>
+      <div class="sysprop-tab" id="tab-dev">Device Manager</div>
+      <div class="sysprop-tab" id="tab-perf">Performance</div>
+    </div>
+    <div class="sysprop-tab-content">
+      <div style="display:flex;gap:16px;align-items:flex-start;margin-bottom:12px;">
+        <svg style="width:48px;height:48px;flex-shrink:0;" viewBox="0 0 32 32">
+          <rect x="2" y="2" width="28" height="20" rx="1" fill="#c0c0c0" stroke="#000" stroke-width="1.5"/>
+          <rect x="4" y="4" width="24" height="16" fill="#008080"/>
+          <path d="M12 22 L8 29 L24 29 L20 22 Z" fill="#808080" stroke="#000" stroke-width="1.5"/>
+          <rect x="6" y="28" width="20" height="2" fill="#dfdfdf"/>
+          <text x="12" y="15" font-family="monospace" font-size="10" font-weight="bold" fill="#fff">5</text>
+        </svg>
+        <div>
+          <b>System:</b><br>
+          CINCO OS 2.5 Workstation Platform<br>
+          Cinco Business Systems, Inc.<br>
+          Celery Man Edition [v2.5]<br><br>
+          <b>Registered to:</b><br>
+          Paul (Senior Managing Director)<br>
+          Department of Identity Operations<br><br>
+          <b>Computer:</b><br>
+          Cinco 4d3d3d3 Dual-Core Processor<br>
+          73,728 Bytes SRAM, 301,984 Bytes DRAM<br>
+          ST7789 12MHz SPI Hardware Accelerated
+        </div>
+      </div>
+      <div style="display:flex;justify-content:flex-end;gap:6px;">
+        <button class="dialog-btn" id="sysprop-ok">OK</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 <!-- About Modal Dialog -->
 <div class="modal-overlay" id="about-modal">
   <div class="modal-dialog bevel-raised">
@@ -996,32 +1916,32 @@ kbd {
       <button class="win-btn" id="modal-close">×</button>
     </div>
     <div class="modal-body">
-      <div class="modal-header-row">
-        <svg class="modal-logo" viewBox="0 0 32 32">
+      <div style="display:flex;gap:14px;align-items:center;">
+        <svg style="width:44px;height:44px;flex-shrink:0;" viewBox="0 0 32 32">
           <rect width="32" height="32" rx="4" fill="#000080"/>
           <rect x="6" y="4" width="20" height="8" fill="#fff"/>
           <rect x="6" y="16" width="20" height="12" fill="#c0c0c0"/>
           <text x="8" y="26" font-family="monospace" font-size="14" font-weight="bold" fill="#000080">5</text>
         </svg>
-        <div class="modal-info">
-          <h3>Cinco Identity Generator 2.5™</h3>
-          <p>CINCO OS 2.5 Enterprise Workstation Platform</p>
-          <p>Version v2.5 (preview)</p>
+        <div>
+          <h3 style="margin:0 0 4px;font-size:13px;color:var(--win-blue);">Cinco Identity Generator 2.5™</h3>
+          <p style="margin:0;font-size:11px;color:#333;">CINCO OS 2.5 Enterprise Workstation Platform</p>
+          <p style="margin:0;font-size:11px;color:#333;">Version v2.5 (preview)</p>
         </div>
       </div>
 
-      <div class="modal-box">
+      <div class="bevel-thin-sunken" style="background:#ffffff;padding:8px 10px;font-size:11px;line-height:1.4;">
         <b>Cinco Business Systems, Inc.</b><br>
         Portions derived from Felucca by Leo Kuroshita, Hügelton Instruments (GPL-3.0).<br><br>
         <b>Licensed to:</b><br>
         &nbsp;&nbsp;Paul (Senior Managing Director)<br>
         &nbsp;&nbsp;Department of Identity Operations<br><br>
-        <b>Hardware Memory Available:</b> 73,728 Bytes SRAM<br>
-        <b>Dynamic Heap:</b> 301,984 Bytes DRAM<br>
-        <b>Display Bus:</b> 12 MHz SPI ST7789
+        <b>Audio Engine:</b> 44.1kHz Interactive AudioWorklet<br>
+        <b>DSP Core:</b> Fixed-Point Q15 Arithmetic<br>
+        <b>Hardware Memory:</b> 73,728 Bytes SRAM / 301,984 Bytes DRAM
       </div>
 
-      <div class="modal-btn-row">
+      <div style="display:flex;justify-content:flex-end;">
         <button class="dialog-btn" id="modal-ok">OK</button>
       </div>
     </div>
@@ -1030,282 +1950,37 @@ kbd {
 
 <script type="module">
 import { midiKnob, KNOB_MODES } from "./worklet.js";
-const NS = "http://www.w3.org/2000/svg";
-// panel.c's labels (bit = label) and encoder roles
+
+// Hardware button bits (panel.c) and encoder roles
 const B = { FX: 0, SCL: 1, ENV: 2, LFO: 3, EDIT: 4, GLO: 5, HOME: 6, SAVE: 7, ARP: 8, SEQ: 9, PLAY: 10, REC: 11, "OCT-": 12, "OCT+": 13 };
 const EN = { SELECT: 0, ALGORITHM: 1, PRESETS: 2, "KNOB 1": 3, "KNOB 2": 4, "KNOB 3": 5, "KNOB 4": 6 };
 const PLAY_GREEN = 14;
-// the 27 keys F3..G5: key k = k semitones above F3
+
+// 27 keys: F3 (0) to G5 (26)
 const WHITE = [0, 2, 4, 6, 7, 9, 11, 12, 14, 16, 18, 19, 21, 23, 24, 26];
 const BLACK = [1, 3, 5, 8, 10, 13, 15, 17, 20, 22, 25];
-const BLACK_AFTER = [0, 1, 2, 4, 5, 7, 8, 9, 11, 12, 14];      // the white key each black one follows
 const STORE = "felucca-emu-flash", KNOBS_ON = "felucca-emu-knobs", KNOB_MODE = "felucca-emu-knobmode";
 
-// ------------------------------------------------------------------ the panel
-// Two drawings of the same controls: WIDE after the FM-1's own layout, TALL for a phone held upright (the
-// screen larger, the keys across the whole width). Rebuilt when the orientation changes; the state stays.
-const ROW1 = ["FX", "SCL", "ENV", "LFO", "EDIT", "GLO"], ROW2 = ["HOME", "SAVE", "ARP", "SEQ", "PLAY", "REC"];
-const KNOBS = ["MASTER", "SELECT", "PRESETS", "ALGORITHM", "KNOB 1", "KNOB 2", "KNOB 3", "KNOB 4"];
-const KNOB_SUBS = { "KNOB 1": "4d3d3d3", "KNOB 2": "TONE", "KNOB 3": "TEMPO", "KNOB 4": "MIX" };
-const LAYOUTS = {
-  wide: {
-    w: 1000, h: 624, screen: [292, 44, 256],
-    knobs: [[105, 100, 24], [215, 100, 24], [105, 205, 24], [215, 205, 24], [610, 100, 22], [714, 100, 22], [818, 100, 22], [922, 100, 22]],
-    trays: [[50, 250, 220, 50], [568, 160, 400, 140]],
-    oct: [[60, 258, 90, 34], [170, 258, 90, 34]],
-    grid: [582, 174, 54, 48, 63, 62], keybed: [36, 332, 928, 256],
-  },
-  tall: {
-    w: 600, h: 1070, screen: [130, 104, 340],
-    knobs: [[66, 64, 24], [186, 64, 24], [414, 64, 24], [534, 64, 24], [90, 512, 26], [230, 512, 26], [370, 512, 26], [510, 512, 26]],
-    trays: [[14, 572, 572, 146], [150, 728, 300, 62]],
-    oct: [[164, 737, 128, 44], [308, 737, 128, 44]],
-    grid: [24, 582, 86, 60, 94, 70], keybed: [14, 800, 572, 256],
-  },
-};
-const svg = document.getElementById("panel"), device = document.getElementById("device"), canvas = document.getElementById("screen");
-function el(tag, attrs, parent = svg) {
-  const e = document.createElementNS(NS, tag);
-  for (const [k, v] of Object.entries(attrs)) e.setAttribute(k, v);
-  parent.appendChild(e);
-  return e;
-}
-const SANS = "-apple-system, 'Helvetica Neue', Arial, sans-serif", DOT = "'DotGothic16', " + SANS;
-function label(parent, x, y, s, size, font = SANS, ink = "var(--label)") {
-  const t = el("text", { x, y, "text-anchor": "middle", "font-family": font,
-                         "font-size": size, "font-weight": 600, fill: ink, "letter-spacing": ".04em" }, parent);
-  t.textContent = s;
-  return t;
-}
-const KEYNAMES = ["F", "F♯", "G", "G♯", "A", "A♯", "B", "C", "C♯", "D", "D♯", "E"];
-const keyName = (k) => KEYNAMES[k % 12] + (3 + Math.floor((k + 5) / 12));
+let node = null, btnMask = 0, keyMask = 0, latched = 0, masterValue = 700, lastLeds = [0, 0, 0, 0, 0];
+let currentOctave = 0;
+let currentSource = 0;
+let currentK4d = 0;
+let currentTempo = 120;
+let currentTone = 64;
+let currentMix = 64;
 
-let node = null, btnMask = 0, keyMask = 0, latched = 0, masterValue = 700, lastLeds = [0, 0, 0, 0, 0], layout = null;
-const angle = Object.fromEntries(KNOBS.map((n) => [n, 0]));
-angle.MASTER = -135 + 270 * masterValue / 1023;
-const knobs = [], buttons = [], keys = [];
-const btnBy = new Map(), keyBy = new Map();                   // pointer / key code -> label bit or key
+const btnBy = new Map(), keyBy = new Map();
 const send = (m) => { if (node) node.port.postMessage(m); };
 
-function build(name) {
-  const L = LAYOUTS[name];
-  layout = name;
-  svg.innerHTML = "";
-  svg.setAttribute("viewBox", `0 0 ${L.w} ${L.h}`);
-  device.style.aspectRatio = `${L.w} / ${L.h}`;
-  for (const d of device.querySelectorAll(".hit")) d.remove();
-  knobs.length = buttons.length = keys.length = 0;
-  el("rect", { x: 4, y: 4, width: L.w - 8, height: L.h - 8, rx: 40, fill: "var(--body)" });
-  for (const [x, y, w, h] of L.trays) el("rect", { x, y, width: w, height: h, rx: 14, fill: "var(--tray)" });
-  const [sx, sy, ss] = L.screen;
-  el("rect", { x: sx, y: sy, width: ss, height: ss, rx: 18, fill: "#0b0b0c" });
-  const inset = ss / 32;                                         // the 240 x 240 panel inside its bezel
-  Object.assign(canvas.style, { left: `${(sx + inset) / L.w * 100}%`, top: `${(sy + inset) / L.h * 100}%`,
-                                width: `${(ss - 2 * inset) / L.w * 100}%`, height: `${(ss - 2 * inset) / L.h * 100}%` });
-  KNOBS.forEach((n, i) => {
-    const [x, y, r] = L.knobs[i], g = el("g", {});
-    el("circle", { cx: x, cy: y, r: r + 5, fill: "var(--tray)" }, g);
-    el("circle", { cx: x, cy: y, r, fill: "var(--part)", stroke: "var(--edge)", "stroke-width": 2 }, g);
-    const ind = n === "MASTER" ? el("line", { x1: x, y1: y - r + 5, x2: x, y2: y - r + 14, stroke: "var(--label)", "stroke-width": 3, "stroke-linecap": "round" }, g) : null;
-    label(g, x, y - r - 12, n, 16, DOT);
-    const sub = KNOB_SUBS[n];
-    if (sub) label(g, x, y + r + 16, sub, 12, DOT);
-    el("circle", { cx: x, cy: y, r: r + 12, fill: "transparent" }, g);
-    const fullName = sub ? `${n} (${sub})` : n;
-    knobs.push({ g, ind, x, y, name: fullName, key: n, role: n === "MASTER" ? "master" : EN[n] });
-  });
-  const button = ([x, y, w, h], n, sub) => {
-    const g = el("g", {});
-    el("rect", { x, y, width: w, height: h, rx: 8, fill: "var(--part)", stroke: "var(--edge)", "stroke-width": 1.5, class: "face btn" }, g);
-    const ink = n === "REC" ? "#ff453a" : undefined;
-    if (sub) { label(g, x + w / 2, y + h / 2 - 2, n, 10.8, SANS, ink); label(g, x + w / 2, y + h / 2 + 11, sub, 9.9); }
-    else label(g, x + w / 2, y + h / 2 + 4.5, n, 12.6, SANS, ink);
-    buttons.push({ g, bit: B[n], name: sub ? `${n} / ${sub}` : n });
-  };
-  button(L.oct[0], "OCT-");
-  button(L.oct[1], "OCT+");
-  const [gx, gy, gw, gh, dx, dy] = L.grid;
-  for (let i = 0; i < 6; i++) {
-    button([gx + i * dx, gy, gw, gh], ROW1[i]);
-    button([gx + i * dx, gy + dy, gw, gh], ROW2[i], ROW2[i] === "PLAY" ? "STOP" : "");
-  }
-  const [x0, y0, w, h] = L.keybed;
-  el("rect", { x: x0, y: y0, width: w, height: h, rx: 18, fill: "var(--tray)" });
-  // the keys: two rows of the same black keys, each with a slit down its middle that lights
-  const pitch = (w - 24) / 16, kw = pitch * 0.78, kh = h * 0.425, sw = Math.max(3, kw * 0.14);
-  const key = (cx, cy, k) => {
-    const g = el("g", {}), y = cy - kh / 2;
-    el("rect", { x: cx - kw / 2, y, width: kw, height: kh, rx: kw / 2, class: "face key" }, g);
-    el("rect", { x: cx - sw / 2, y: y + kw * 0.4, width: sw, height: kh - kw * 0.8, rx: sw / 2, class: "slit" }, g);
-    el("rect", { x: cx - pitch / 2, y: cy - h * 0.24, width: pitch, height: h * 0.48, fill: "transparent" }, g);   // its target
-    keys[k] = { g, name: keyName(k) };
-  };
-  WHITE.forEach((k, i) => key(x0 + 12 + (i + 0.5) * pitch, y0 + h * 0.75, k));
-  BLACK_AFTER.forEach((a, j) => key(x0 + 12 + (a + 1) * pitch, y0 + h * 0.25, BLACK[j]));
-  // HTML targets over the drawing (pointer-events: none): touch-action and pointer capture work on them everywhere
-  const hit = (c, cls, role) => {
-    const b = c.g.getBBox(), d = document.createElement("div");
-    d.className = "hit" + (cls ? " " + cls : "");
-    Object.assign(d.style, { left: `${b.x / L.w * 100}%`, top: `${b.y / L.h * 100}%`,
-                             width: `${b.width / L.w * 100}%`, height: `${b.height / L.h * 100}%` });
-    d.setAttribute("role", role);
-    d.setAttribute("aria-label", c.name);
-    d.title = c.name;
-    d.tabIndex = 0;
-    d.addEventListener("touchstart", (e) => e.preventDefault(), { passive: false });
-    d.addEventListener("contextmenu", (e) => e.preventDefault());
-    device.insertBefore(d, document.getElementById("start"));
-    c.hit = d;
-  };
-  knobs.forEach((k) => { hit(k, "knob", "slider"); bindKnob(k); drawKnob(k); });
-  buttons.forEach((b) => { hit(b, "", "button"); bindButton(b); });
-  keys.forEach((k, i) => { hit(k, "", "button"); bindKey(k, i); });
-  syncButtons(true);
-  syncKeys(true);
-  drawLights(lastLeds);
-}
-
-// ------------------------------------------------------------------ input
-function syncButtons(redraw) {
-  let m = latched;
-  for (const b of btnBy.values()) m |= 1 << b;
-  if (m !== btnMask) { btnMask = m; send({ type: "buttons", mask: m }); }
-  else if (!redraw) return;
-  for (const b of buttons) {
-    const on = !!(m & (1 << b.bit));
-    b.g.classList.toggle("held", on);
-    b.g.classList.toggle("latched", !!(latched & (1 << b.bit)));
-    b.hit.setAttribute("aria-pressed", on);
-  }
-}
-function syncKeys(redraw) {
-  let m = 0;
-  for (const k of keyBy.values()) m |= 1 << k;
-  if (m !== keyMask) { keyMask = m; send({ type: "keys", mask: m }); }
-  else if (!redraw) return;
-  keys.forEach((k, i) => k.g.classList.toggle("held", !!(m & (1 << i))));
-}
-function bindButton(b) {
-  b.hit.addEventListener("pointerdown", (e) => {
-    e.preventDefault();
-    if (e.shiftKey || e.button === 2) { latched ^= 1 << b.bit; syncButtons(true); return; }
-    if (latched & (1 << b.bit)) { latched &= ~(1 << b.bit); syncButtons(true); return; }
-    b.hit.setPointerCapture(e.pointerId);
-    btnBy.set("p" + e.pointerId, b.bit);
-    syncButtons();
-  });
-  b.hit.addEventListener("keydown", (e) => {
-    if ((e.key === "Enter" || e.key === " ") && !e.repeat) { btnBy.set("f" + b.bit, b.bit); syncButtons(); e.preventDefault(); e.stopPropagation(); }
-  });
-  b.hit.addEventListener("keyup", () => { if (btnBy.delete("f" + b.bit)) syncButtons(); });
-}
-function bindKey(k, i) {
-  k.hit.addEventListener("pointerdown", (e) => {
-    e.preventDefault();
-    k.hit.setPointerCapture(e.pointerId);
-    keyBy.set("p" + e.pointerId, i);
-    syncKeys();
-  });
-}
-function release(e) {
-  const id = "p" + e.pointerId;
-  if (btnBy.delete(id)) syncButtons();
-  if (keyBy.delete(id)) syncKeys();
-}
-for (const t of ["pointerup", "pointercancel", "lostpointercapture"]) device.addEventListener(t, release);
-
-function drawKnob(k) { if (k.ind) k.ind.setAttribute("transform", `rotate(${angle[k.key || k.name]} ${k.x} ${k.y})`); }
-function setMaster(v) {
-  masterValue = Math.max(0, Math.min(1023, v));
-  angle.MASTER = -135 + 270 * masterValue / 1023;
-  send({ type: "master", value: masterValue });
-}
-function turn(k, n) {
-  if (!n) return;
-  if (k.role === "master") setMaster(masterValue + n * 16);
-  else {
-    const id = k.key || k.name;
-    angle[id] = (angle[id] + n * 18) % 360;            // 20 detents a turn
-    send({ type: "enc", role: k.role, n });
-  }
-  drawKnob(k);
-}
-function bindKnob(k) {
-  let drag = null, wheel = 0;
-  k.hit.addEventListener("pointerdown", (e) => {
-    e.preventDefault();
-    k.hit.setPointerCapture(e.pointerId);
-    drag = { x: e.clientX, y: e.clientY, acc: 0 };
-  });
-  k.hit.addEventListener("pointermove", (e) => {
-    if (!drag) return;
-    const dx = e.clientX - drag.x, dy = drag.y - e.clientY;   // up or right: clockwise
-    drag.acc += Math.abs(dx) > Math.abs(dy) ? dx : dy;          // the larger of the two
-    drag.x = e.clientX;
-    drag.y = e.clientY;
-    const step = k.role === "master" ? 3 : 8, n = Math.trunc(drag.acc / step);
-    if (n) { drag.acc -= n * step; turn(k, n); }
-  });
-  const end = () => { drag = null; };
-  k.hit.addEventListener("pointerup", end);
-  k.hit.addEventListener("pointercancel", end);
-  k.hit.addEventListener("wheel", (e) => {
-    e.preventDefault();
-    const dy = e.deltaMode === 1 ? e.deltaY * 33 : e.deltaY;
-    if (Math.abs(dy) >= 50) { turn(k, dy < 0 ? 1 : -1); wheel = 0; return; }   // a wheel notch: one detent
-    wheel -= dy;                                                                   // a trackpad: by distance
-    const n = Math.trunc(wheel / 25);
-    if (n) { wheel -= n * 25; turn(k, n); }
-  }, { passive: false });
-  k.hit.addEventListener("keydown", (e) => {
-    const d = { ArrowUp: 1, ArrowRight: 1, ArrowDown: -1, ArrowLeft: -1 }[e.key];
-    if (d) { turn(k, d); e.preventDefault(); e.stopPropagation(); }
-  });
-}
-const tall = matchMedia("(orientation: portrait) and (max-width: 700px)");
-build(tall.matches ? "tall" : "wide");
-tall.addEventListener("change", () => build(tall.matches ? "tall" : "wide"));
-document.fonts?.load("16px DotGothic16").then(() => build(layout), () => {});   // the labels' width: the hit areas
-
-// the computer keyboard, every key one control: F3..A#4 on the Z (white) and A (black) rows, B4..G5 on Q..O
-// in semitones, the twelve buttons on the number row in the panel's order (held while the key is), [ ] OCT
-const KEYMAP = {};
-["KeyZ", "KeyX", "KeyC", "KeyV", "KeyB", "KeyN", "KeyM", "Comma", "Period", "Slash"].forEach((c, i) => KEYMAP[c] = { key: WHITE[i] });
-[["KeyS", 1], ["KeyD", 3], ["KeyF", 5], ["KeyH", 8], ["KeyJ", 10], ["KeyL", 13], ["Semicolon", 15], ["Quote", 17]].forEach(([c, k]) => KEYMAP[c] = { key: k });
-["KeyQ", "KeyW", "KeyE", "KeyR", "KeyT", "KeyY", "KeyU", "KeyI", "KeyO"].forEach((c, i) => KEYMAP[c] = { key: 18 + i });
-["Digit1", "Digit2", "Digit3", "Digit4", "Digit5", "Digit6", "Digit7", "Digit8", "Digit9", "Digit0", "Minus", "Equal"]
-  .forEach((c, i) => KEYMAP[c] = { btn: B[[...ROW1, ...ROW2][i]] });
-Object.assign(KEYMAP, { BracketLeft: { btn: B["OCT-"] }, BracketRight: { btn: B["OCT+"] } });
-const ARROWS = { ArrowUp: [EN.SELECT, 1], ArrowDown: [EN.SELECT, -1], ArrowRight: [EN.ALGORITHM, 1], ArrowLeft: [EN.ALGORITHM, -1] };
-addEventListener("keydown", (e) => {
-  if (!node || e.metaKey || e.ctrlKey || e.altKey || e.target.closest?.(".hit.knob")) return;
-  if (ARROWS[e.code]) { const [r, n] = ARROWS[e.code]; turn(knobs.find((k) => k.role === r), n); e.preventDefault(); return; }
-  const m = KEYMAP[e.code];
-  if (!m) return;
-  e.preventDefault();
-  if (e.repeat) return;
-  if (m.key !== undefined) { keyBy.set("k" + e.code, m.key); syncKeys(); }
-  else { btnBy.set("k" + e.code, m.btn); syncButtons(); }
-});
-addEventListener("keyup", (e) => {
-  const id = "k" + e.code;
-  if (keyBy.delete(id)) syncKeys();
-  if (btnBy.delete(id)) syncButtons();
-});
-addEventListener("blur", () => {
-  for (const id of [...btnBy.keys()]) if (id[0] !== "p") btnBy.delete(id);
-  for (const id of [...keyBy.keys()]) if (id[0] !== "p") keyBy.delete(id);
-  syncButtons();
-  syncKeys();
-});
-
-// ------------------------------------------------------------------ screen and lights
-const ctx = document.getElementById("screen").getContext("2d");
+// ------------------------------------------------------------------ Screen Rendering
+const canvas = document.getElementById("screen");
+const ctx = canvas.getContext("2d");
 const img = ctx.createImageData(240, 240);
+
 function drawScreen(fb) {
   const d = img.data;
   for (let i = 0; i < 240 * 240; i++) {
-    const v = fb[i], p = ((v >> 8) | (v << 8)) & 0xFFFF;          // the panel's byte order -> RGB565
+    const v = fb[i], p = ((v >> 8) | (v << 8)) & 0xFFFF; // RGB565 byte order swap
     d[i * 4] = ((p >> 11) & 31) * 255 / 31;
     d[i * 4 + 1] = ((p >> 5) & 63) * 255 / 63;
     d[i * 4 + 2] = (p & 31) * 255 / 31;
@@ -1313,38 +1988,147 @@ function drawScreen(fb) {
   }
   ctx.putImageData(img, 0, 0);
 }
-// the power-on sweep (hal/fm1_led_anim.h): a level per LED, lit frames /64 (| 128: the glow under them), drawn as the
-// LED's share of lit between its dark (or glowing) colour and the lit one, mixed in linear light
-const lin = (h) => [1, 3, 5].map((i) => (parseInt(h.slice(i, i + 2), 16) / 255) ** 2.2);
-const ANIM = { btn: [lin("#3a3934"), lin("#3a3934"), lin("#fff4d6")], slit: [lin("#3a3a3c"), lin("#77777b"), lin("#ececee")] };
-function animFill(kind, q) {
-  const [dark, glow, lit] = ANIM[kind], s = Math.min(q & 127, 64) / 64, base = q & 128 ? glow : dark;
-  const c = base.map((v, i) => Math.round(255 * (v + (lit[i] - v) * s) ** (1 / 2.2)));
-  return `rgb(${c.join(",")})`;
-}
-function drawAnim(anim) {
-  for (const b of buttons) b.g.querySelector(".face").style.fill = anim ? animFill("btn", anim[b.bit]) : "";
-  keys.forEach((k, i) => { k.g.querySelector(".slit").style.fill = anim ? animFill("slit", anim[14 + i]) : ""; });
-}
+
+// ------------------------------------------------------------------ LED and Lights
 function drawLights([litB, litK, dimB, dimK, dimLo = 0, brB = 0, brK = 0, midK = 0], anim = null) {
-  drawAnim(anim);
-  document.documentElement.classList.toggle("dimlo", !!dimLo);   // (the breath's lower peak)
-  for (const b of buttons) {
-    const bit = 1 << b.bit, green = b.bit === B.PLAY && (litB & (1 << PLAY_GREEN));
-    b.g.classList.toggle("lit", !!(litB & bit) && !green);
-    b.g.classList.toggle("green", !!green);
-    b.g.classList.toggle("dim", !!(dimB & bit));
-    b.g.classList.toggle("breath", !!(brB & bit));
+  // Update Piano Key LEDs
+  for (let i = 0; i < 27; i++) {
+    const el = document.getElementById("pk-" + i);
+    if (!el) continue;
+    const isLit = !!(litK & (1 << i));
+    const isCyan = (brK & (1 << i)) || (midK & (1 << i));
+    el.classList.toggle("lit", isLit && !isCyan);
+    el.classList.toggle("cyan", !!isCyan);
   }
-  keys.forEach((k, i) => {
-    k.g.classList.toggle("lit", !!(litK & (1 << i)));
-    k.g.classList.toggle("dim", !!(dimK & (1 << i)));
-    k.g.classList.toggle("breath", !!(brK & (1 << i)));
-    k.g.classList.toggle("mid", !!(midK & (1 << i)));
+
+  // Update Function Button LEDs
+  const ledGlo = document.getElementById("led-glo");
+  if (ledGlo) ledGlo.classList.toggle("lit", !!(litB & (1 << B.GLO)));
+
+  const ledScl = document.getElementById("led-scl");
+  if (ledScl) ledScl.classList.toggle("lit", !!(litB & (1 << B.SCL)));
+
+  const ledArp = document.getElementById("led-arp");
+  if (ledArp) ledArp.classList.toggle("lit", !!(litB & (1 << B.ARP)));
+
+  const ledFx = document.getElementById("led-fx");
+  if (ledFx) ledFx.classList.toggle("lit", !!(litB & (1 << B.FX)));
+
+  const ledSeq = document.getElementById("led-seq");
+  if (ledSeq) ledSeq.classList.toggle("lit", !!(litB & (1 << B.SEQ)));
+
+  const ledEdit = document.getElementById("led-edit");
+  if (ledEdit) ledEdit.classList.toggle("lit", !!(litB & (1 << B.EDIT)));
+
+  const ledPlay = document.getElementById("led-play");
+  if (ledPlay) {
+    const isGreen = !!(litB & (1 << PLAY_GREEN));
+    const isLit = !!(litB & (1 << B.PLAY));
+    ledPlay.classList.toggle("green", isGreen);
+    ledPlay.classList.toggle("lit", isLit && !isGreen);
+  }
+}
+
+// ------------------------------------------------------------------ Input Synchronization
+function syncButtons(redraw) {
+  let m = latched;
+  for (const b of btnBy.values()) m |= 1 << b;
+  if (m !== btnMask) { btnMask = m; send({ type: "buttons", mask: m }); }
+}
+
+function syncKeys(redraw) {
+  let m = 0;
+  for (const k of keyBy.values()) m |= 1 << k;
+  if (m !== keyMask) { keyMask = m; send({ type: "keys", mask: m }); }
+  for (let i = 0; i < 27; i++) {
+    const el = document.getElementById("pk-" + i);
+    if (el) el.classList.toggle("active", !!(m & (1 << i)));
+  }
+}
+
+function pressBtn(name, durationMs = 120) {
+  const bit = B[name];
+  if (bit !== undefined) {
+    btnBy.set("ui_" + name, bit);
+    syncButtons();
+    setTimeout(() => { btnBy.delete("ui_" + name); syncButtons(); }, durationMs);
+  }
+}
+
+function turnKnob(roleName, steps) {
+  const role = EN[roleName];
+  if (role !== undefined && steps) {
+    send({ type: "enc", role, n: steps });
+  }
+}
+
+function setMaster(v) {
+  masterValue = Math.max(0, Math.min(1023, v));
+  send({ type: "master", value: masterValue });
+  const sl = document.getElementById("master-vol-slider");
+  if (sl) sl.value = masterValue;
+  const lbl = document.getElementById("master-vol-label");
+  if (lbl) lbl.textContent = Math.round(masterValue * 100 / 1023) + "%";
+}
+
+// ------------------------------------------------------------------ Piano Keys Interaction
+document.querySelectorAll(".piano-key-white, .piano-key-black").forEach((el) => {
+  const k = parseInt(el.getAttribute("data-key"), 10);
+  el.addEventListener("pointerdown", (e) => {
+    e.preventDefault();
+    el.setPointerCapture(e.pointerId);
+    keyBy.set("p" + e.pointerId, k);
+    syncKeys();
+  });
+});
+
+for (const t of ["pointerup", "pointercancel", "lostpointercapture"]) {
+  window.addEventListener(t, (e) => {
+    if (keyBy.delete("p" + e.pointerId)) syncKeys();
   });
 }
 
-// ------------------------------------------------------------------ the flash, kept in this browser
+// ------------------------------------------------------------------ Keyboard Mappings
+const KEYMAP = {};
+["KeyZ", "KeyX", "KeyC", "KeyV", "KeyB", "KeyN", "KeyM", "Comma", "Period", "Slash"].forEach((c, i) => KEYMAP[c] = { key: WHITE[i] });
+[["KeyS", 1], ["KeyD", 3], ["KeyF", 5], ["KeyH", 8], ["KeyJ", 10], ["KeyL", 13], ["Semicolon", 15], ["Quote", 17]].forEach(([c, k]) => KEYMAP[c] = { key: k });
+["KeyQ", "KeyW", "KeyE", "KeyR", "KeyT", "KeyY", "KeyU", "KeyI", "KeyO"].forEach((c, i) => KEYMAP[c] = { key: 18 + i });
+["Digit1", "Digit2", "Digit3", "Digit4", "Digit5", "Digit6", "Digit7", "Digit8", "Digit9", "Digit0", "Minus", "Equal"]
+  .forEach((c, i) => KEYMAP[c] = { btn: [B.FX, B.SCL, B.ENV, B.LFO, B.EDIT, B.GLO, B.HOME, B.SAVE, B.ARP, B.SEQ, B.PLAY, B.REC][i] });
+Object.assign(KEYMAP, { BracketLeft: { btn: B["OCT-"] }, BracketRight: { btn: B["OCT+"] } });
+
+const ARROWS = { ArrowUp: [EN.SELECT, 1], ArrowDown: [EN.SELECT, -1], ArrowRight: [EN.ALGORITHM, 1], ArrowLeft: [EN.ALGORITHM, -1] };
+
+window.addEventListener("keydown", (e) => {
+  if (!node || e.metaKey || e.ctrlKey || e.altKey || e.target.tagName === "INPUT") return;
+  if (ARROWS[e.code]) {
+    const [r, n] = ARROWS[e.code];
+    send({ type: "enc", role: r, n });
+    e.preventDefault();
+    return;
+  }
+  const m = KEYMAP[e.code];
+  if (!m) return;
+  e.preventDefault();
+  if (e.repeat) return;
+  if (m.key !== undefined) { keyBy.set("k" + e.code, m.key); syncKeys(); }
+  else { btnBy.set("k" + e.code, m.btn); syncButtons(); }
+});
+
+window.addEventListener("keyup", (e) => {
+  const id = "k" + e.code;
+  if (keyBy.delete(id)) syncKeys();
+  if (btnBy.delete(id)) syncButtons();
+});
+
+window.addEventListener("blur", () => {
+  for (const id of [...btnBy.keys()]) if (id[0] === "k") btnBy.delete(id);
+  for (const id of [...keyBy.keys()]) if (id[0] === "k") keyBy.delete(id);
+  syncButtons();
+  syncKeys();
+});
+
+// ------------------------------------------------------------------ Flash Storage
 function loadFlash() {
   try {
     const raw = JSON.parse(localStorage.getItem(STORE) || "{}"), out = {};
@@ -1352,6 +2136,7 @@ function loadFlash() {
     return out;
   } catch { return {}; }
 }
+
 function saveFlash(sectors) {
   try {
     const raw = {};
@@ -1362,12 +2147,10 @@ function saveFlash(sectors) {
     }
     localStorage.setItem(STORE, JSON.stringify(raw));
     return true;
-  } catch { return false; }                                       // private mode, full: this session only
+  } catch { return false; }
 }
 
-// ------------------------------------------------------------------ Web MIDI in (channel messages)
-// With the page's checkbox on, CC 20..27 turn the panel's knobs (worklet.js midiKnob), any channel, CC 20..26 sent
-// as the select says; off (the default), and the rest, go to the firmware
+// ------------------------------------------------------------------ Web MIDI
 const knobCC = [], knobBox = document.getElementById("knobson"), knobSelect = document.getElementById("knobmode");
 let knobsOn = false, knobMode = "abs";
 try {
@@ -1375,21 +2158,21 @@ try {
   const m = localStorage.getItem(KNOB_MODE);
   if (KNOB_MODES.includes(m)) knobMode = m;
 } catch {}
-knobBox.checked = knobsOn;
-knobSelect.hidden = !knobsOn;
-knobSelect.value = knobMode;
-knobBox.addEventListener("change", () => {
+if (knobBox) knobBox.checked = knobsOn;
+if (knobSelect) { knobSelect.hidden = !knobsOn; knobSelect.value = knobMode; }
+knobBox?.addEventListener("change", () => {
   knobsOn = knobBox.checked;
-  knobSelect.hidden = !knobsOn;
+  if (knobSelect) knobSelect.hidden = !knobsOn;
   knobCC.length = 0;
   try { localStorage.setItem(KNOBS_ON, knobsOn ? "1" : "0"); } catch {}
 });
-knobSelect.addEventListener("change", () => {
+knobSelect?.addEventListener("change", () => {
   knobMode = knobSelect.value;
-  knobCC.length = 0;                                              // absolute again: no jump on the first touch
+  knobCC.length = 0;
   try { localStorage.setItem(KNOB_MODE, knobMode); } catch {}
 });
-document.getElementById("midiknobs").hidden = !navigator.requestMIDIAccess;
+if (document.getElementById("midiknobs")) document.getElementById("midiknobs").hidden = !navigator.requestMIDIAccess;
+
 async function midiOn() {
   if (!navigator.requestMIDIAccess) return;
   try {
@@ -1401,28 +2184,29 @@ async function midiOn() {
           if (d.length < 2 || d[0] < 0x80 || d[0] >= 0xF0) return;
           const k = knobsOn && (d[0] & 0xF0) === 0xB0 ? midiKnob(knobCC, d[1], d[2] || 0, knobMode) : null;
           if (!k) send({ type: "midi", data: [d[0], d[1], d[2] || 0] });
-          else if (k.master !== undefined) { setMaster(k.master); drawKnob(knobs.find((x) => x.role === "master")); }
-          else turn(knobs.find((x) => x.role === k.role), k.n);
+          else if (k.master !== undefined) setMaster(k.master);
+          else send({ type: "enc", role: k.role, n: k.n });
         };
       }
     };
     access.onstatechange = bind;
     bind();
-  } catch { /* no permission: the panel only */ }
+  } catch {}
 }
 
-// ------------------------------------------------------------------ switching on
-const status = document.getElementById("status");
-const say = (t) => { status.textContent = t; status.hidden = !t; };
+// ------------------------------------------------------------------ Audio Engine Startup
+const statusText = document.getElementById("status");
+const say = (t) => { if (statusText) { statusText.textContent = t; statusText.hidden = !t; } };
+
 async function switchOn() {
   const go = document.getElementById("go");
-  go.disabled = true;
-  go.textContent = "Starting…";
+  if (go) { go.disabled = true; go.textContent = "Starting…"; }
   try {
     const ac = new AudioContext({ sampleRate: 44100, latencyHint: "interactive" });
     const [wasm] = await Promise.all([
       fetch("felucca.wasm").then((r) => { if (!r.ok) throw new Error(`felucca.wasm: ${r.status}`); return r.arrayBuffer(); }),
-      ac.audioWorklet.addModule("worklet.js")]);
+      ac.audioWorklet.addModule("worklet.js")
+    ]);
     node = new AudioWorkletNode(ac, "felucca", { numberOfInputs: 0, numberOfOutputs: 1, outputChannelCount: [2] });
     node.connect(ac.destination);
     let warned = false;
@@ -1444,24 +2228,246 @@ async function switchOn() {
     });
     await ac.resume();
     document.getElementById("start").hidden = true;
-    go.textContent = "On";
-    if (ac.sampleRate !== 44100) console.warn(`Felucca: the browser plays at ${ac.sampleRate} Hz, the pitch is off by ${(1200 * Math.log2(ac.sampleRate / 44100)).toFixed(0)} cents.`);
+    const powerLed = document.getElementById("crt-power-led");
+    if (powerLed) { powerLed.classList.add("active"); powerLed.title = "Power: Active (44.1kHz)"; }
+    const statusMain = document.getElementById("status-main");
+    if (statusMain) statusMain.textContent = "Running - CINCO OS 2.5 Active [Paul, Managing Director]";
     syncButtons();
     syncKeys();
     send({ type: "visible", on: !document.hidden });
     midiOn();
   } catch (err) {
     node = null;
-    go.disabled = false;
-    go.textContent = "Switch on";
+    if (go) { go.disabled = false; go.textContent = "Switch on"; }
     say("Could not start: " + (err && err.message || err) + ". A current Chrome, Edge, Firefox or Safari should work.");
   }
 }
-document.getElementById("go").addEventListener("click", switchOn);
+
+document.getElementById("go")?.addEventListener("click", switchOn);
 document.addEventListener("visibilitychange", () => send({ type: "visible", on: !document.hidden }));
 
-// ------------------------------------------------------------------ Windows 98 UI System
-// Live digital clock in systray
+// ------------------------------------------------------------------ UI Kinetics Controls Hookup
+// 4d3d3d3 Macro
+const slMacro = document.getElementById("sl-macro");
+const badgeMacro = document.getElementById("macro-badge");
+function updateMacro(val) {
+  val = Math.max(0, Math.min(127, val));
+  const delta = val - currentK4d;
+  currentK4d = val;
+  if (slMacro) slMacro.value = val;
+  const pct = Math.round(val * 100 / 127);
+  let statusStr = "READY";
+  if (val > 115) statusStr = "MAX OSHA FLARH";
+  else if (val > 32) statusStr = "4D ENGAGED";
+  if (badgeMacro) badgeMacro.textContent = `${pct}% [${statusStr}]`;
+  if (delta !== 0) turnKnob("KNOB 1", delta);
+}
+slMacro?.addEventListener("input", (e) => updateMacro(parseInt(e.target.value, 10)));
+document.getElementById("btn-macro-down")?.addEventListener("click", () => updateMacro(currentK4d - 8));
+document.getElementById("btn-macro-up")?.addEventListener("click", () => updateMacro(currentK4d + 8));
+
+// Tempo (BPM)
+const slBpm = document.getElementById("sl-bpm");
+const badgeBpm = document.getElementById("bpm-badge");
+const statusTempo = document.getElementById("status-tempo");
+function updateTempo(bpm) {
+  bpm = Math.max(80, Math.min(160, bpm));
+  const delta = bpm - currentTempo;
+  currentTempo = bpm;
+  if (slBpm) slBpm.value = bpm;
+  if (badgeBpm) badgeBpm.textContent = `${bpm} BPM`;
+  if (statusTempo) statusTempo.textContent = `${bpm} BPM`;
+  if (delta !== 0) turnKnob("KNOB 3", delta);
+}
+slBpm?.addEventListener("input", (e) => updateTempo(parseInt(e.target.value, 10)));
+document.getElementById("btn-bpm-down")?.addEventListener("click", () => updateTempo(currentTempo - 4));
+document.getElementById("btn-bpm-up")?.addEventListener("click", () => updateTempo(currentTempo + 4));
+
+// Filter Cutoff (Tone)
+const slTone = document.getElementById("sl-tone");
+const badgeTone = document.getElementById("tone-badge");
+function updateTone(v) {
+  v = Math.max(0, Math.min(127, v));
+  const delta = v - currentTone;
+  currentTone = v;
+  if (slTone) slTone.value = v;
+  if (badgeTone) badgeTone.textContent = `Tone: ${v}`;
+  if (delta !== 0) turnKnob("KNOB 2", delta);
+}
+slTone?.addEventListener("input", (e) => updateTone(parseInt(e.target.value, 10)));
+document.getElementById("btn-tone-down")?.addEventListener("click", () => updateTone(currentTone - 8));
+document.getElementById("btn-tone-up")?.addEventListener("click", () => updateTone(currentTone + 8));
+
+// Mix / Resonance
+const slMix = document.getElementById("sl-mix");
+const badgeMix = document.getElementById("mix-badge");
+function updateMix(v) {
+  v = Math.max(0, Math.min(127, v));
+  const delta = v - currentMix;
+  currentMix = v;
+  if (slMix) slMix.value = v;
+  if (badgeMix) badgeMix.textContent = `Mix: ${v}`;
+  if (delta !== 0) turnKnob("KNOB 4", delta);
+}
+slMix?.addEventListener("input", (e) => updateMix(parseInt(e.target.value, 10)));
+document.getElementById("btn-mix-down")?.addEventListener("click", () => updateMix(currentMix - 8));
+document.getElementById("btn-mix-up")?.addEventListener("click", () => updateMix(currentMix + 8));
+
+// ------------------------------------------------------------------ Identity Selection
+const statusIdentity = document.getElementById("status-identity");
+function selectIdentity(id, name) {
+  currentSource = id;
+  const rad = document.querySelector(`input[name="id-routine"][value="${id}"]`);
+  if (rad) rad.checked = true;
+  if (statusIdentity) statusIdentity.textContent = name.toUpperCase();
+  send({ type: "cinco", fn: "set_source", args: [id] });
+  turnKnob("SELECT", 1);
+}
+
+document.querySelectorAll('input[name="id-routine"]').forEach((rad) => {
+  rad.addEventListener("change", (e) => {
+    const id = parseInt(e.target.value, 10);
+    const names = ["Celery Man", "Oyster Smiling", "Tayne Beta", "Speech Synth"];
+    selectIdentity(id, names[id]);
+  });
+});
+
+// Identity Pushbuttons
+document.getElementById("btn-k4d")?.addEventListener("click", () => {
+  updateMacro(96);
+  pressBtn("REC");
+});
+document.getElementById("btn-wobble")?.addEventListener("click", () => pressBtn("LFO"));
+document.getElementById("btn-flail")?.addEventListener("click", () => pressBtn("ARP"));
+document.getElementById("btn-nude")?.addEventListener("click", () => {
+  selectIdentity(2, "Tayne Beta");
+  pressBtn("FX");
+  send({ type: "cinco", fn: "trigger_nsfw" });
+});
+document.getElementById("btn-receipt")?.addEventListener("click", () => {
+  selectIdentity(1, "Oyster Smiling");
+  pressBtn("SAVE");
+  send({ type: "cinco", fn: "trigger_receipt" });
+});
+document.getElementById("btn-coffee")?.addEventListener("click", () => {
+  const el = document.getElementById("status-coffee");
+  if (el) el.textContent = "☕ 100% (Hot)";
+  alert("Cinco Coffee Service:\nManaging Director Paul has taken a coffee break.\nOSHA vigilance level restored to 100%.");
+});
+
+// ------------------------------------------------------------------ Toolbar Actions
+document.getElementById("tb-power")?.addEventListener("click", () => {
+  const go = document.getElementById("go");
+  if (go && !go.disabled) go.click();
+  else pressBtn("PLAY");
+});
+document.getElementById("tb-stop")?.addEventListener("click", () => pressBtn("PLAY"));
+document.getElementById("tb-celery")?.addEventListener("click", () => selectIdentity(0, "Celery Man"));
+document.getElementById("tb-oyster")?.addEventListener("click", () => selectIdentity(1, "Oyster Smiling"));
+document.getElementById("tb-tayne")?.addEventListener("click", () => selectIdentity(2, "Tayne Beta"));
+document.getElementById("tb-4d")?.addEventListener("click", () => updateMacro(currentK4d >= 80 ? 0 : 80));
+document.getElementById("tb-wobble")?.addEventListener("click", () => pressBtn("LFO"));
+document.getElementById("tb-flarh")?.addEventListener("click", () => pressBtn("ARP"));
+document.getElementById("tb-nude")?.addEventListener("click", () => {
+  selectIdentity(2, "Tayne Beta");
+  pressBtn("FX");
+  send({ type: "cinco", fn: "trigger_nsfw" });
+});
+document.getElementById("tb-boss")?.addEventListener("click", () => pressBtn("EDIT"));
+document.getElementById("tb-defrag")?.addEventListener("click", () => pressBtn("SEQ"));
+document.getElementById("tb-receipt")?.addEventListener("click", () => {
+  selectIdentity(1, "Oyster Smiling");
+  pressBtn("SAVE");
+  send({ type: "cinco", fn: "trigger_receipt" });
+});
+
+// ------------------------------------------------------------------ Monitor Buttons
+const crtFrame = document.getElementById("crt-frame");
+document.getElementById("btn-degauss")?.addEventListener("click", () => {
+  if (crtFrame) {
+    crtFrame.classList.remove("degauss-active");
+    void crtFrame.offsetWidth; // trigger reflow
+    crtFrame.classList.add("degauss-active");
+  }
+  send({ type: "cinco", fn: "clear_popups" });
+  send({ type: "cinco", fn: "set_screensaver", args: [0] });
+});
+
+document.getElementById("btn-fullscreen")?.addEventListener("click", () => {
+  const crt = document.querySelector(".crt-screen-well");
+  if (crt) {
+    if (!document.fullscreenElement) crt.requestFullscreen?.();
+    else document.exitFullscreen?.();
+  }
+});
+
+document.getElementById("btn-reset-crt")?.addEventListener("click", () => {
+  send({ type: "cinco", fn: "clear_popups" });
+  send({ type: "cinco", fn: "set_boss", args: [0] });
+  send({ type: "cinco", fn: "set_view", args: [0] });
+  send({ type: "cinco", fn: "set_screensaver", args: [0] });
+});
+
+document.getElementById("btn-snapshot")?.addEventListener("click", () => {
+  const link = document.createElement("a");
+  link.download = `cinco_${Date.now()}.png`;
+  link.href = canvas.toDataURL("image/png");
+  link.click();
+});
+
+// ------------------------------------------------------------------ Synthesizer Header Buttons
+document.getElementById("btn-oct-dn")?.addEventListener("click", () => {
+  currentOctave = Math.max(-2, currentOctave - 1);
+  const el = document.getElementById("oct-badge");
+  if (el) el.textContent = `Octave: ${currentOctave}`;
+  pressBtn("OCT-");
+});
+
+document.getElementById("btn-oct-up")?.addEventListener("click", () => {
+  currentOctave = Math.min(2, currentOctave + 1);
+  const el = document.getElementById("oct-badge");
+  if (el) el.textContent = `Octave: ${currentOctave}`;
+  pressBtn("OCT+");
+});
+
+document.getElementById("btn-voice")?.addEventListener("click", () => pressBtn("GLO"));
+document.getElementById("btn-macro-mode")?.addEventListener("click", () => pressBtn("SCL"));
+document.getElementById("btn-arp")?.addEventListener("click", () => pressBtn("ARP"));
+document.getElementById("btn-fx")?.addEventListener("click", () => pressBtn("FX"));
+document.getElementById("btn-seq")?.addEventListener("click", () => pressBtn("SEQ"));
+document.getElementById("btn-edit")?.addEventListener("click", () => pressBtn("EDIT"));
+document.getElementById("btn-boss-mode")?.addEventListener("click", () => pressBtn("EDIT"));
+document.getElementById("btn-play-stop")?.addEventListener("click", () => pressBtn("PLAY"));
+
+// ------------------------------------------------------------------ Master Volume Control
+const volPopup = document.getElementById("volume-popup");
+const volSlider = document.getElementById("master-vol-slider");
+const muteChk = document.getElementById("master-mute-chk");
+let unmutedVal = 700;
+
+document.getElementById("systray-vol")?.addEventListener("click", (e) => {
+  e.stopPropagation();
+  volPopup?.classList.toggle("open");
+});
+
+document.getElementById("vol-popup-close")?.addEventListener("click", () => volPopup?.classList.remove("open"));
+
+volSlider?.addEventListener("input", (e) => {
+  const v = parseInt(e.target.value, 10);
+  if (muteChk) muteChk.checked = (v === 0);
+  setMaster(v);
+});
+
+muteChk?.addEventListener("change", (e) => {
+  if (e.target.checked) {
+    unmutedVal = masterValue;
+    setMaster(0);
+  } else {
+    setMaster(unmutedVal || 700);
+  }
+});
+
+// ------------------------------------------------------------------ Windows 98 Taskbar, Start Menu & Modals
 function updateClock() {
   const now = new Date();
   let h = now.getHours();
@@ -1474,6 +2480,15 @@ function updateClock() {
 setInterval(updateClock, 1000);
 updateClock();
 
+// Start button toggle
+const startBtn = document.getElementById("start-btn");
+const startMenu = document.getElementById("start-menu");
+startBtn?.addEventListener("click", (e) => {
+  e.stopPropagation();
+  const isOpen = startMenu?.classList.toggle("open");
+  startBtn.classList.toggle("pressed", isOpen);
+});
+
 // Menu bar dropdowns
 document.querySelectorAll(".menu-item").forEach((item) => {
   item.addEventListener("click", (e) => {
@@ -1484,90 +2499,94 @@ document.querySelectorAll(".menu-item").forEach((item) => {
   });
 });
 
-document.addEventListener("click", () => {
-  document.querySelectorAll(".menu-item").forEach((i) => i.classList.remove("active"));
-  const sm = document.getElementById("start-menu");
-  const sb = document.getElementById("start-btn");
-  if (sm) sm.classList.remove("open");
-  if (sb) sb.classList.remove("pressed");
+document.addEventListener("click", (e) => {
+  if (!e.target.closest(".menu-item")) document.querySelectorAll(".menu-item").forEach((i) => i.classList.remove("active"));
+  if (!e.target.closest("#start-menu") && !e.target.closest("#start-btn")) {
+    startMenu?.classList.remove("open");
+    startBtn?.classList.remove("pressed");
+  }
+  if (!e.target.closest("#volume-popup") && !e.target.closest("#systray-vol")) {
+    volPopup?.classList.remove("open");
+  }
 });
 
-// Start button toggle
-const startBtn = document.getElementById("start-btn");
-const startMenu = document.getElementById("start-menu");
-if (startBtn && startMenu) {
-  startBtn.addEventListener("click", (e) => {
-    e.stopPropagation();
-    const isOpen = startMenu.classList.toggle("open");
-    startBtn.classList.toggle("pressed", isOpen);
-  });
-}
+// System Properties Modal (My Computer)
+const syspropModal = document.getElementById("sysprop-modal");
+const showSysprop = () => { syspropModal?.classList.add("open"); };
+const closeSysprop = () => { syspropModal?.classList.remove("open"); };
+document.getElementById("d-mycomp")?.addEventListener("click", showSysprop);
+document.getElementById("d-mycomp")?.addEventListener("dblclick", showSysprop);
+document.getElementById("m-sysprop")?.addEventListener("click", showSysprop);
+document.getElementById("sm-sysprop")?.addEventListener("click", showSysprop);
+document.getElementById("sysprop-ok")?.addEventListener("click", closeSysprop);
+document.getElementById("sysprop-close")?.addEventListener("click", closeSysprop);
 
-// Modal dialog handlers
+// About Modal
 const aboutModal = document.getElementById("about-modal");
-const showAbout = () => { if (aboutModal) aboutModal.classList.add("open"); };
-const closeAbout = () => { if (aboutModal) aboutModal.classList.remove("open"); };
-
+const showAbout = () => { aboutModal?.classList.add("open"); };
+const closeAbout = () => { aboutModal?.classList.remove("open"); };
 document.getElementById("m-about")?.addEventListener("click", showAbout);
 document.getElementById("sm-about")?.addEventListener("click", showAbout);
 document.getElementById("modal-ok")?.addEventListener("click", closeAbout);
 document.getElementById("modal-close")?.addEventListener("click", closeAbout);
 
-// Interactive menu actions to hardware controls
-function pressBtn(name) {
-  const b = buttons.find((x) => x.name.startsWith(name) || x.name === name);
-  if (b) {
-    btnBy.set("ui", b.bit);
-    syncButtons();
-    setTimeout(() => { btnBy.delete("ui"); syncButtons(); }, 120);
-  }
-}
+// Desktop Icons Launchers
+document.getElementById("d-app")?.addEventListener("click", () => {
+  const win = document.getElementById("main-win");
+  if (win) { win.style.display = "flex"; }
+  document.getElementById("task-pill-main")?.classList.remove("inactive");
+});
+document.getElementById("d-tayne")?.addEventListener("click", () => selectIdentity(2, "Tayne Beta"));
+document.getElementById("d-defrag")?.addEventListener("click", () => pressBtn("SEQ"));
+document.getElementById("d-boss")?.addEventListener("click", () => pressBtn("EDIT"));
+document.getElementById("d-recycle")?.addEventListener("click", () => alert("Recycle Bin is currently empty."));
 
-function turnKnob(roleName, steps) {
-  const k = knobs.find((x) => x.role === EN[roleName] || x.key === roleName);
-  if (k) turn(k, steps);
-}
+document.getElementById("sm-app")?.addEventListener("click", () => {
+  const win = document.getElementById("main-win");
+  if (win) { win.style.display = "flex"; }
+  document.getElementById("task-pill-main")?.classList.remove("inactive");
+});
+document.getElementById("sm-tayne")?.addEventListener("click", () => selectIdentity(2, "Tayne Beta"));
+document.getElementById("sm-defrag")?.addEventListener("click", () => pressBtn("SEQ"));
+document.getElementById("sm-boss")?.addEventListener("click", () => pressBtn("EDIT"));
+document.getElementById("sm-shutdown")?.addEventListener("click", () => {
+  if (confirm("Shut down CINCO OS 2.5 Workstation?")) window.location.href = "about:blank";
+});
 
+// Menu shortcuts
 document.getElementById("m-switch-on")?.addEventListener("click", () => {
   const go = document.getElementById("go");
   if (go && !go.disabled) go.click();
 });
-
-document.getElementById("m-restart")?.addEventListener("click", () => {
-  window.location.reload();
-});
-
+document.getElementById("m-restart")?.addEventListener("click", () => window.location.reload());
 document.getElementById("m-exit")?.addEventListener("click", () => {
-  if (confirm("Shut down CINCO OS 2.5?")) window.location.href = "about:blank";
+  if (confirm("Exit CINCO OS 2.5?")) window.location.href = "about:blank";
 });
-
-document.getElementById("sm-shutdown")?.addEventListener("click", () => {
-  if (confirm("Shut down CINCO OS 2.5?")) window.location.href = "about:blank";
-});
-
-// Menu shortcuts to synthesizer voices & modes
-document.getElementById("m-celery")?.addEventListener("click", () => { turnKnob("PRESETS", 1); });
-document.getElementById("m-oyster")?.addEventListener("click", () => { turnKnob("PRESETS", 1); });
-document.getElementById("m-tayne")?.addEventListener("click", () => { turnKnob("PRESETS", 1); });
+document.getElementById("m-celery")?.addEventListener("click", () => selectIdentity(0, "Celery Man"));
+document.getElementById("m-oyster")?.addEventListener("click", () => selectIdentity(1, "Oyster Smiling"));
+document.getElementById("m-tayne")?.addEventListener("click", () => selectIdentity(2, "Tayne Beta"));
+document.getElementById("m-speech")?.addEventListener("click", () => selectIdentity(3, "Speech Synth"));
 document.getElementById("m-wobble")?.addEventListener("click", () => pressBtn("LFO"));
 document.getElementById("m-flail")?.addEventListener("click", () => pressBtn("ARP"));
-document.getElementById("m-nude")?.addEventListener("click", () => pressBtn("FX"));
-document.getElementById("m-k4d")?.addEventListener("click", () => turnKnob("KNOB 1", 10));
+document.getElementById("m-nude")?.addEventListener("click", () => {
+  selectIdentity(2, "Tayne Beta");
+  pressBtn("FX");
+  send({ type: "cinco", fn: "trigger_nsfw" });
+});
+document.getElementById("m-k4d")?.addEventListener("click", () => updateMacro(96));
 document.getElementById("m-defrag")?.addEventListener("click", () => pressBtn("SEQ"));
-document.getElementById("d-defrag")?.addEventListener("click", () => pressBtn("SEQ"));
-document.getElementById("sm-defrag")?.addEventListener("click", () => pressBtn("SEQ"));
 document.getElementById("m-boss")?.addEventListener("click", () => pressBtn("EDIT"));
+document.getElementById("m-screensaver")?.addEventListener("click", () => send({ type: "cinco", fn: "set_screensaver", args: [1] }));
 
-// Window controls
+// Window min / max / close
 document.getElementById("btn-win-min")?.addEventListener("click", () => {
   const win = document.getElementById("main-win");
   const pill = document.getElementById("task-pill-main");
   if (win && pill) {
-    win.style.display = win.style.display === "none" ? "flex" : "none";
-    pill.classList.toggle("inactive", win.style.display === "none");
+    win.style.display = "none";
+    pill.classList.add("inactive");
   }
 });
-
 document.getElementById("task-pill-main")?.addEventListener("click", () => {
   const win = document.getElementById("main-win");
   const pill = document.getElementById("task-pill-main");
@@ -1576,21 +2595,14 @@ document.getElementById("task-pill-main")?.addEventListener("click", () => {
     pill.classList.remove("inactive");
   }
 });
-
 document.getElementById("btn-win-max")?.addEventListener("click", () => {
   const win = document.getElementById("main-win");
   if (!win) return;
-  if (win.style.maxWidth === "100%") {
-    win.style.maxWidth = "1040px";
-  } else {
-    win.style.maxWidth = "100%";
-  }
+  win.style.maxWidth = win.style.maxWidth === "100%" ? "1060px" : "100%";
 });
-
 document.getElementById("btn-win-close")?.addEventListener("click", () => {
   if (confirm("Shut down CINCO OS 2.5?")) window.location.href = "installer/";
 });
-
 </script>
 </body>
 </html>
