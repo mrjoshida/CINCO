@@ -944,7 +944,7 @@ kbd {
       <circle cx="26" cy="10" r="2" fill="#ff453a"/>
       <rect x="5" y="20" width="22" height="5" rx="1" fill="#2a2a2d"/>
     </svg>
-    <span class="icon-lbl">CINCO OS 2.5</span>
+    <span class="icon-lbl">Cinco Synth</span>
   </div>
 
   <div class="desktop-icon" id="d-tayne" tabindex="0">
@@ -953,7 +953,7 @@ kbd {
       <rect x="9" y="8" width="14" height="14" rx="2" fill="#000080" stroke="#000" stroke-width="1.5"/>
       <line x1="9" y1="18" x2="23" y2="18" stroke="#ff0000" stroke-width="2"/>
     </svg>
-    <span class="icon-lbl">Tayne Studio</span>
+    <span class="icon-lbl">Tayne Studio 98</span>
   </div>
 
   <div class="desktop-icon" id="d-defrag" tabindex="0">
@@ -1445,7 +1445,7 @@ kbd {
       <span>CINCO OS 2.5</span>
     </div>
     <div class="task-pill inactive" id="task-pill-tayne" style="display:none;">
-      <span>Tayne Studio</span>
+      <span>Tayne Studio 98</span>
     </div>
     <div class="task-pill inactive" id="task-pill-defrag" style="display:none;">
       <span>Cinco Defrag</span>
@@ -1477,15 +1477,15 @@ kbd {
 
 <!-- Windows 98 Start Menu Popup -->
 <div class="start-menu" id="start-menu">
-  <div class="start-sidebar">CINCO 98</div>
+  <div class="start-sidebar">CINCO OS 2.5</div>
   <div class="start-items">
     <div class="start-item" id="sm-app">
       <svg class="start-item-icon" viewBox="0 0 16 16"><rect width="16" height="16" fill="#000080"/></svg>
-      <span>CINCO OS 2.5</span>
+      <span>Cinco Synth</span>
     </div>
     <div class="start-item" id="sm-tayne">
       <svg class="start-item-icon" viewBox="0 0 16 16"><circle cx="8" cy="8" r="6" fill="#808080"/></svg>
-      <span>Tayne Studio</span>
+      <span>Tayne Studio 98</span>
     </div>
     <div class="start-item" id="sm-defrag">
       <svg class="start-item-icon" viewBox="0 0 16 16"><rect width="16" height="16" fill="#008000"/></svg>
@@ -1501,7 +1501,7 @@ kbd {
     </div>
     <div class="start-item" id="sm-manual">
       <svg class="start-item-icon" viewBox="0 0 16 16"><path d="M3 2 L13 2 L13 14 L3 14 Z" fill="#fff" stroke="#000"/></svg>
-      <span>Help Manual</span>
+      <span>CINCO Manual</span>
     </div>
     <div class="start-divider"></div>
     <div class="start-item" id="sm-sysprop">
@@ -2366,6 +2366,27 @@ document.getElementById("dos-input")?.addEventListener("keydown", (e) => {
       e.target.value = "";
     }
   }
+});
+
+// CINCO Manual TOC Switching
+const MANUAL_SECTIONS = {
+  "toc-welcome": "<h3>Welcome to Cinco Identity Generator 2.5™</h3><p>This workstation runs custom Cinco OS 2.5 firmware for the M-VAVE FM-1 Synthesizer Terminal, featuring 4d3d3d3 window cascading, rotoscoped SCUMM dancers, and LPC speech synthesis.</p>",
+  "toc-controls": "<h3>Workstation & Synthesizer Controls</h3><p>Use keys Z through / for the lower manual, Q through O for the upper manual. Number keys 1-6 trigger row 1 buttons (FX, SCL, ENV, LFO, EDIT, GLO). Press [ and ] for octave shifts.</p>",
+  "toc-identities": "<h3>Cinco Identity Routines</h3><p>Rotate PRESETS encoder to toggle dancer routines: Celery Man (default 4d3d3d3 sequence), Oyster Smiling, and Tayne (Beta). Press GLO for phonetic LPC speech generation.</p>",
+  "toc-kinetics": "<h3>Kinetic Modulation (4d3d3d3)</h3><p>Engage Hat Wobble with LFO key (4). Flarhgunnstow arpeggiation mode engages with ARP key (9). Kick up the 4d3d3d3 with Macro Knob 1.</p>",
+  "toc-boss": "<h3>Lotus 1-2-3 Stealth Boss Key</h3><p>Press EDIT key or Tools &gt; Lotus 1-2-3 to instantly summon corporate spreadsheet cover mode. Total corporate allocation: $32,820,000.</p>",
+  "toc-osha": "<h3>OSHA Compliance Guidelines</h3><p>15-minute executive espresso recesses are mandatory under Cinco corporate policy. Maintain safe distance from Celery Man kinetic routines.</p>"
+};
+
+document.querySelectorAll(".manual-toc-item").forEach((item) => {
+  item.addEventListener("click", () => {
+    document.querySelectorAll(".manual-toc-item").forEach((i) => i.classList.remove("selected"));
+    item.classList.add("selected");
+    const view = document.getElementById("manual-content-view");
+    if (view && MANUAL_SECTIONS[item.id]) {
+      view.innerHTML = MANUAL_SECTIONS[item.id];
+    }
+  });
 });
 
 // Systray Volume Popup

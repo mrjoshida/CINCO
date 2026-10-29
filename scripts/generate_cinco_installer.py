@@ -3,6 +3,7 @@
 # Cinco Identity Generator 2.5™ Web Installer Generator
 # Cinco Business Systems, Inc. [v2.5] (Celery Man Edition)
 # Generates web/cinco_installer.html with authentic Windows 98 Setup Wizard UI
+# and unified CINCO OS 2.5 desktop environment
 import re
 from pathlib import Path
 
@@ -25,7 +26,7 @@ combined_lib = f"""// --- INLINED FM1 PKG / OTA / BACKUP LIBRARIES ---
 {lib_backup}
 """
 
-template = """<!doctype html>
+template = r"""<!doctype html>
 <!-- SPDX-License-Identifier: GPL-3.0-only
      Cinco Identity Generator 2.5™ Web Installer
      Cinco Business Systems, Inc. [v2.5] (Celery Man Edition)
@@ -44,137 +45,200 @@ template = """<!doctype html>
     --win-light: #ffffff;
     --win-lighter: #dfdfdf;
     --win-dark: #808080;
-    --win-darker: #0a0a0a;
+    --win-darker: #000000;
     --win-blue: #000080;
     --win-blue-light: #1084d0;
+    --win-selection: #000080;
+    --win-text: #000000;
   }
   * { box-sizing: border-box; }
   body {
     margin: 0;
-    padding: 20px 10px 48px;
+    padding: 10px 10px 40px;
     background-color: var(--win-bg);
-    color: #000000;
-    font-family: "MS Sans Serif", Tahoma, "Segoe UI", Arial, sans-serif;
-    font-size: 11px;
+    color: var(--win-text);
+    font-family: Tahoma, "Segoe UI", -apple-system, BlinkMacSystemFont, Arial, sans-serif;
+    font-size: 12px;
     line-height: 1.4;
     min-height: 100vh;
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: flex-start;
-    -webkit-font-smoothing: antialiased;
+    -webkit-font-smoothing: subpixel-antialiased;
+    -moz-osx-font-smoothing: auto;
+    text-rendering: optimizeLegibility;
     overflow-x: hidden;
+    user-select: none;
+  }
+
+  button, input, select, textarea {
+    font-family: inherit;
+    -webkit-font-smoothing: subpixel-antialiased;
+    -moz-osx-font-smoothing: auto;
+    text-rendering: optimizeLegibility;
+  }
+
+  a { color: inherit; text-decoration: none; }
+  a:hover { text-decoration: underline; }
+
+  /* 3D Bevel Utilities */
+  .bevel-raised {
+    border-top: 2px solid var(--win-light);
+    border-left: 2px solid var(--win-light);
+    border-right: 2px solid var(--win-darker);
+    border-bottom: 2px solid var(--win-darker);
+    box-shadow: inset 1px 1px 0 var(--win-lighter), inset -1px -1px 0 var(--win-dark);
+  }
+
+  .bevel-sunken {
+    border-top: 2px solid var(--win-dark);
+    border-left: 2px solid var(--win-dark);
+    border-right: 2px solid var(--win-light);
+    border-bottom: 2px solid var(--win-light);
+    box-shadow: inset 1px 1px 0 var(--win-darker), inset -1px -1px 0 var(--win-lighter);
+  }
+
+  .bevel-thin-raised {
+    border-top: 1px solid var(--win-light);
+    border-left: 1px solid var(--win-light);
+    border-right: 1px solid var(--win-darker);
+    border-bottom: 1px solid var(--win-darker);
+    box-shadow: inset 1px 1px 0 var(--win-lighter), inset -1px -1px 0 var(--win-dark);
+  }
+
+  .bevel-thin-sunken {
+    border-top: 1px solid var(--win-dark);
+    border-left: 1px solid var(--win-dark);
+    border-right: 1px solid var(--win-light);
+    border-bottom: 1px solid var(--win-light);
+    box-shadow: inset 1px 1px 0 var(--win-darker);
   }
 
   /* Desktop Icons on Teal Background */
   .desktop-icons {
     position: fixed;
-    top: 16px;
-    left: 16px;
+    top: 14px;
+    left: 14px;
     display: flex;
     flex-direction: column;
-    gap: 18px;
+    gap: 16px;
     z-index: 5;
-    user-select: none;
   }
   .desktop-icon {
     display: flex;
     flex-direction: column;
     align-items: center;
-    width: 74px;
+    width: 72px;
     text-align: center;
     cursor: pointer;
     text-decoration: none;
     color: #ffffff;
-    font-size: 11px;
-    font-family: "MS Sans Serif", Tahoma, sans-serif;
-    text-shadow: 1px 1px 1px #000000;
+    padding: 4px 2px;
   }
-  .desktop-icon svg {
+  .desktop-icon:focus, .desktop-icon.active {
+    outline: 1px dotted #ffffff;
+  }
+  .desktop-icon:focus .icon-lbl, .desktop-icon.active .icon-lbl {
+    background: var(--win-selection);
+    color: #ffffff;
+  }
+  .desktop-icon .icon-img {
+    width: 32px;
+    height: 32px;
     margin-bottom: 3px;
-    filter: drop-shadow(1px 1px 0 rgba(0,0,0,0.6));
+    filter: drop-shadow(1px 1px 1px rgba(0,0,0,0.6));
   }
-  .desktop-icon span {
+  .desktop-icon .icon-lbl {
+    font-size: 11px;
     padding: 1px 3px;
     border-radius: 1px;
     word-break: break-word;
     line-height: 1.2;
-  }
-  .desktop-icon:hover span,
-  .desktop-icon:focus span {
-    background: var(--win-blue);
-    outline: 1px dotted #ffff80;
+    text-shadow: 1px 1px 1px #000000;
   }
 
-  /* Main Windows 98 Setup Window */
-  .win98-window {
+  /* Windows 98 Base Window Styles */
+  .win-window {
+    background: var(--win-gray);
+    color: var(--win-text);
+    display: flex;
+    flex-direction: column;
+    position: absolute;
+    user-select: none;
+  }
+
+  #main-win {
+    position: relative;
     width: 580px;
     max-width: 96vw;
-    background: var(--win-gray);
-    border: 1px solid #000000;
-    box-shadow: inset 1px 1px var(--win-light), inset -1px -1px var(--win-darker),
-                inset 2px 2px var(--win-lighter), inset -2px -2px var(--win-dark),
-                2px 2px 8px rgba(0, 0, 0, 0.4);
-    padding: 3px;
-    margin: auto 0 16px;
-    position: relative;
-    z-index: 20;
+    margin: 14px auto 36px auto;
+    z-index: 10;
   }
 
-  /* Title Bar */
-  .win98-titlebar {
-    background: linear-gradient(90deg, var(--win-blue) 0%, var(--win-blue-light) 100%);
-    height: 22px;
-    padding: 2px 3px 2px 4px;
+  /* Titlebars */
+  .win-titlebar {
+    height: 20px;
+    background: linear-gradient(90deg, var(--win-blue), var(--win-blue-light));
+    color: #ffffff;
+    padding: 2px 4px;
     display: flex;
     align-items: center;
     justify-content: space-between;
-    user-select: none;
+    font-weight: bold;
+    font-size: 12px;
+    cursor: default;
   }
-  .win98-title-left {
+  .win-titlebar.inactive {
+    background: linear-gradient(90deg, #808080, #b0b0b0);
+    color: #c0c0c0;
+  }
+  .win-titlebar-left {
     display: flex;
     align-items: center;
-    gap: 5px;
+    gap: 6px;
     overflow: hidden;
     white-space: nowrap;
     text-overflow: ellipsis;
   }
-  .win98-title-icon {
+  .win-title-icon {
     width: 16px;
     height: 16px;
     flex-shrink: 0;
   }
-  .win98-title-text {
-    color: #ffffff;
-    font-weight: bold;
-    font-size: 11px;
-    letter-spacing: 0.2px;
-  }
-  .win98-title-controls {
+  .win-controls {
     display: flex;
-    align-items: center;
     gap: 2px;
+    flex-shrink: 0;
   }
-  .win98-title-btn {
+  .win-btn {
     width: 16px;
     height: 14px;
     background: var(--win-gray);
-    border: none;
-    box-shadow: inset 1px 1px var(--win-light), inset -1px -1px var(--win-darker),
-                inset 2px 2px var(--win-lighter), inset -2px -2px var(--win-dark);
-    font-family: "MS Sans Serif", Tahoma, sans-serif;
-    font-size: 9px;
-    font-weight: bold;
-    line-height: 12px;
-    text-align: center;
-    color: #000000;
+    border-top: 1px solid var(--win-light);
+    border-left: 1px solid var(--win-light);
+    border-right: 1px solid var(--win-darker);
+    border-bottom: 1px solid var(--win-darker);
+    box-shadow: inset 1px 1px 0 var(--win-lighter), inset -1px -1px 0 var(--win-dark);
+    display: flex;
+    align-items: center;
+    justify-content: center;
     cursor: pointer;
     padding: 0;
+    font-family: inherit;
+    font-size: 11px;
+    font-weight: bold;
+    color: #000000;
+    line-height: 1;
   }
-  .win98-title-btn:active {
-    box-shadow: inset 1px 1px var(--win-darker), inset -1px -1px var(--win-light),
-                inset 2px 2px var(--win-dark), inset -2px -2px var(--win-lighter);
-    padding: 1px 0 0 1px;
+  .win-btn:active {
+    border-top: 1px solid var(--win-darker);
+    border-left: 1px solid var(--win-darker);
+    border-right: 1px solid var(--win-light);
+    border-bottom: 1px solid var(--win-light);
+    box-shadow: none;
+    padding-top: 1px;
+    padding-left: 1px;
   }
 
   /* Wizard Banner Header */
@@ -266,8 +330,11 @@ template = """<!doctype html>
     justify-content: space-between;
     align-items: center;
     background: #ffffff;
-    border: 1px solid var(--win-dark);
-    box-shadow: inset 1px 1px var(--win-dark), inset -1px -1px var(--win-light);
+    border-top: 1px solid var(--win-dark);
+    border-left: 1px solid var(--win-dark);
+    border-right: 1px solid var(--win-light);
+    border-bottom: 1px solid var(--win-light);
+    box-shadow: inset 1px 1px 0 var(--win-darker);
     padding: 2px 6px;
     font-family: "Courier New", monospace;
     font-size: 10.5px;
@@ -292,9 +359,11 @@ template = """<!doctype html>
   /* Classic Windows 98 Segmented Progress Bar */
   .progress-frame {
     background: #ffffff;
-    border: 1px solid var(--win-dark);
-    box-shadow: inset 1px 1px var(--win-darker), inset -1px -1px var(--win-light),
-                inset 2px 2px var(--win-dark), inset -2px -2px var(--win-lighter);
+    border-top: 2px solid var(--win-dark);
+    border-left: 2px solid var(--win-dark);
+    border-right: 2px solid var(--win-light);
+    border-bottom: 2px solid var(--win-light);
+    box-shadow: inset 1px 1px 0 var(--win-darker), inset -1px -1px 0 var(--win-lighter);
     padding: 2px;
     margin: 4px 0 8px;
   }
@@ -307,9 +376,7 @@ template = """<!doctype html>
     border: none;
     background: #ffffff;
   }
-  progress#bar::-webkit-progress-bar {
-    background: #ffffff;
-  }
+  progress#bar::-webkit-progress-bar { background: #ffffff; }
   progress#bar::-webkit-progress-value {
     background-color: var(--win-blue);
     background-image: repeating-linear-gradient(
@@ -334,9 +401,11 @@ template = """<!doctype html>
   /* Status Line Box (Sunken 3D) */
   #status {
     background: #ffffff;
-    border: 1px solid var(--win-dark);
-    box-shadow: inset 1px 1px var(--win-darker), inset -1px -1px var(--win-light),
-                inset 2px 2px var(--win-dark), inset -2px -2px var(--win-lighter);
+    border-top: 1px solid var(--win-dark);
+    border-left: 1px solid var(--win-dark);
+    border-right: 1px solid var(--win-light);
+    border-bottom: 1px solid var(--win-light);
+    box-shadow: inset 1px 1px 0 var(--win-darker);
     padding: 3px 6px;
     font-family: "Courier New", Courier, monospace;
     font-size: 11px;
@@ -350,13 +419,15 @@ template = """<!doctype html>
     align-items: center;
   }
 
-  /* Log Terminal Box (DOS Command Prompt sunken black window) */
+  /* Log Terminal Box */
   #log {
     background: #000000;
     color: #00ff66;
-    border: 1px solid var(--win-dark);
-    box-shadow: inset 1px 1px var(--win-darker), inset -1px -1px var(--win-light),
-                inset 2px 2px var(--win-dark), inset -2px -2px var(--win-lighter);
+    border-top: 1px solid var(--win-dark);
+    border-left: 1px solid var(--win-dark);
+    border-right: 1px solid var(--win-light);
+    border-bottom: 1px solid var(--win-light);
+    box-shadow: inset 1px 1px 0 var(--win-darker);
     padding: 6px 8px;
     font-family: "Courier New", Courier, monospace;
     font-size: 10.5px;
@@ -391,50 +462,6 @@ template = """<!doctype html>
     box-shadow: 0 -1px var(--win-light);
   }
 
-  /* Windows 98 Authentic Buttons */
-  .win98-btn {
-    background: var(--win-gray);
-    color: #000000;
-    font-family: "MS Sans Serif", Tahoma, "Segoe UI", Arial, sans-serif;
-    font-size: 11px;
-    padding: 3px 12px;
-    min-width: 75px;
-    min-height: 23px;
-    border: 1px solid #000000;
-    box-shadow: inset 1px 1px var(--win-light), inset -1px -1px var(--win-darker),
-                inset 2px 2px var(--win-lighter), inset -2px -2px var(--win-dark);
-    cursor: pointer;
-    outline: none;
-    user-select: none;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    text-decoration: none;
-    box-sizing: border-box;
-    text-align: center;
-  }
-  .win98-btn:active:not(:disabled),
-  .win98-btn.pressed {
-    box-shadow: inset 1px 1px var(--win-darker), inset -1px -1px var(--win-light),
-                inset 2px 2px var(--win-dark), inset -2px -2px var(--win-lighter);
-    padding: 4px 11px 2px 13px;
-  }
-  .win98-btn:focus-visible {
-    outline: 1px dotted #000000;
-    outline-offset: -4px;
-  }
-  .win98-btn:disabled {
-    color: var(--win-dark);
-    text-shadow: 1px 1px 0 var(--win-light);
-    cursor: default;
-  }
-  .win98-btn-default {
-    font-weight: bold;
-    border: 2px solid #000000;
-    box-shadow: inset 1px 1px var(--win-light), inset -1px -1px var(--win-darker),
-                inset 2px 2px var(--win-lighter), inset -2px -2px var(--win-dark);
-  }
-
   /* Bottom Command Button Bar (Sunken Divider) */
   .win98-command-bar {
     border-top: 1px solid var(--win-dark);
@@ -448,160 +475,32 @@ template = """<!doctype html>
     flex-wrap: wrap;
   }
 
-  /* Dialog Status Bar (3 Sunken Segments) */
-  .win98-statusbar {
-    display: flex;
-    gap: 2px;
-    margin-top: 6px;
-    font-size: 10.5px;
-    user-select: none;
-  }
-  .statusbar-cell {
-    background: var(--win-gray);
-    border: 1px solid var(--win-dark);
-    box-shadow: inset 1px 1px var(--win-dark), inset -1px -1px var(--win-light);
-    padding: 2px 6px;
-    color: #222222;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
+  .win98-btn-default {
+    font-weight: bold;
+    outline: 1px solid #000000;
   }
 
-  /* Fixed Windows 98 Taskbar */
-  .win98-taskbar {
-    position: fixed;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    height: 28px;
-    background: var(--win-gray);
-    border-top: 2px solid var(--win-light);
-    box-shadow: inset 0 1px 0 var(--win-lighter);
+  /* Sunken Status Bar */
+  .win-statusbar {
     display: flex;
-    align-items: center;
-    padding: 2px 3px;
-    z-index: 10000;
-    user-select: none;
-  }
-  .win98-start-btn {
-    height: 22px;
     background: var(--win-gray);
-    border: 1px solid #000000;
-    box-shadow: inset 1px 1px var(--win-light), inset -1px -1px var(--win-darker),
-                inset 2px 2px var(--win-lighter), inset -2px -2px var(--win-dark);
-    font-family: "MS Sans Serif", Tahoma, sans-serif;
-    font-size: 11px;
-    font-weight: bold;
-    display: flex;
-    align-items: center;
+    padding: 2px 4px;
     gap: 4px;
-    padding: 1px 6px 1px 4px;
-    cursor: pointer;
-    outline: none;
+    border-top: 1px solid var(--win-dark);
+    font-size: 11px;
+    line-height: 1.3;
   }
-  .win98-start-btn:active,
-  .win98-start-btn.pressed {
-    box-shadow: inset 1px 1px var(--win-darker), inset -1px -1px var(--win-light),
-                inset 2px 2px var(--win-dark), inset -2px -2px var(--win-lighter);
-    padding: 2px 5px 0 5px;
-  }
-  .taskbar-divider {
-    width: 2px;
-    height: 18px;
+  .status-panel {
+    padding: 2px 6px;
+    border-top: 1px solid var(--win-dark);
     border-left: 1px solid var(--win-dark);
     border-right: 1px solid var(--win-light);
-    margin: 0 4px;
-  }
-  .taskbar-app {
-    height: 22px;
-    background: #e0e0e0;
-    border: 1px solid #000000;
-    box-shadow: inset 1px 1px var(--win-darker), inset -1px -1px var(--win-light),
-                inset 2px 2px var(--win-dark), inset -2px -2px var(--win-lighter);
-    font-family: "MS Sans Serif", Tahoma, sans-serif;
-    font-size: 11px;
-    font-weight: bold;
-    display: flex;
-    align-items: center;
-    gap: 5px;
-    padding: 1px 8px;
-    max-width: 190px;
+    border-bottom: 1px solid var(--win-light);
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
   }
-  .taskbar-tray {
-    margin-left: auto;
-    height: 22px;
-    background: var(--win-gray);
-    border: 1px solid var(--win-dark);
-    box-shadow: inset 1px 1px var(--win-dark), inset -1px -1px var(--win-light);
-    padding: 2px 8px;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    font-family: "MS Sans Serif", Tahoma, monospace;
-    font-size: 11px;
-  }
-
-  /* Start Menu Popup */
-  .win98-start-menu {
-    position: fixed;
-    bottom: 28px;
-    left: 2px;
-    width: 230px;
-    background: var(--win-gray);
-    border: 1px solid #000000;
-    box-shadow: inset 1px 1px var(--win-light), inset -1px -1px var(--win-darker),
-                inset 2px 2px var(--win-lighter), inset -2px -2px var(--win-dark),
-                3px 3px 10px rgba(0,0,0,0.5);
-    display: none;
-    z-index: 10001;
-    font-family: "MS Sans Serif", Tahoma, sans-serif;
-    font-size: 11px;
-  }
-  .win98-start-menu.open {
-    display: flex;
-  }
-  .start-menu-sidebar {
-    width: 26px;
-    background: linear-gradient(180deg, var(--win-blue) 0%, var(--win-blue-light) 100%);
-    display: flex;
-    align-items: flex-end;
-    padding: 8px 4px;
-    color: #ffffff;
-    font-weight: bold;
-    writing-mode: vertical-rl;
-    transform: rotate(180deg);
-    letter-spacing: 2px;
-    font-size: 13px;
-    user-select: none;
-  }
-  .start-menu-items {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    padding: 3px 1px;
-  }
-  .start-menu-item {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    padding: 6px 12px;
-    text-decoration: none;
-    color: #000000;
-    cursor: pointer;
-  }
-  .start-menu-item:hover {
-    background: var(--win-blue);
-    color: #ffffff;
-  }
-  .start-menu-divider {
-    height: 1px;
-    background: var(--win-dark);
-    border-bottom: 1px solid var(--win-light);
-    margin: 3px 1px;
-  }
+  .status-panel.main-panel { flex: 1; }
 
   /* External Links Footer below dialog */
   .footer-links {
@@ -617,116 +516,567 @@ template = """<!doctype html>
     text-decoration: underline;
     text-shadow: 1px 1px 1px #000000;
   }
-  .footer-links a:hover {
-    color: #ffff80;
+  .footer-links a:hover { color: #ffff80; }
+
+  /* Bottom Taskbar */
+  .win-taskbar {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 28px;
+    background: var(--win-gray);
+    border-top: 2px solid var(--win-light);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 2px 3px;
+    z-index: 9999;
+    box-shadow: inset 0 1px 0 var(--win-lighter);
+  }
+  .taskbar-left {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    overflow-x: auto;
+    height: 100%;
+  }
+  .start-btn {
+    height: 22px;
+    padding: 2px 6px;
+    background: var(--win-gray);
+    border-top: 2px solid var(--win-light);
+    border-left: 2px solid var(--win-light);
+    border-right: 2px solid var(--win-darker);
+    border-bottom: 2px solid var(--win-darker);
+    box-shadow: inset 1px 1px 0 var(--win-lighter), inset -1px -1px 0 var(--win-dark);
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    font-weight: bold;
+    font-size: 11px;
+    cursor: pointer;
+  }
+  .start-btn:active, .start-btn.pressed {
+    border-top: 2px solid var(--win-darker);
+    border-left: 2px solid var(--win-darker);
+    border-right: 2px solid var(--win-light);
+    border-bottom: 2px solid var(--win-light);
+    box-shadow: none;
+    padding-top: 3px;
+    padding-left: 7px;
+  }
+  .start-logo {
+    width: 14px;
+    height: 14px;
+  }
+  .taskbar-divider {
+    width: 2px;
+    height: 20px;
+    border-left: 1px solid var(--win-dark);
+    border-right: 1px solid var(--win-light);
+    margin: 0 2px;
+  }
+  .task-pill {
+    height: 22px;
+    padding: 2px 8px;
+    background: var(--win-gray);
+    border-top: 2px solid var(--win-darker);
+    border-left: 2px solid var(--win-darker);
+    border-right: 2px solid var(--win-light);
+    border-bottom: 2px solid var(--win-light);
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 11px;
+    font-weight: bold;
+    cursor: pointer;
+    max-width: 260px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .task-pill.inactive {
+    border-top: 2px solid var(--win-light);
+    border-left: 2px solid var(--win-light);
+    border-right: 2px solid var(--win-darker);
+    border-bottom: 2px solid var(--win-darker);
+    box-shadow: inset 1px 1px 0 var(--win-lighter), inset -1px -1px 0 var(--win-dark);
+    font-weight: normal;
+  }
+  .taskbar-right {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 0 4px;
+  }
+  .systray {
+    height: 22px;
+    padding: 2px 6px;
+    border-top: 1px solid var(--win-dark);
+    border-left: 1px solid var(--win-dark);
+    border-right: 1px solid var(--win-light);
+    border-bottom: 1px solid var(--win-light);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 11px;
+  }
+  .systray-icon {
+    width: 16px;
+    height: 16px;
+    cursor: pointer;
+  }
+
+  /* Start Menu */
+  .start-menu {
+    display: none;
+    position: fixed;
+    bottom: 28px;
+    left: 2px;
+    width: 200px;
+    background: var(--win-gray);
+    border-top: 2px solid var(--win-light);
+    border-left: 2px solid var(--win-light);
+    border-right: 2px solid var(--win-darker);
+    border-bottom: 2px solid var(--win-darker);
+    box-shadow: 2px 2px 6px rgba(0,0,0,0.5);
+    z-index: 10000;
+  }
+  .start-menu.open { display: flex; }
+  .start-sidebar {
+    width: 24px;
+    background: linear-gradient(180deg, var(--win-blue), #000040);
+    color: #ffffff;
+    writing-mode: vertical-rl;
+    transform: rotate(180deg);
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    padding: 8px 2px;
+    font-weight: bold;
+    font-size: 12px;
+    letter-spacing: 2px;
+  }
+  .start-items {
+    flex: 1;
+    padding: 3px 0;
+    display: flex;
+    flex-direction: column;
+  }
+  .start-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 5px 12px;
+    cursor: pointer;
+    color: #000000;
+    font-size: 12px;
+    text-decoration: none;
+  }
+  .start-item:hover {
+    background: var(--win-blue);
+    color: #ffffff;
+  }
+  .start-item-icon {
+    width: 16px;
+    height: 16px;
+  }
+  .start-divider {
+    height: 1px;
+    background: var(--win-dark);
+    border-bottom: 1px solid var(--win-light);
+    margin: 3px 2px;
+  }
+
+  /* Generic Dialog & Modal Styling */
+  .modal-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.3);
+    z-index: 10001;
+    align-items: center;
+    justify-content: center;
+  }
+  .modal-overlay.open { display: flex; }
+  .win-dialog {
+    background: var(--win-gray);
+    border-top: 2px solid var(--win-light);
+    border-left: 2px solid var(--win-light);
+    border-right: 2px solid var(--win-darker);
+    border-bottom: 2px solid var(--win-darker);
+    box-shadow: 3px 3px 10px rgba(0,0,0,0.6);
+    min-width: 320px;
+    display: flex;
+    flex-direction: column;
+  }
+  .dialog-body {
+    padding: 12px 14px;
+    font-size: 12px;
+    line-height: 1.5;
+  }
+  .dialog-btn {
+    font-family: inherit;
+    font-size: 12px;
+    min-width: 68px;
+    padding: 3px 12px;
+    background: var(--win-gray);
+    border-top: 2px solid var(--win-light);
+    border-left: 2px solid var(--win-light);
+    border-right: 2px solid var(--win-darker);
+    border-bottom: 2px solid var(--win-darker);
+    box-shadow: inset 1px 1px 0 var(--win-lighter), inset -1px -1px 0 var(--win-dark);
+    cursor: pointer;
+  }
+  .dialog-btn:active {
+    border-top: 2px solid var(--win-darker);
+    border-left: 2px solid var(--win-darker);
+    border-right: 2px solid var(--win-light);
+    border-bottom: 2px solid var(--win-light);
+    box-shadow: none;
+    padding-top: 4px;
+    padding-left: 13px;
+  }
+  .dialog-btn:disabled {
+    color: var(--win-dark);
+    text-shadow: 1px 1px 0 var(--win-light);
+    cursor: default;
+  }
+
+  /* Systray Volume Popup */
+  .volume-popup {
+    display: none;
+    position: fixed;
+    bottom: 30px;
+    right: 10px;
+    background: var(--win-gray);
+    padding: 10px 14px;
+    z-index: 10000;
+    width: 90px;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    font-size: 11px;
+  }
+  .volume-popup.open { display: flex; }
+  .vol-slider {
+    writing-mode: vertical-lr;
+    direction: rtl;
+    height: 80px;
+  }
+
+  /* App Windows: Floating Window Layouts */
+  .app-window {
+    display: none;
+    position: absolute;
+    top: 40px;
+    left: 60px;
+    z-index: 20;
+  }
+  .app-window.open { display: flex; }
+
+  /* Recycle Bin Window */
+  #win-recycle { width: 560px; height: 340px; }
+  .explorer-toolbar {
+    display: flex;
+    gap: 4px;
+    padding: 3px 6px;
+    border-bottom: 1px solid var(--win-dark);
+    background: var(--win-gray);
+  }
+  .explorer-table {
+    flex: 1;
+    background: #ffffff;
+    border-top: 1px solid var(--win-dark);
+    border-left: 1px solid var(--win-dark);
+    border-right: 1px solid var(--win-light);
+    border-bottom: 1px solid var(--win-light);
+    overflow-y: auto;
+    margin: 4px;
+  }
+  .file-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 12px;
+    line-height: 1.4;
+  }
+  .file-table th {
+    background: var(--win-gray);
+    border-right: 1px solid var(--win-dark);
+    border-bottom: 1px solid var(--win-dark);
+    padding: 2px 6px;
+    text-align: left;
+    font-weight: normal;
+  }
+  .file-table td {
+    padding: 2px 6px;
+    cursor: pointer;
+  }
+  .file-table tr.selected {
+    background: var(--win-blue);
+    color: #ffffff;
+  }
+
+  /* Tayne Studio 98 */
+  #win-tayne { width: 420px; }
+  .tayne-card {
+    background: #000000;
+    color: #5fe08a;
+    font-family: monospace;
+    padding: 8px;
+    margin-bottom: 10px;
+    border: 1px solid #5fe08a;
+    font-size: 12px;
+    line-height: 1.5;
+  }
+  .tayne-buttons {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+  }
+
+  /* Cinco Defrag */
+  #win-defrag { width: 440px; }
+  .defrag-grid {
+    display: grid;
+    grid-template-columns: repeat(20, 1fr);
+    gap: 2px;
+    background: #ffffff;
+    padding: 6px;
+    height: 120px;
+    border: 2px solid var(--win-dark);
+    margin: 8px 0;
+  }
+  .cluster-box {
+    width: 100%;
+    height: 100%;
+    background: #ffffff;
+  }
+  .cluster-alloc { background: #000080; }
+  .cluster-free { background: #ffffff; border: 1px solid #c0c0c0; }
+  .cluster-frag { background: #ff0000; }
+  .cluster-unmov { background: #008000; }
+
+  /* Lotus 1-2-3 */
+  #win-lotus { width: 620px; }
+  .lotus-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-family: monospace;
+    font-size: 12px;
+    line-height: 1.4;
+    background: #ffffff;
+  }
+  .lotus-table th, .lotus-table td {
+    border: 1px solid #808080;
+    padding: 3px 6px;
+  }
+  .lotus-table th { background: var(--win-gray); font-weight: bold; }
+
+  /* CINCO Manual */
+  #win-manual { width: 560px; height: 380px; }
+  .manual-split {
+    display: flex;
+    flex: 1;
+    gap: 6px;
+    padding: 6px;
+    overflow: hidden;
+  }
+  .manual-toc {
+    width: 160px;
+    background: #ffffff;
+    border: 1px solid var(--win-dark);
+    padding: 4px;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+  .manual-toc-item {
+    padding: 3px 6px;
+    cursor: pointer;
+    font-size: 12px;
+  }
+  .manual-toc-item.selected {
+    background: var(--win-blue);
+    color: #ffffff;
+  }
+  .manual-view {
+    flex: 1;
+    background: #ffffff;
+    border: 1px solid var(--win-dark);
+    padding: 8px;
+    overflow-y: auto;
+    font-size: 12px;
+    line-height: 1.5;
+  }
+
+  /* Shut Down & Fullscreen DOS / Power Screens */
+  #screen-shutdown {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: #000000;
+    color: #ff6600;
+    font-family: Tahoma, "Segoe UI", -apple-system, BlinkMacSystemFont, Arial, sans-serif;
+    font-size: 26px;
+    font-weight: bold;
+    text-align: center;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    gap: 20px;
+    z-index: 20000;
+  }
+  #screen-shutdown.open { display: flex; }
+
+  #screen-dos {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: #000000;
+    color: #ffffff;
+    font-family: monospace;
+    font-size: 14px;
+    padding: 20px;
+    flex-direction: column;
+    z-index: 20000;
+  }
+  #screen-dos.open { display: flex; }
+  .dos-input-line { display: flex; gap: 8px; }
+  .dos-input {
+    background: transparent;
+    border: none;
+    color: #ffffff;
+    font-family: monospace;
+    font-size: 14px;
+    outline: none;
+    flex: 1;
   }
 
   @media (max-width: 768px) {
-    .desktop-icons {
-      display: none;
-    }
-    .win98-window {
-      width: 100%;
-      max-width: 100%;
-      margin: 0 0 16px;
-    }
-    .hw-grid {
-      grid-template-columns: 1fr;
-    }
-    .banner-pc-art {
-      display: none;
-    }
+    .desktop-icons { display: none; }
+    #main-win { width: 100%; max-width: 100%; margin: 0 0 16px; }
+    .hw-grid { grid-template-columns: 1fr; }
+    .banner-pc-art { display: none; }
   }
 </style>
 </head>
 <body>
 
-<!-- Windows 98 Desktop Icons -->
+<!-- Windows 98 Desktop Icons (Identical to Cinco Workstation) -->
 <div class="desktop-icons" aria-label="Desktop Shortcuts">
-  <div class="desktop-icon" tabindex="0" onclick="alert('Cinco Identity Generator 2.5 Workstation\nDestination Terminal: M-VAVE FM-1 (AC7916A)')">
-    <svg width="32" height="32" viewBox="0 0 32 32">
-      <rect x="4" y="3" width="24" height="18" rx="2" fill="#dcd8cf" stroke="#000" stroke-width="1"/>
-      <rect x="7" y="6" width="18" height="12" fill="#008080"/>
-      <rect x="13" y="21" width="6" height="4" fill="#808080"/>
-      <rect x="8" y="25" width="16" height="4" fill="#dcd8cf" stroke="#000" stroke-width="1"/>
+  <div class="desktop-icon" id="d-mycomp" tabindex="0">
+    <svg class="icon-img" viewBox="0 0 32 32">
+      <rect x="3" y="3" width="26" height="19" rx="1" fill="#c0c0c0" stroke="#000" stroke-width="1.5"/>
+      <rect x="5" y="5" width="22" height="15" fill="#008080"/>
+      <path d="M12 22 L8 28 L24 28 L20 22 Z" fill="#808080" stroke="#000" stroke-width="1.5"/>
+      <rect x="7" y="27" width="18" height="2" fill="#dfdfdf"/>
     </svg>
-    <span>My Computer</span>
+    <span class="icon-lbl">My Computer</span>
   </div>
 
-  <div class="desktop-icon" tabindex="0" onclick="alert('WebMIDI Network Neighborhood\nProtocol: Direct SysEx Over USB')">
-    <svg width="32" height="32" viewBox="0 0 32 32">
-      <rect x="2" y="4" width="16" height="12" rx="1" fill="#dcd8cf" stroke="#000" stroke-width="1"/>
-      <rect x="4" y="6" width="12" height="8" fill="#000080"/>
-      <rect x="14" y="14" width="16" height="12" rx="1" fill="#dcd8cf" stroke="#000" stroke-width="1"/>
-      <rect x="16" y="16" width="12" height="8" fill="#000080"/>
-      <line x1="10" y1="20" x2="10" y2="28" stroke="#000" stroke-width="2"/>
-      <line x1="22" y1="26" x2="22" y2="28" stroke="#000" stroke-width="2"/>
-      <line x1="6" y1="28" x2="26" y2="28" stroke="#000" stroke-width="2"/>
+  <div class="desktop-icon" id="d-app" tabindex="0">
+    <svg class="icon-img" viewBox="0 0 32 32">
+      <rect x="2" y="4" width="28" height="24" rx="2" fill="#141415" stroke="#3a3a3e" stroke-width="1.5"/>
+      <rect x="8" y="7" width="16" height="10" fill="#000000"/>
+      <circle cx="6" cy="10" r="2" fill="#5fe08a"/>
+      <circle cx="26" cy="10" r="2" fill="#ff453a"/>
+      <rect x="5" y="20" width="22" height="5" rx="1" fill="#2a2a2d"/>
     </svg>
-    <span>Network</span>
+    <span class="icon-lbl">Cinco Synth</span>
   </div>
 
-  <div class="desktop-icon" tabindex="0" onclick="alert('Recycle Bin (0 items discarded)')">
-    <svg width="32" height="32" viewBox="0 0 32 32">
-      <path d="M8 8 L10 28 L22 28 L24 8 Z" fill="#dcd8cf" stroke="#000" stroke-width="1"/>
-      <ellipse cx="16" cy="8" rx="8" ry="3" fill="#a0a0a0" stroke="#000" stroke-width="1"/>
-      <line x1="12" y1="12" x2="13" y2="24" stroke="#808080" stroke-width="1.5"/>
+  <div class="desktop-icon" id="d-tayne" tabindex="0">
+    <svg class="icon-img" viewBox="0 0 32 32">
+      <ellipse cx="16" cy="22" rx="12" ry="5" fill="#808080" stroke="#000" stroke-width="1.5"/>
+      <rect x="9" y="8" width="14" height="14" rx="2" fill="#000080" stroke="#000" stroke-width="1.5"/>
+      <line x1="9" y1="18" x2="23" y2="18" stroke="#ff0000" stroke-width="2"/>
+    </svg>
+    <span class="icon-lbl">Tayne Studio 98</span>
+  </div>
+
+  <div class="desktop-icon" id="d-defrag" tabindex="0">
+    <svg class="icon-img" viewBox="0 0 32 32">
+      <rect x="3" y="4" width="26" height="24" fill="#c0c0c0" stroke="#000" stroke-width="1.5"/>
+      <rect x="6" y="7" width="5" height="5" fill="#000080"/>
+      <rect x="13" y="7" width="5" height="5" fill="#000080"/>
+      <rect x="20" y="7" width="5" height="5" fill="#ffffff"/>
+      <rect x="6" y="14" width="5" height="5" fill="#008000"/>
+      <rect x="13" y="14" width="5" height="5" fill="#ff0000"/>
+      <rect x="20" y="14" width="5" height="5" fill="#008000"/>
+      <rect x="6" y="21" width="5" height="5" fill="#ffffff"/>
+      <rect x="13" y="21" width="5" height="5" fill="#000080"/>
+      <rect x="20" y="21" width="5" height="5" fill="#000080"/>
+    </svg>
+    <span class="icon-lbl">Cinco Defrag</span>
+  </div>
+
+  <div class="desktop-icon" id="d-boss" tabindex="0">
+    <svg class="icon-img" viewBox="0 0 32 32">
+      <rect x="3" y="3" width="26" height="26" fill="#ffffff" stroke="#000" stroke-width="1.5"/>
+      <rect x="3" y="3" width="26" height="6" fill="#008000"/>
+      <line x1="3" y1="15" x2="29" y2="15" stroke="#808080" stroke-width="1"/>
+      <line x1="3" y1="21" x2="29" y2="21" stroke="#808080" stroke-width="1"/>
+      <line x1="12" y1="9" x2="12" y2="29" stroke="#808080" stroke-width="1"/>
+      <line x1="20" y1="9" x2="20" y2="29" stroke="#808080" stroke-width="1"/>
+    </svg>
+    <span class="icon-lbl">Lotus 1-2-3</span>
+  </div>
+
+  <div class="desktop-icon" id="d-installer" tabindex="0">
+    <svg class="icon-img" viewBox="0 0 32 32">
+      <rect x="4" y="2" width="24" height="28" rx="2" fill="#000080" stroke="#000" stroke-width="1.5"/>
+      <rect x="8" y="4" width="16" height="8" fill="#ffffff"/>
+      <rect x="18" y="6" width="4" height="5" fill="#808080"/>
+      <rect x="8" y="16" width="16" height="10" fill="#c0c0c0" stroke="#000" stroke-width="1"/>
+      <text x="11" y="24" font-family="monospace" font-size="9" font-weight="bold" fill="#000080">5</text>
+    </svg>
+    <span class="icon-lbl">Setup Wizard</span>
+  </div>
+
+  <div class="desktop-icon" id="d-manual" tabindex="0">
+    <svg class="icon-img" viewBox="0 0 32 32">
+      <path d="M6 3 L22 3 L27 8 L27 29 L6 29 Z" fill="#ffffff" stroke="#000" stroke-width="1.5"/>
+      <path d="M22 3 L22 8 L27 8 Z" fill="#c0c0c0" stroke="#000" stroke-width="1"/>
+      <line x1="9" y1="12" x2="23" y2="12" stroke="#000" stroke-width="1.5"/>
+      <line x1="9" y1="16" x2="23" y2="16" stroke="#000" stroke-width="1.5"/>
+      <line x1="9" y1="20" x2="23" y2="20" stroke="#000" stroke-width="1.5"/>
+      <line x1="9" y1="24" x2="18" y2="24" stroke="#000" stroke-width="1.5"/>
+    </svg>
+    <span class="icon-lbl">CINCO Manual</span>
+  </div>
+
+  <div class="desktop-icon" id="d-recycle" tabindex="0">
+    <svg class="icon-img" viewBox="0 0 32 32">
+      <path d="M7 8 L25 8 L23 28 L9 28 Z" fill="#c0c0c0" stroke="#000" stroke-width="1.5"/>
+      <line x1="5" y1="8" x2="27" y2="8" stroke="#000" stroke-width="2"/>
+      <rect x="12" y="5" width="8" height="3" fill="#808080" stroke="#000" stroke-width="1"/>
+      <line x1="12" y1="12" x2="12" y2="24" stroke="#808080" stroke-width="1.5"/>
       <line x1="16" y1="12" x2="16" y2="24" stroke="#808080" stroke-width="1.5"/>
-      <line x1="20" y1="12" x2="19" y2="24" stroke="#808080" stroke-width="1.5"/>
+      <line x1="20" y1="12" x2="20" y2="24" stroke="#808080" stroke-width="1.5"/>
     </svg>
-    <span>Recycle Bin</span>
+    <span class="icon-lbl">Recycle Bin</span>
   </div>
-
-  <a class="desktop-icon" href="../" title="Launch Web Browser Emulator">
-    <svg width="32" height="32" viewBox="0 0 32 32">
-      <rect x="3" y="3" width="26" height="20" rx="2" fill="#202020" stroke="#00ff66" stroke-width="1"/>
-      <rect x="6" y="6" width="20" height="14" fill="#001a00"/>
-      <text x="8" y="16" fill="#00ff66" font-family="monospace" font-size="8" font-weight="bold">CELERY</text>
-      <rect x="12" y="23" width="8" height="3" fill="#555"/>
-      <rect x="8" y="26" width="16" height="3" fill="#202020" stroke="#00ff66" stroke-width="1"/>
-    </svg>
-    <span>Paul's PC</span>
-  </a>
-
-  <a class="desktop-icon" href="../firmware/cinco.fwsc" download title="Download Firmware Package">
-    <svg width="32" height="32" viewBox="0 0 32 32">
-      <path d="M6 3 L22 3 L26 7 L26 29 L6 29 Z" fill="#000080" stroke="#000" stroke-width="1"/>
-      <rect x="9" y="4" width="12" height="8" fill="#ffffff"/>
-      <rect x="11" y="5" width="3" height="6" fill="#808080"/>
-      <rect x="9" y="16" width="14" height="10" rx="1" fill="#ffffff"/>
-      <text x="11" y="23" font-family="monospace" font-size="6" font-weight="bold" fill="#000080">FWSC</text>
-    </svg>
-    <span>cinco.fwsc</span>
-  </a>
-
-  <a class="desktop-icon" href="https://github.com/mrjoshida/CINCO/blob/main/docs/cinco/MANUAL.md" target="_blank" rel="noopener" title="Open Cinco Documentation">
-    <svg width="32" height="32" viewBox="0 0 32 32">
-      <rect x="5" y="4" width="22" height="24" rx="2" fill="#dcd8cf" stroke="#000" stroke-width="1"/>
-      <rect x="8" y="7" width="16" height="3" fill="#000080"/>
-      <line x1="8" y1="14" x2="24" y2="14" stroke="#000" stroke-width="1"/>
-      <line x1="8" y1="18" x2="24" y2="18" stroke="#000" stroke-width="1"/>
-      <line x1="8" y1="22" x2="18" y2="22" stroke="#000" stroke-width="1"/>
-    </svg>
-    <span>Manual</span>
-  </a>
 </div>
 
-<!-- Centered Windows 98 Setup Window -->
-<main class="win98-window" role="dialog" aria-labelledby="win98-title">
+<!-- Main Application Window: Cinco Identity Generator 2.5 Setup Wizard -->
+<main class="win-window bevel-raised" id="main-win" role="dialog" aria-labelledby="win98-title">
   <!-- Title Bar -->
-  <div class="win98-titlebar">
-    <div class="win98-title-left">
-      <svg class="win98-title-icon" viewBox="0 0 16 16">
+  <div class="win-titlebar" id="win-drag-bar">
+    <div class="win-titlebar-left">
+      <svg class="win-title-icon" viewBox="0 0 16 16">
         <rect x="1" y="1" width="14" height="14" rx="1" fill="#000080"/>
         <rect x="3" y="2" width="10" height="4" fill="#ffffff"/>
         <rect x="3" y="8" width="10" height="6" fill="#c0c0c0"/>
         <text x="4" y="13" font-family="monospace" font-size="6" font-weight="bold" fill="#000080">5</text>
       </svg>
-      <span class="win98-title-text" id="win98-title">Cinco Identity Generator 2.5 Setup Wizard</span>
+      <span id="win98-title">Cinco Identity Generator 2.5 Setup Wizard</span>
     </div>
-    <div class="win98-title-controls">
-      <button class="win98-title-btn" id="win-help" title="Setup Help">?</button>
-      <button class="win98-title-btn" id="win-close" title="Exit Setup">✕</button>
+    <div class="win-controls">
+      <button class="win-btn" id="btn-win-help" title="Setup Help">?</button>
+      <button class="win-btn" id="btn-win-min" title="Minimize">_</button>
+      <button class="win-btn" id="btn-win-close" title="Exit Setup">×</button>
     </div>
   </div>
 
@@ -738,7 +1088,7 @@ template = """<!doctype html>
       <div class="banner-corp">CINCO BUSINESS SYSTEMS, INC. &bull; CELERY MAN EDITION [v2.5]</div>
     </div>
     <div class="banner-right">
-      <button class="win98-btn" id="lang" title="Toggle Language (English / 日本語)" style="min-width: 54px; height: 21px; font-size: 10px; padding: 1px 6px;">English</button>
+      <button class="dialog-btn" id="lang" title="Toggle Language (English / 日本語)" style="min-width: 54px; height: 21px; font-size: 11px; padding: 1px 6px;">English</button>
       <svg class="banner-pc-art" viewBox="0 0 54 46" fill="none" aria-label="4d3d3d3 Retro Terminal">
         <!-- CRT Monitor -->
         <rect x="4" y="2" width="44" height="30" rx="2" fill="#d4d0c8" stroke="#808080" stroke-width="1.5"/>
@@ -805,7 +1155,7 @@ template = """<!doctype html>
     <p style="font-size: 11px; color: #222222; margin: 4px 0 2px;">
       <span data-t="direct"></span>
     </p>
-    <p style="font-size: 10.5px; color: #444444; margin: 0 0 6px;">
+    <p style="font-size: 11px; color: #444444; margin: 0 0 6px;">
       <span data-t="brick"></span>
       <a href="https://github.com/kurogedelic/FM-1-transporter" target="_blank" rel="noopener" style="color: var(--win-blue);">FM-1-transporter</a>
     </p>
@@ -818,9 +1168,9 @@ template = """<!doctype html>
         <p style="margin: 4px 0;"><a href="https://www.m-vave.com/download" target="_blank" rel="noopener" style="color: var(--win-blue); font-weight: bold;">[↗ M-VAVE Official Firmware Downloads]</a></p>
         <p style="margin: 6px 0;"><label style="font-size: 11px; font-weight: bold; color: #000000;"><span data-t="stockFile">Official FM-1.fwsc:</span><br>
            <input id="stock-file" type="file" accept=".fwsc" style="font-size: 11px; margin-top: 4px;"></label></p>
-        <p style="margin: 6px 0;"><button id="stock-go" class="win98-btn" disabled data-t="stockGo">Back up and return to official V15</button></p>
-        <p style="font-size: 10.5px; color: #444444; margin: 4px 0;" data-t="stockBackup"></p>
-        <p style="font-size: 10.5px; color: #444444; margin: 4px 0;">
+        <p style="margin: 6px 0;"><button id="stock-go" class="dialog-btn" disabled data-t="stockGo">Back up and return to official V15</button></p>
+        <p style="font-size: 11px; color: #444444; margin: 4px 0;" data-t="stockBackup"></p>
+        <p style="font-size: 11px; color: #444444; margin: 4px 0;">
           <label><input id="stock-recovery" type="checkbox"> <span data-t="stockRecovery">Resume an interrupted update: I already saved a complete backup to this computer</span></label>
         </p>
       </div>
@@ -828,102 +1178,435 @@ template = """<!doctype html>
 
     <!-- Bottom Command Button Bar -->
     <div class="win98-command-bar">
-      <a href="../" class="win98-btn" id="emu-link" style="margin-right: auto;">
-        ⚡ <span data-t="emuLink">Launch Browser Emulator</span>
+      <a href="../" class="dialog-btn" id="emu-link" style="margin-right: auto; text-decoration: none;">
+        ⚡ <span data-t="emuLink">Cinco Synth Workstation</span>
       </a>
-      <button class="win98-btn" disabled>&lt; Back</button>
-      <button id="go" class="win98-btn win98-btn-default" disabled>
+      <button class="dialog-btn" disabled>&lt; Back</button>
+      <button id="go" class="dialog-btn win98-btn-default" disabled>
         <span data-t="install">Install &gt;</span>
       </button>
-      <button class="win98-btn" id="cancel-btn">Cancel</button>
-    </div>
-
-    <!-- Window Status Bar (Sunken 3D Cells) -->
-    <div class="win98-statusbar">
-      <div class="statusbar-cell" style="flex: 2;">
-        <span data-t="license"></span>
-        <a href="https://github.com/mrjoshida/CINCO" target="_blank" rel="noopener" style="color: var(--win-blue);">github.com/mrjoshida/CINCO</a>
-      </div>
-      <div class="statusbar-cell" style="flex: 1; text-align: center;">Target: FM-1</div>
-      <div class="statusbar-cell" style="flex: 1; text-align: center;">WebMIDI SysEx</div>
+      <button class="dialog-btn" id="cancel-btn">Cancel</button>
     </div>
   </div>
+
+  <!-- Sunken Status Bar -->
+  <footer class="win-statusbar">
+    <div class="status-panel main-panel">
+      <span data-t="license"></span>
+      <a href="https://github.com/mrjoshida/CINCO" target="_blank" rel="noopener" style="color: var(--win-blue);">github.com/mrjoshida/CINCO</a>
+    </div>
+    <div class="status-panel">Target: FM-1</div>
+    <div class="status-panel">WebMIDI SysEx</div>
+  </footer>
 </main>
 
 <!-- External Links Footer -->
 <footer class="footer-links">
-  <a href="../">⚡ Web Emulator</a>
-  <a href="https://github.com/mrjoshida/CINCO">GitHub Repository</a>
-  <a href="https://github.com/mrjoshida/CINCO/blob/main/docs/cinco/MANUAL.md">Cinco Manual</a>
+  <a href="../">⚡ Cinco Synth Workstation</a>
+  <a href="https://github.com/mrjoshida/CINCO" target="_blank" rel="noopener">GitHub Repository</a>
+  <a href="https://github.com/mrjoshida/CINCO/blob/main/docs/cinco/MANUAL.md" target="_blank" rel="noopener">Cinco Manual</a>
   <a href="../firmware/cinco.fwsc" download>Download Firmware (cinco.fwsc)</a>
 </footer>
 
-<!-- Windows 98 Start Menu Popup -->
-<div class="win98-start-menu" id="start-menu" role="menu">
-  <div class="start-menu-sidebar">Windows 98</div>
-  <div class="start-menu-items">
-    <a class="start-menu-item" href="../">
-      <span>⚡</span>
-      <span>Web Emulator</span>
-    </a>
-    <a class="start-menu-item" href="../firmware/cinco.fwsc" download>
-      <span>💾</span>
-      <span>Download cinco.fwsc</span>
-    </a>
-    <a class="start-menu-item" href="https://github.com/mrjoshida/CINCO/blob/main/docs/cinco/MANUAL.md" target="_blank" rel="noopener">
-      <span>📖</span>
-      <span>Cinco Manual</span>
-    </a>
-    <a class="start-menu-item" href="https://github.com/mrjoshida/CINCO" target="_blank" rel="noopener">
-      <span>🐙</span>
-      <span>GitHub Repository</span>
-    </a>
-    <div class="start-menu-divider"></div>
-    <div class="start-menu-item" onclick="alert('Cinco Identity Generator 2.5™\\nCinco Business Systems, Inc.\\nCelery Man Edition [v2.5]\\nTarget: M-VAVE FM-1 (AC7916A)\\nLicensed under GPL-3.0')">
-      <span>ℹ️</span>
-      <span>About Cinco 2.5...</span>
+<!-- Windows 98 Application: Recycle Bin Window -->
+<div class="win-window bevel-raised app-window" id="win-recycle">
+  <div class="win-titlebar" id="drag-recycle">
+    <div class="win-titlebar-left">
+      <svg class="win-title-icon" viewBox="0 0 16 16"><path d="M3 4 L13 4 L12 14 L4 14 Z" fill="#c0c0c0" stroke="#000"/><line x1="2" y1="4" x2="14" y2="4" stroke="#000"/></svg>
+      <span>Recycle Bin</span>
+    </div>
+    <div class="win-controls">
+      <button class="win-btn win-close-btn" data-target="win-recycle">×</button>
+    </div>
+  </div>
+  <div class="explorer-toolbar">
+    <button class="dialog-btn" id="btn-empty-recycle">Empty Recycle Bin</button>
+  </div>
+  <div class="explorer-table">
+    <table class="file-table" id="recycle-table">
+      <thead>
+        <tr><th>Name</th><th>Original Location</th><th>Date Deleted</th><th>Type</th><th>Size</th></tr>
+      </thead>
+      <tbody id="recycle-tbody">
+        <tr tabindex="0"><td>tayne_beta_leaked_v1.raw</td><td>C:\CINCO\ASSETS</td><td>10/24/98 4:18 PM</td><td>RAW File</td><td>4,210 KB</td></tr>
+        <tr tabindex="0"><td>paul_sandwich_order.txt</td><td>C:\CINCO\EXECUTIVE</td><td>10/25/98 12:04 PM</td><td>Text Document</td><td>1 KB</td></tr>
+        <tr tabindex="0"><td>corrupted_cluster_4d3d.dat</td><td>C:\CINCO\SYSTEM</td><td>10/26/98 9:30 AM</td><td>DAT File</td><td>64 KB</td></tr>
+        <tr tabindex="0"><td>oyster_receipt_unpaid.doc</td><td>C:\CINCO\RECEIPTS</td><td>10/27/98 2:15 PM</td><td>WordPad Document</td><td>12 KB</td></tr>
+        <tr tabindex="0"><td>celery_unapproved_moves.avi</td><td>C:\CINCO\VAULT</td><td>10/28/98 11:42 AM</td><td>Video Clip</td><td>8,900 KB</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <footer class="win-statusbar">
+    <div class="status-panel" id="recycle-status-count">5 object(s)</div>
+    <div class="status-panel" id="recycle-status-size">13.1 MB</div>
+  </footer>
+</div>
+
+<!-- Modal Dialog: Confirm Empty Recycle Bin -->
+<div class="modal-overlay" id="modal-confirm-recycle">
+  <div class="win-dialog bevel-raised" style="max-width:380px;">
+    <div class="win-titlebar">
+      <div class="win-titlebar-left"><span>Confirm File Delete</span></div>
+      <div class="win-controls"><button class="win-btn win-close-btn" data-target="modal-confirm-recycle">×</button></div>
+    </div>
+    <div class="dialog-body" style="display:flex;gap:12px;align-items:center;">
+      <svg viewBox="0 0 32 32" style="width:32px;height:32px;flex-shrink:0;"><circle cx="16" cy="16" r="14" fill="#ffcc00" stroke="#000"/><text x="13" y="24" font-weight="bold" font-size="20">?</text></svg>
+      <div>Are you sure you want to permanently incinerate these 5 Cinco memory assets?</div>
+    </div>
+    <div style="display:flex;justify-content:flex-end;gap:8px;padding:8px 12px;background:var(--win-gray);border-top:1px solid var(--win-dark);">
+      <button class="dialog-btn" id="btn-confirm-recycle-yes">Yes</button>
+      <button class="dialog-btn" id="btn-confirm-recycle-no">No</button>
     </div>
   </div>
 </div>
 
-<!-- Windows 98 Fixed Bottom Taskbar -->
-<div class="win98-taskbar">
-  <button class="win98-start-btn" id="start-btn" aria-haspopup="true" aria-expanded="false">
-    <svg width="16" height="16" viewBox="0 0 16 16" style="vertical-align: middle;">
-      <rect x="2" y="2" width="5" height="5" fill="#f25022"/>
-      <rect x="8" y="2" width="5" height="5" fill="#7fba00"/>
-      <rect x="2" y="8" width="5" height="5" fill="#00a4ef"/>
-      <rect x="8" y="8" width="5" height="5" fill="#ffb900"/>
-    </svg>
-    <span>Start</span>
-  </button>
-  <div class="taskbar-divider"></div>
-  <div class="taskbar-app">
-    <svg width="14" height="14" viewBox="0 0 16 16" style="flex-shrink: 0;">
-      <rect x="1" y="1" width="14" height="14" rx="1" fill="#000080"/>
-      <rect x="3" y="2" width="10" height="4" fill="#ffffff"/>
-      <rect x="3" y="8" width="10" height="6" fill="#c0c0c0"/>
-      <text x="4" y="13" font-family="monospace" font-size="6" font-weight="bold" fill="#000080">5</text>
-    </svg>
-    <span>💽 Cinco 2.5 Setup</span>
+<!-- Windows 98 Application: Tayne Studio 98 -->
+<div class="win-window bevel-raised app-window" id="win-tayne">
+  <div class="win-titlebar" id="drag-tayne">
+    <div class="win-titlebar-left">
+      <svg class="win-title-icon" viewBox="0 0 16 16"><circle cx="8" cy="8" r="6" fill="#000080"/></svg>
+      <span>Tayne Studio 98 (Beta Edition)</span>
+    </div>
+    <div class="win-controls">
+      <button class="win-btn win-close-btn" data-target="win-tayne">×</button>
+    </div>
   </div>
-  <div class="taskbar-tray">
-    <!-- Volume Icon -->
-    <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="#000000" stroke-width="1.2" title="Master Audio">
-      <path d="M2 5h3l4-4v14l-4-4H2V5z"/>
-      <path d="M12 5a4.5 4.5 0 0 1 0 6"/>
-      <path d="M14 3a7.5 7.5 0 0 1 0 10"/>
-    </svg>
-    <!-- MIDI Port Icon -->
-    <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="#000000" stroke-width="1.2" title="WebMIDI SysEx Connected">
-      <circle cx="8" cy="8" r="6"/>
-      <circle cx="5" cy="8" r="1" fill="#000000"/>
-      <circle cx="8" cy="5" r="1" fill="#000000"/>
-      <circle cx="11" cy="8" r="1" fill="#000000"/>
-      <circle cx="6.5" cy="11" r="1" fill="#000000"/>
-      <circle cx="9.5" cy="11" r="1" fill="#000000"/>
-    </svg>
-    <span id="tray-clock">12:00 PM</span>
+  <div class="dialog-body">
+    <div class="tayne-card" id="tayne-status-card">Dancer Sequence Loaded</div>
+    <p style="margin:4px 0 10px;">Select an automated routine or macro trigger for the active synthesizer voice:</p>
+    <div class="tayne-buttons">
+      <button class="dialog-btn" id="btn-tayne-load" style="grid-column: span 2;">Load Tayne into Terminal</button>
+      <button class="dialog-btn" id="btn-tayne-wobble">Hat Wobble</button>
+      <button class="dialog-btn" id="btn-tayne-flarh">Flarhgunnstow</button>
+      <button class="dialog-btn" id="btn-tayne-nude" style="color:#aa0000;">Nude Tayne (NSFW)</button>
+      <button class="dialog-btn" id="btn-tayne-receipt">Print Oyster Receipt</button>
+    </div>
+  </div>
+</div>
+
+<!-- Windows 98 Application: Cinco Defrag -->
+<div class="win-window bevel-raised app-window" id="win-defrag">
+  <div class="win-titlebar" id="drag-defrag">
+    <div class="win-titlebar-left">
+      <svg class="win-title-icon" viewBox="0 0 16 16"><rect width="16" height="16" fill="#c0c0c0"/><rect x="2" y="2" width="6" height="6" fill="#000080"/></svg>
+      <span>Defragmenting Drive C:</span>
+    </div>
+    <div class="win-controls">
+      <button class="win-btn win-close-btn" data-target="win-defrag">×</button>
+    </div>
+  </div>
+  <div class="dialog-body">
+    <div style="font-weight:bold;margin-bottom:4px;">Drive C: (Cinco 4D3D3D3 Partition)</div>
+    <div id="defrag-cluster-grid" class="defrag-grid"></div>
+    <div style="display:flex;justify-content:space-between;margin:4px 0;font-size:11px;">
+      <span>■ Allocated</span><span>■ Free</span><span>■ 4d3d3d3 Fragmented</span><span>■ Unmovable</span>
+    </div>
+    <div style="margin:6px 0;display:flex;justify-content:space-between;align-items:center;">
+      <span id="defrag-progress-text">42% Complete</span>
+      <div style="display:flex;gap:4px;">
+        <button class="dialog-btn" id="btn-defrag-pause">Pause</button>
+        <button class="dialog-btn" id="btn-defrag-stop">Stop</button>
+        <button class="dialog-btn" id="btn-defrag-details">Show Details</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Windows 98 Application: Lotus 1-2-3 (Boss Mode) -->
+<div class="win-window bevel-raised app-window" id="win-lotus">
+  <div class="win-titlebar" id="drag-lotus">
+    <div class="win-titlebar-left">
+      <svg class="win-title-icon" viewBox="0 0 16 16"><rect width="16" height="16" fill="#008000"/></svg>
+      <span>Lotus 1-2-3 (Boss Mode) — [CORPORATE_BUDGET.WK1]</span>
+    </div>
+    <div class="win-controls">
+      <button class="win-btn win-close-btn" data-target="win-lotus">×</button>
+    </div>
+  </div>
+  <div style="padding:6px;overflow-x:auto;">
+    <div style="font-weight:bold;color:#000080;margin-bottom:6px;">Q3 Cinco Business Systems Enterprise Forecast</div>
+    <table class="lotus-table">
+      <thead>
+        <tr><th>Account / Division</th><th>Budget (USD)</th><th>Status</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>Celery Stalk Procurement</td><td>$4,200,000</td><td>APPROVED</td></tr>
+        <tr><td>Tayne Beta Research & Development</td><td>$18,500,000</td><td>CONFIDENTIAL</td></tr>
+        <tr><td>Oyster Smiling High-Resolution Printing</td><td>$320,000</td><td>PENDING</td></tr>
+        <tr><td>4d3d3d3 Macro Overclocking</td><td>$9,800,000</td><td>ENGAGED</td></tr>
+        <tr style="font-weight:bold;background:#e0e0e0;"><td>TOTAL CORPORATE ALLOCATION</td><td>$32,820,000</td><td>SIGNED (PAUL)</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <footer class="win-statusbar">
+    <div class="status-panel">READY | A1 | CALC</div>
+  </footer>
+</div>
+
+<!-- Windows 98 Application: CINCO Manual Window -->
+<div class="win-window bevel-raised app-window" id="win-manual">
+  <div class="win-titlebar" id="drag-manual">
+    <div class="win-titlebar-left">
+      <svg class="win-title-icon" viewBox="0 0 16 16"><path d="M3 2 L11 2 L13 4 L13 14 L3 14 Z" fill="#fff" stroke="#000"/></svg>
+      <span>Cinco Business Systems Help — User Reference Guide</span>
+    </div>
+    <div class="win-controls">
+      <button class="win-btn win-close-btn" data-target="win-manual">×</button>
+    </div>
+  </div>
+  <div class="manual-split">
+    <div class="manual-toc">
+      <div class="manual-toc-item selected" id="toc-welcome">1. Overview</div>
+      <div class="manual-toc-item" id="toc-controls">2. Controls</div>
+      <div class="manual-toc-item" id="toc-identities">3. Identities</div>
+      <div class="manual-toc-item" id="toc-kinetics">4. Kinetics</div>
+      <div class="manual-toc-item" id="toc-boss">5. Boss Key</div>
+      <div class="manual-toc-item" id="toc-osha">6. OSHA Guidelines</div>
+    </div>
+    <div class="manual-view" id="manual-content-view">
+      <h3>Welcome to Cinco Identity Generator 2.5™</h3>
+      <p>This workstation runs custom Cinco OS 2.5 firmware for the M-VAVE FM-1 Synthesizer Terminal, featuring 4d3d3d3 window cascading, rotoscoped SCUMM dancers, and LPC speech synthesis.</p>
+    </div>
+  </div>
+  <footer class="win-statusbar">
+    <div class="status-panel" id="manual-status-panel">Cinco Reference Library v2.5</div>
+  </footer>
+</div>
+
+<!-- Modal: Exit Setup Confirmation -->
+<div class="modal-overlay" id="modal-exit-setup">
+  <div class="win-dialog bevel-raised" style="max-width:380px;">
+    <div class="win-titlebar">
+      <div class="win-titlebar-left"><span>Exit Setup</span></div>
+      <div class="win-controls"><button class="win-btn win-close-btn" data-target="modal-exit-setup">×</button></div>
+    </div>
+    <div class="dialog-body" style="display:flex;gap:12px;align-items:center;">
+      <svg viewBox="0 0 32 32" style="width:32px;height:32px;flex-shrink:0;">
+        <circle cx="16" cy="16" r="14" fill="#ffcc00" stroke="#000"/>
+        <text x="13" y="24" font-weight="bold" font-size="20">?</text>
+      </svg>
+      <div>Are you sure you want to cancel Cinco Identity Generator 2.5 Setup and return to the Cinco Workstation?</div>
+    </div>
+    <div style="display:flex;justify-content:flex-end;gap:8px;padding:8px 12px;background:var(--win-gray);border-top:1px solid var(--win-dark);">
+      <button class="dialog-btn" id="btn-exit-setup-yes">Yes</button>
+      <button class="dialog-btn" id="btn-exit-setup-no">No</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal: Confirm Factory Stock Restore -->
+<div class="modal-overlay" id="modal-confirm-stock">
+  <div class="win-dialog bevel-raised" style="max-width:400px;">
+    <div class="win-titlebar">
+      <div class="win-titlebar-left"><span>Confirm Factory Restore</span></div>
+      <div class="win-controls"><button class="win-btn" id="btn-confirm-stock-x">×</button></div>
+    </div>
+    <div class="dialog-body" style="display:flex;gap:12px;align-items:center;">
+      <svg viewBox="0 0 32 32" style="width:32px;height:32px;flex-shrink:0;">
+        <path d="M16 2 L30 28 L2 28 Z" fill="#ffcc00" stroke="#000" stroke-width="1.5"/>
+        <text x="14" y="24" font-weight="bold" font-size="18">!</text>
+      </svg>
+      <div id="confirm-stock-msg">Has the complete backup file been saved to this computer? Continue to return to official V15. Official V15 cannot open Cinco projects.</div>
+    </div>
+    <div style="display:flex;justify-content:flex-end;gap:8px;padding:8px 12px;background:var(--win-gray);border-top:1px solid var(--win-dark);">
+      <button class="dialog-btn" id="btn-confirm-stock-yes">Yes</button>
+      <button class="dialog-btn" id="btn-confirm-stock-no">No</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal: Shut Down Windows -->
+<div class="modal-overlay" id="modal-shutdown">
+  <div class="win-dialog bevel-raised" style="max-width:350px;">
+    <div class="win-titlebar">
+      <div class="win-titlebar-left"><span>Shut Down Windows</span></div>
+      <div class="win-controls"><button class="win-btn win-close-btn" data-target="modal-shutdown">×</button></div>
+    </div>
+    <div class="dialog-body">
+      <div style="display:flex;gap:12px;align-items:flex-start;">
+        <svg viewBox="0 0 32 32" style="width:32px;height:32px;flex-shrink:0;"><rect width="32" height="32" fill="#000080"/><circle cx="16" cy="16" r="10" fill="#c0c0c0"/></svg>
+        <div>
+          <div style="margin-bottom:8px;">What do you want the computer to do?</div>
+          <div style="display:flex;flex-direction:column;gap:6px;">
+            <label><input type="radio" name="shutdown-opt" id="shutdown-opt-off" checked> Shut down the computer</label>
+            <label><input type="radio" name="shutdown-opt" id="shutdown-opt-restart"> Restart the computer</label>
+            <label><input type="radio" name="shutdown-opt" id="shutdown-opt-dos"> Restart the computer in MS-DOS mode</label>
+          </div>
+        </div>
+      </div>
+      <div style="display:flex;justify-content:flex-end;gap:6px;margin-top:16px;">
+        <button class="dialog-btn" id="btn-shutdown-ok">OK</button>
+        <button class="dialog-btn" id="btn-shutdown-cancel">Cancel</button>
+        <button class="dialog-btn" id="btn-shutdown-help">Help</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Screen: It's now safe to turn off your computer -->
+<div id="screen-shutdown">
+  <div>It's now safe to turn off<br>your computer.</div>
+  <button class="dialog-btn" id="btn-turn-on" style="font-size:14px;padding:6px 16px;">Turn On</button>
+</div>
+
+<!-- Screen: MS-DOS 7.10 Mode -->
+<div id="screen-dos">
+  <div>Cinco Business Systems(R) MS-DOS 7.10</div>
+  <div>(C)Copyright Cinco Business Systems Corp 1981-1998.</div>
+  <br>
+  <div class="dos-input-line">
+    <span>C:\CINCO&gt;</span>
+    <input type="text" class="dos-input" id="dos-input" autofocus>
+  </div>
+  <div style="margin-top:auto;">
+    <button class="dialog-btn" id="btn-dos-exit" style="background:#333;color:#fff;border-color:#666;">Exit to Windows 98</button>
+  </div>
+</div>
+
+<!-- Modal: Coffee Dialog -->
+<div class="modal-overlay" id="modal-coffee">
+  <div class="win-dialog bevel-raised" style="max-width:380px;">
+    <div class="win-titlebar">
+      <div class="win-titlebar-left"><span>Cinco Executive Coffee Service</span></div>
+      <div class="win-controls"><button class="win-btn win-close-btn" data-target="modal-coffee">×</button></div>
+    </div>
+    <div class="dialog-body">
+      <p>Managing Director Paul has taken a 15-minute executive espresso recess. OSHA vigilance level restored to 100%.</p>
+      <div style="display:flex;justify-content:flex-end;margin-top:12px;">
+        <button class="dialog-btn" id="btn-coffee-ok">OK</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal: System Properties -->
+<div class="modal-overlay" id="sysprop-modal">
+  <div class="win-dialog bevel-raised" style="max-width:380px;">
+    <div class="win-titlebar">
+      <div class="win-titlebar-left"><span>System Properties</span></div>
+      <div class="win-controls"><button class="win-btn win-close-btn" data-target="sysprop-modal">×</button></div>
+    </div>
+    <div class="dialog-body">
+      <p><b>Cinco Business Systems OS 2.5</b><br>Celery Man Workstation Edition</p>
+      <p>Computer:<br>M-VAVE FM-1 Synthesizer Terminal<br>WebMIDI SysEx Flasher Engine<br>Registered to: Paul (Managing Director)</p>
+      <div style="display:flex;justify-content:flex-end;margin-top:12px;">
+        <button class="dialog-btn" id="sysprop-ok">OK</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal: About Dialog -->
+<div class="modal-overlay" id="about-modal">
+  <div class="win-dialog bevel-raised" style="max-width:360px;">
+    <div class="win-titlebar">
+      <div class="win-titlebar-left"><span>About Cinco 2.5</span></div>
+      <div class="win-controls"><button class="win-btn win-close-btn" data-target="about-modal">×</button></div>
+    </div>
+    <div class="dialog-body">
+      <p><b>CINCO OS 2.5 (Celery Man Edition)</b></p>
+      <p>Copyright © 2026 Cinco Business Systems, Inc.<br>Portions derived from Felucca by Leo Kuroshita (@kurogedelic), Hügelton Instruments.</p>
+      <div style="display:flex;justify-content:flex-end;margin-top:12px;">
+        <button class="dialog-btn" id="modal-ok">OK</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Systray Volume Popup -->
+<div class="win-window bevel-raised volume-popup" id="volume-popup">
+  <div style="font-size:11px;font-weight:bold;">Volume</div>
+  <input type="range" class="vol-slider" id="master-vol-slider" min="0" max="1023" value="700">
+  <button class="win-btn" id="vol-popup-close" style="width:100%;height:18px;">Close</button>
+</div>
+
+<!-- Bottom Windows 98 Taskbar -->
+<footer class="win-taskbar">
+  <div class="taskbar-left">
+    <button class="start-btn" id="start-btn" aria-haspopup="true" aria-expanded="false">
+      <svg class="start-logo" viewBox="0 0 16 16">
+        <rect width="16" height="16" fill="#000080"/>
+        <rect x="3" y="2" width="10" height="4" fill="#fff"/>
+        <rect x="3" y="8" width="10" height="6" fill="#c0c0c0"/>
+        <text x="4" y="13" font-family="monospace" font-size="6" font-weight="bold" fill="#000080">5</text>
+      </svg>
+      <span>Start</span>
+    </button>
+    <div class="taskbar-divider"></div>
+    <div class="task-pill" id="task-pill-main">
+      <svg viewBox="0 0 16 16" style="width:12px;height:12px;"><rect width="16" height="16" fill="#000080"/></svg>
+      <span>Cinco Identity Generator 2.5 Setup Wizard</span>
+    </div>
+    <div class="task-pill inactive" id="task-pill-tayne" style="display:none;">
+      <span>Tayne Studio 98</span>
+    </div>
+    <div class="task-pill inactive" id="task-pill-defrag" style="display:none;">
+      <span>Cinco Defrag</span>
+    </div>
+    <div class="task-pill inactive" id="task-pill-lotus" style="display:none;">
+      <span>Lotus 1-2-3</span>
+    </div>
+    <div class="task-pill inactive" id="task-pill-manual" style="display:none;">
+      <span>CINCO Manual</span>
+    </div>
+    <div class="task-pill inactive" id="task-pill-recycle" style="display:none;">
+      <span>Recycle Bin</span>
+    </div>
+  </div>
+
+  <div class="taskbar-right">
+    <div class="systray">
+      <svg class="systray-icon" id="systray-vol" viewBox="0 0 16 16" title="Volume Control">
+        <path d="M2 5 L5 5 L9 2 L9 14 L5 11 L2 11 Z" fill="#000000"/>
+        <path d="M11 5 C12 7 12 9 11 11" stroke="#000000" fill="none" stroke-width="1.5"/>
+      </svg>
+      <span id="systray-clock">12:00 PM</span>
+    </div>
+  </div>
+</footer>
+
+<!-- Windows 98 Start Menu Popup -->
+<div class="start-menu" id="start-menu" role="menu">
+  <div class="start-sidebar">CINCO OS 2.5</div>
+  <div class="start-items">
+    <a class="start-item" id="sm-app" href="../">
+      <svg class="start-item-icon" viewBox="0 0 16 16"><rect width="16" height="16" fill="#000080"/></svg>
+      <span>Cinco Synth</span>
+    </a>
+    <div class="start-item" id="sm-setup">
+      <svg class="start-item-icon" viewBox="0 0 16 16"><rect width="16" height="16" fill="#000080"/></svg>
+      <span>Setup Wizard</span>
+    </div>
+    <div class="start-item" id="sm-tayne">
+      <svg class="start-item-icon" viewBox="0 0 16 16"><circle cx="8" cy="8" r="6" fill="#808080"/></svg>
+      <span>Tayne Studio 98</span>
+    </div>
+    <div class="start-item" id="sm-defrag">
+      <svg class="start-item-icon" viewBox="0 0 16 16"><rect width="16" height="16" fill="#008000"/></svg>
+      <span>Cinco Defrag</span>
+    </div>
+    <div class="start-item" id="sm-boss">
+      <svg class="start-item-icon" viewBox="0 0 16 16"><rect width="16" height="16" fill="#008000"/></svg>
+      <span>Lotus 1-2-3</span>
+    </div>
+    <div class="start-item" id="sm-manual">
+      <svg class="start-item-icon" viewBox="0 0 16 16"><path d="M3 2 L13 2 L13 14 L3 14 Z" fill="#fff" stroke="#000"/></svg>
+      <span>CINCO Manual</span>
+    </div>
+    <div class="start-divider"></div>
+    <div class="start-item" id="sm-sysprop">
+      <svg class="start-item-icon" viewBox="0 0 16 16"><rect width="16" height="16" fill="#808080"/></svg>
+      <span>Control Panel</span>
+    </div>
+    <div class="start-item" id="sm-about">
+      <svg class="start-item-icon" viewBox="0 0 16 16"><circle cx="8" cy="8" r="6" fill="#000080"/></svg>
+      <span>About Cinco 2.5</span>
+    </div>
+    <div class="start-divider"></div>
+    <div class="start-item" id="sm-shutdown">
+      <svg class="start-item-icon" viewBox="0 0 16 16"><rect width="16" height="16" fill="#ff0000"/></svg>
+      <span>Shut Down...</span>
+    </div>
   </div>
 </div>
 
@@ -937,7 +1620,7 @@ const TEXT = {
     intro: "Connect your M-VAVE FM-1 via USB-C in Chrome or Edge. Installs Cinco Identity Generator 2.5 (Celery Man Edition) directly over WebMIDI SysEx.",
     warn: "Do not unplug the USB-C cable while writing.",
     install: "Install >",
-    emuLink: "Launch Browser Emulator",
+    emuLink: "Cinco Synth Workstation",
     other: "日本語",
     direct: "Connect the USB cable directly to your computer. No probe or Transporter hardware is required.",
     brick: "If an install fails and the FM-1 no longer starts, recovery requires a Transporter or hardware UBoot:",
@@ -979,7 +1662,7 @@ const TEXT = {
     intro: "FM-1 を USB-C で接続してください（Chrome または Edge 対応）。Cinco Identity Generator 2.5 (Celery Man Edition) を WebMIDI SysEx 経由で直接インストールします。",
     warn: "書き込み中は USB ケーブルを抜かないでください。",
     install: "インストール >",
-    emuLink: "Webエミュレータを起動",
+    emuLink: "Cinco Synth ワークステーション",
     other: "English",
     direct: "USB ケーブルはパソコンに直接つないでください。Transporter 等の追加機材は不要です。",
     brick: "万一インストールに失敗して起動しなくなった場合の復旧には Transporter が必要です:",
@@ -1039,52 +1722,366 @@ $("lang").addEventListener("click", () => {
 });
 applyLang();
 
-// Windows 98 UI Controls
-$("cancel-btn").addEventListener("click", () => {
-  if (confirm("Cancel Cinco Identity Generator 2.5 Setup and return to Web Emulator?")) {
-    window.location.href = "../";
-  }
-});
-
-$("win-close").addEventListener("click", () => {
-  if (confirm("Exit Cinco Identity Generator 2.5 Setup?")) {
-    window.location.href = "../";
-  }
-});
-
-$("win-help").addEventListener("click", () => {
-  alert("Cinco Identity Generator 2.5 Setup Wizard\\n\\n1. Connect your M-VAVE FM-1 via USB-C to this computer.\\n2. Click 'Install >' to flash cinco.fwsc over WebMIDI SysEx.\\n3. Do not disconnect the cable during flashing.\\n\\nEnjoy CINCO OS 2.5!");
-});
-
-// Start Menu Toggle
-$("start-btn").addEventListener("click", (e) => {
-  e.stopPropagation();
-  const isOpen = $("start-menu").classList.toggle("open");
-  $("start-btn").classList.toggle("pressed", isOpen);
-  $("start-btn").setAttribute("aria-expanded", isOpen ? "true" : "false");
-});
-
-document.addEventListener("click", (e) => {
-  if (!$("start-menu").contains(e.target) && e.target !== $("start-btn")) {
-    $("start-menu").classList.remove("open");
-    $("start-btn").classList.remove("pressed");
-    $("start-btn").setAttribute("aria-expanded", "false");
-  }
-});
-
-// Live Taskbar Clock
+// ------------------------------------------------------------------ Windows 98 UI System
 function updateClock() {
-  const d = new Date();
-  let h = d.getHours();
-  const m = String(d.getMinutes()).padStart(2, "0");
+  const now = new Date();
+  let h = now.getHours();
+  const m = String(now.getMinutes()).padStart(2, "0");
   const ampm = h >= 12 ? "PM" : "AM";
   h = h % 12 || 12;
-  const el = $("tray-clock");
-  if (el) el.textContent = `${h}:${m} ${ampm}`;
+  const clockEl = $("systray-clock");
+  if (clockEl) clockEl.textContent = `${h}:${m} ${ampm}`;
 }
 setInterval(updateClock, 1000);
 updateClock();
 
+// Start menu toggle
+const startBtn = $("start-btn");
+const startMenu = $("start-menu");
+if (startBtn && startMenu) {
+  startBtn.addEventListener("click", (e) => {
+    e.stopPropagation();
+    const isOpen = startMenu.classList.toggle("open");
+    startBtn.classList.toggle("pressed", isOpen);
+    startBtn.setAttribute("aria-expanded", isOpen ? "true" : "false");
+  });
+}
+
+document.addEventListener("click", () => {
+  if (startMenu) startMenu.classList.remove("open");
+  if (startBtn) {
+    startBtn.classList.remove("pressed");
+    startBtn.setAttribute("aria-expanded", "false");
+  }
+});
+
+// Window Management
+let topZ = 30;
+function focusWindow(win, pillId) {
+  if (!win) return;
+  topZ++;
+  win.style.zIndex = topZ;
+  win.classList.remove("inactive");
+  if (pillId) {
+    document.querySelectorAll(".task-pill").forEach((p) => p.classList.add("inactive"));
+    const p = $(pillId);
+    if (p) {
+      p.style.display = "flex";
+      p.classList.remove("inactive");
+    }
+  }
+}
+
+function openWindow(winId, pillId) {
+  const win = $(winId);
+  if (!win) return;
+  win.style.display = "flex";
+  focusWindow(win, pillId);
+}
+
+function closeWindow(winId, pillId) {
+  const win = $(winId);
+  if (!win) return;
+  win.style.display = "none";
+  if (pillId) {
+    const pill = $(pillId);
+    if (pill) pill.style.display = "none";
+  }
+}
+
+// Generic close buttons
+document.querySelectorAll(".win-close-btn").forEach((btn) => {
+  btn.addEventListener("click", (e) => {
+    e.stopPropagation();
+    const target = btn.dataset.target;
+    if (target) {
+      const elTarget = $(target);
+      if (elTarget) {
+        if (elTarget.classList.contains("modal-overlay")) elTarget.classList.remove("open");
+        else elTarget.style.display = "none";
+      }
+      const pill = $("task-pill-" + target.replace("win-", ""));
+      if (pill) pill.style.display = "none";
+    }
+  });
+});
+
+// Window Dragging
+function makeDraggable(win, handle) {
+  if (!win || !handle) return;
+  let ox = 0, oy = 0, dragging = false;
+  handle.addEventListener("pointerdown", (e) => {
+    if (e.target.closest("button")) return;
+    dragging = true;
+    focusWindow(win);
+    ox = e.clientX - win.offsetLeft;
+    oy = e.clientY - win.offsetTop;
+    handle.setPointerCapture(e.pointerId);
+  });
+  handle.addEventListener("pointermove", (e) => {
+    if (!dragging) return;
+    win.style.position = "absolute";
+    win.style.left = Math.max(0, e.clientX - ox) + "px";
+    win.style.top = Math.max(0, e.clientY - oy) + "px";
+  });
+  const stop = () => { dragging = false; };
+  handle.addEventListener("pointerup", stop);
+  handle.addEventListener("pointercancel", stop);
+}
+
+makeDraggable($("main-win"), $("win-drag-bar"));
+makeDraggable($("win-recycle"), $("drag-recycle"));
+makeDraggable($("win-tayne"), $("drag-tayne"));
+makeDraggable($("win-defrag"), $("drag-defrag"));
+makeDraggable($("win-lotus"), $("drag-lotus"));
+makeDraggable($("win-manual"), $("drag-manual"));
+
+// Taskbar Pill Toggles
+function setupTaskPill(pillId, winId) {
+  const pill = $(pillId);
+  const win = $(winId);
+  if (!pill || !win) return;
+  pill.addEventListener("click", () => {
+    if (win.style.display === "none") {
+      win.style.display = "flex";
+      focusWindow(win, pillId);
+    } else if (pill.classList.contains("inactive")) {
+      focusWindow(win, pillId);
+    } else {
+      win.style.display = "none";
+      pill.classList.add("inactive");
+    }
+  });
+}
+
+setupTaskPill("task-pill-main", "main-win");
+setupTaskPill("task-pill-recycle", "win-recycle");
+setupTaskPill("task-pill-tayne", "win-tayne");
+setupTaskPill("task-pill-defrag", "win-defrag");
+setupTaskPill("task-pill-lotus", "win-lotus");
+setupTaskPill("task-pill-manual", "win-manual");
+
+// Setup Wizard Window Controls
+$("btn-win-min")?.addEventListener("click", () => {
+  const win = $("main-win");
+  const pill = $("task-pill-main");
+  if (win && pill) {
+    win.style.display = "none";
+    pill.classList.add("inactive");
+  }
+});
+
+$("btn-win-close")?.addEventListener("click", () => {
+  $("modal-exit-setup")?.classList.add("open");
+});
+
+$("cancel-btn")?.addEventListener("click", () => {
+  $("modal-exit-setup")?.classList.add("open");
+});
+
+$("btn-win-help")?.addEventListener("click", () => {
+  openWindow("win-manual", "task-pill-manual");
+});
+
+$("btn-exit-setup-yes")?.addEventListener("click", () => {
+  window.location.href = "../";
+});
+
+$("btn-exit-setup-no")?.addEventListener("click", () => {
+  $("modal-exit-setup")?.classList.remove("open");
+});
+
+// Desktop Icons
+function setupDesktopIcon(id, winId, pillId, action) {
+  const el = $(id);
+  if (!el) return;
+  el.addEventListener("click", () => {
+    document.querySelectorAll(".desktop-icon").forEach((d) => d.classList.remove("active"));
+    el.classList.add("active");
+  });
+  el.addEventListener("dblclick", () => {
+    if (action) action();
+    else if (winId) openWindow(winId, pillId);
+  });
+}
+
+setupDesktopIcon("d-mycomp", "sysprop-modal", null, () => $("sysprop-modal")?.classList.add("open"));
+setupDesktopIcon("d-app", null, null, () => { window.location.href = "../"; });
+setupDesktopIcon("d-tayne", "win-tayne", "task-pill-tayne");
+setupDesktopIcon("d-defrag", "win-defrag", "task-pill-defrag");
+setupDesktopIcon("d-boss", "win-lotus", "task-pill-lotus");
+setupDesktopIcon("d-installer", "main-win", "task-pill-main", () => {
+  const win = $("main-win");
+  if (win) {
+    win.style.display = "flex";
+    focusWindow(win, "task-pill-main");
+  }
+});
+setupDesktopIcon("d-manual", "win-manual", "task-pill-manual");
+setupDesktopIcon("d-recycle", "win-recycle", "task-pill-recycle");
+
+// Start Menu Items
+$("sm-app")?.addEventListener("click", () => { window.location.href = "../"; });
+$("sm-setup")?.addEventListener("click", () => {
+  const win = $("main-win");
+  if (win) {
+    win.style.display = "flex";
+    focusWindow(win, "task-pill-main");
+  }
+});
+$("sm-tayne")?.addEventListener("click", () => openWindow("win-tayne", "task-pill-tayne"));
+$("sm-defrag")?.addEventListener("click", () => openWindow("win-defrag", "task-pill-defrag"));
+$("sm-boss")?.addEventListener("click", () => openWindow("win-lotus", "task-pill-lotus"));
+$("sm-manual")?.addEventListener("click", () => openWindow("win-manual", "task-pill-manual"));
+$("sm-sysprop")?.addEventListener("click", () => $("sysprop-modal")?.classList.add("open"));
+$("sm-about")?.addEventListener("click", () => $("about-modal")?.classList.add("open"));
+$("sm-shutdown")?.addEventListener("click", () => $("modal-shutdown")?.classList.add("open"));
+
+// Dialog Buttons
+$("modal-ok")?.addEventListener("click", () => $("about-modal")?.classList.remove("open"));
+$("sysprop-ok")?.addEventListener("click", () => $("sysprop-modal")?.classList.remove("open"));
+$("btn-coffee-ok")?.addEventListener("click", () => $("modal-coffee")?.classList.remove("open"));
+
+// Tayne Studio 98 Actions
+$("btn-tayne-load")?.addEventListener("click", () => {
+  const c = $("tayne-status-card");
+  if (c) c.textContent = "Tayne 4d3d3d3 routine loaded into FM-1 buffer";
+});
+$("btn-tayne-wobble")?.addEventListener("click", () => {
+  const c = $("tayne-status-card");
+  if (c) c.textContent = "Hat Wobble engaged (LFO at 4.2 Hz)";
+});
+$("btn-tayne-flarh")?.addEventListener("click", () => {
+  const c = $("tayne-status-card");
+  if (c) c.textContent = "Flarhgunnstow routine executing";
+});
+$("btn-tayne-nude")?.addEventListener("click", () => {
+  const c = $("tayne-status-card");
+  if (c) c.textContent = "Nude Tayne rendered: NSFW filter overridden";
+});
+$("btn-tayne-receipt")?.addEventListener("click", () => {
+  const c = $("tayne-status-card");
+  if (c) c.textContent = "Oyster Receipt printed to LPT1";
+});
+
+// Recycle Bin Incineration
+$("btn-empty-recycle")?.addEventListener("click", () => {
+  $("modal-confirm-recycle")?.classList.add("open");
+});
+$("btn-confirm-recycle-no")?.addEventListener("click", () => {
+  $("modal-confirm-recycle")?.classList.remove("open");
+});
+$("btn-confirm-recycle-yes")?.addEventListener("click", () => {
+  const tbody = $("recycle-tbody");
+  if (tbody) tbody.innerHTML = "";
+  const count = $("recycle-status-count");
+  const size = $("recycle-status-size");
+  if (count) count.textContent = "0 object(s)";
+  if (size) size.textContent = "0 KB";
+  $("modal-confirm-recycle")?.classList.remove("open");
+});
+
+// Cinco Defrag Cluster Grid Simulation
+const defragGrid = $("defrag-cluster-grid");
+if (defragGrid) {
+  defragGrid.innerHTML = "";
+  for (let i = 0; i < 160; i++) {
+    const box = document.createElement("div");
+    box.className = "cluster-box " + (i % 7 === 0 ? "cluster-frag" : i % 5 === 0 ? "cluster-unmov" : i % 2 === 0 ? "cluster-alloc" : "cluster-free");
+    defragGrid.appendChild(box);
+  }
+}
+
+// Shut Down Routine
+$("btn-shutdown-cancel")?.addEventListener("click", () => $("modal-shutdown")?.classList.remove("open"));
+$("btn-shutdown-help")?.addEventListener("click", () => openWindow("win-manual", "task-pill-manual"));
+$("btn-shutdown-ok")?.addEventListener("click", () => {
+  $("modal-shutdown")?.classList.remove("open");
+  const off = $("shutdown-opt-off");
+  const restart = $("shutdown-opt-restart");
+  const dos = $("shutdown-opt-dos");
+  if (off && off.checked) {
+    $("screen-shutdown")?.classList.add("open");
+  } else if (restart && restart.checked) {
+    window.location.reload();
+  } else if (dos && dos.checked) {
+    $("screen-dos")?.classList.add("open");
+    $("dos-input")?.focus();
+  }
+});
+
+$("btn-turn-on")?.addEventListener("click", () => {
+  $("screen-shutdown")?.classList.remove("open");
+});
+
+$("btn-dos-exit")?.addEventListener("click", () => {
+  $("screen-dos")?.classList.remove("open");
+});
+
+$("dos-input")?.addEventListener("keydown", (e) => {
+  if (e.key === "Enter") {
+    const val = e.target.value.trim().toLowerCase();
+    if (val === "exit" || val === "win") {
+      $("screen-dos")?.classList.remove("open");
+    } else {
+      e.target.value = "";
+    }
+  }
+});
+
+// Systray Volume Popup
+$("systray-vol")?.addEventListener("click", (e) => {
+  e.stopPropagation();
+  $("volume-popup")?.classList.toggle("open");
+});
+$("vol-popup-close")?.addEventListener("click", () => {
+  $("volume-popup")?.classList.remove("open");
+});
+
+// CINCO Manual TOC Switching
+const MANUAL_SECTIONS = {
+  "toc-welcome": "<h3>Welcome to Cinco Identity Generator 2.5™</h3><p>This workstation runs custom Cinco OS 2.5 firmware for the M-VAVE FM-1 Synthesizer Terminal, featuring 4d3d3d3 window cascading, rotoscoped SCUMM dancers, and LPC speech synthesis.</p>",
+  "toc-controls": "<h3>Workstation & Synthesizer Controls</h3><p>Use keys Z through / for the lower manual, Q through O for the upper manual. Number keys 1-6 trigger row 1 buttons (FX, SCL, ENV, LFO, EDIT, GLO). Press [ and ] for octave shifts.</p>",
+  "toc-identities": "<h3>Cinco Identity Routines</h3><p>Rotate PRESETS encoder to toggle dancer routines: Celery Man (default 4d3d3d3 sequence), Oyster Smiling, and Tayne (Beta). Press GLO for phonetic LPC speech generation.</p>",
+  "toc-kinetics": "<h3>Kinetic Modulation (4d3d3d3)</h3><p>Engage Hat Wobble with LFO key (4). Flarhgunnstow arpeggiation mode engages with ARP key (9). Kick up the 4d3d3d3 with Macro Knob 1.</p>",
+  "toc-boss": "<h3>Lotus 1-2-3 Stealth Boss Key</h3><p>Press EDIT key or Tools &gt; Lotus 1-2-3 to instantly summon corporate spreadsheet cover mode. Total corporate allocation: $32,820,000.</p>",
+  "toc-osha": "<h3>OSHA Compliance Guidelines</h3><p>15-minute executive espresso recesses are mandatory under Cinco corporate policy. Maintain safe distance from Celery Man kinetic routines.</p>"
+};
+
+document.querySelectorAll(".manual-toc-item").forEach((item) => {
+  item.addEventListener("click", () => {
+    document.querySelectorAll(".manual-toc-item").forEach((i) => i.classList.remove("selected"));
+    item.classList.add("selected");
+    const view = $("manual-content-view");
+    if (view && MANUAL_SECTIONS[item.id]) {
+      view.innerHTML = MANUAL_SECTIONS[item.id];
+    }
+  });
+});
+
+// In-Universe Confirm Dialog for Factory Restore
+function confirmStockModal() {
+  return new Promise((resolve) => {
+    const modal = $("modal-confirm-stock");
+    const msg = $("confirm-stock-msg");
+    if (msg) msg.textContent = t("stockConfirm");
+    modal.classList.add("open");
+    const cleanup = (res) => {
+      modal.classList.remove("open");
+      $("btn-confirm-stock-yes").removeEventListener("click", onYes);
+      $("btn-confirm-stock-no").removeEventListener("click", onNo);
+      $("btn-confirm-stock-x").removeEventListener("click", onNo);
+      resolve(res);
+    };
+    const onYes = () => cleanup(true);
+    const onNo = () => cleanup(false);
+    $("btn-confirm-stock-yes").addEventListener("click", onYes);
+    $("btn-confirm-stock-no").addEventListener("click", onNo);
+    $("btn-confirm-stock-x").addEventListener("click", onNo);
+  });
+}
+
+// ------------------------------------------------------------------ SysEx Installer Core
 const sayK = (k, arg = "") => {
   lastKey = k;
   lastArg = arg;
@@ -1266,7 +2263,7 @@ $("stock-go").addEventListener("click", async () => {
         sayK("stockNeedBackup");
         return;
       }
-      if (!confirm(t("stockConfirm"))) return;
+      if (!(await confirmStockModal())) return;
       sayK((await up.resume(selected.image, step, selected.product)) ? "done" : "stopped");
     } else {
       const device = await up.find((id) => id.model === "FM-1");
@@ -1290,7 +2287,7 @@ $("stock-go").addEventListener("click", async () => {
       saveArchive(archive);
       link.close();
       link = null;
-      if (!confirm(t("stockConfirm"))) return;
+      if (!(await confirmStockModal())) return;
       await up.install(selected.image, selected.product, step);
     }
   } catch (e) {
