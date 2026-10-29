@@ -9,6 +9,8 @@
 #include "cinco_state.h"
 #include "cinco_gfx.c"
 
+static uint8_t view_initialized = 0;
+
 /* Draw 3D beveled window chrome */
 static void cinco_draw_window_chrome(int32_t x, int32_t y, int32_t w, int32_t h, const char *title)
 {
@@ -239,16 +241,48 @@ static void cinco_draw_defrag_progress(int32_t ox, int32_t oy, int32_t ww, int32
     }
 }
 
+static uint32_t defrag_start_ms = 0;
+static uint8_t defrag_prev_mode = 0;
+
+static uint32_t cinco_get_defrag_progress(uint32_t bpm)
+{
+    if (defrag_start_ms == 0 || !defrag_prev_mode) {
+        defrag_start_ms = fm1_ms;
+        defrag_prev_mode = 1;
+    }
+    uint32_t elapsed = fm1_ms - defrag_start_ms;
+    /* Duration: ~8000ms at 120 BPM */
+    uint32_t duration_ms = 960000u / (bpm ? bpm : 120u);
+    if (duration_ms < 4000u) duration_ms = 4000u;
+    uint32_t progress = (elapsed * 100u) / duration_ms;
+    if (progress > 100u) progress = 100u;
+    return progress;
+}
+
+static void cinco_check_defrag_complete(uint32_t progress)
+{
+    if (progress >= 100u) {
+        perf.view_mode = 0;
+        defrag_prev_mode = 0;
+        defrag_start_ms = 0;
+        view_initialized = 0;
+        ui.force = 1;
+        cinco_term_push("> DEFRAG: 240 clusters optimized. 0 errors.");
+        cinco_speech_play(CINCO_PHRASE_YES);
+    }
+}
+
 static void cinco_draw_defrag_content(int32_t ox, int32_t oy, int32_t ww, int32_t wh)
 {
     uint32_t bpm = perf.tempo ? perf.tempo : 120u;
     uint32_t ms_per_step = 15000u / bpm;
     if (ms_per_step == 0) ms_per_step = 1;
     uint8_t step = perf.groove ? cinco_groove_get_step() : (uint8_t)((fm1_ms / ms_per_step) & 15u);
-    uint32_t progress = 50u + ((fm1_ms * bpm / 1200u) % 49u);
+    uint32_t progress = cinco_get_defrag_progress(bpm);
 
     cinco_draw_defrag_grid(ox, oy, ww, wh, step);
     cinco_draw_defrag_progress(ox, oy, ww, wh, bpm, progress);
+    cinco_check_defrag_complete(progress);
 }
 
 static void cinco_draw_defrag(void)
@@ -535,7 +569,6 @@ static void cinco_draw_coffee_mug(int32_t x, int32_t y, uint8_t level)
 }
 
 /* ----------------------------------------------- Dirty State Tracking --- */
-static uint8_t view_initialized = 0;
 static uint8_t last_rendered_frame = 255;
 static uint8_t last_rendered_cursor = 255;
 static uint32_t last_rendered_state = 0xFFFFFFFFu;
@@ -1028,14 +1061,17 @@ static void cinco_view_render(void)
                 last_rendered_defrag_step = step;
             }
             if (time_up) {
-                uint32_t progress = 50u + ((fm1_ms * bpm / 1200u) % 49u);
+                uint32_t progress = cinco_get_defrag_progress(bpm);
                 if (progress != last_rendered_defrag_prog) {
                     cinco_draw_defrag_progress(ox, oy, ww, wh, bpm, progress);
                     last_rendered_defrag_prog = progress;
                     last_rendered_defrag_ms = fm1_ms;
+                    cinco_check_defrag_complete(progress);
                 }
             }
         } else {
+            defrag_prev_mode = 0;
+            defrag_start_ms = 0;
             if (perf.frame_idx != last_rendered_frame) {
                 int32_t cx = ox + 4 + (ww - 8 - anim->w) / 2;
                 int32_t cy = oy + 21 + (wh - 25 - anim->h) / 2;

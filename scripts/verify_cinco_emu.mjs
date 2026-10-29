@@ -157,9 +157,9 @@ async function run() {
     ex.web_cinco_set_screensaver(0);
     renderMs(50);
 
-    console.log("=== 13. Cinco System Alert Popup (B_GLO Pressed) ===");
-    // B_GLO is 1 << 5 (0x20)
-    ex.web_buttons(1 << 5);
+    console.log("=== 13. Cinco System Alert Popup (Easter Egg: HOME + GLO Pressed) ===");
+    // Easter Egg: B_HOME is 1 << 6, B_GLO is 1 << 5
+    ex.web_buttons((1 << 5) | (1 << 6));
     renderMs(50);
     grabScreen("13_cinco_error");
     ex.web_buttons(0);

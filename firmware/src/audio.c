@@ -24,6 +24,8 @@ static volatile uint32_t audio_halves, audio_max_us;
 static volatile uint32_t t5_nested_ticks;              /* TIMER4 ticks TIMER5 spent nested in this ISR (main.c) */
 static uint32_t audio_cpu_rem;                         /* keep the fractional IIR step: no low-load bias */
 
+__attribute__((weak)) void cinco_audio_block(int32_t *out, uint32_t n) { (void)out; (void)n; }
+
 static void audio_block(int32_t *out, uint32_t n)       /* mix (fx.c), then Q15 -> 24 bit */
 {
     uint32_t i;

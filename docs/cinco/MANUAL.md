@@ -48,7 +48,7 @@ Welcome to the cutting edge of electronic office identity deployment. The **Cinc
 * **Display Terminal:** 1.54" Active Matrix Color ST7789 Super-VGA LCD (240×240 native pixel resolution, 65,536 colors).
 * **Sound Generation:** 16-bit 44.1 kHz Stereo DAC with hardware DC-blocking, peak limiting, and soft-saturation.
 * **System Memory:** 56.8 KB Conventional SRAM, 302 KB Dynamic Heap Pool, 1 MB Non-Volatile SPI NOR Flash ROM.
-* **Operator Inputs:** 27-key Velocity Sensitive Capacitive Matrix, 7 Precision Rotary Detent Knobs, 14 Tactile Action Buttons.
+* **Operator Inputs:** 27-Key Capacitive Workplace Touch Matrix (Clean Non-Velocity Touch Response), 7 Precision Rotary Detent Knobs, 14 Tactile Action Buttons.
 * **Workplace Environment:** Standard office cubicle, low-glare fluorescent illumination, minimum 8 oz. steaming coffee, zero active supervisory oversight.
 
 ---
@@ -60,7 +60,7 @@ Welcome to the cutting edge of electronic office identity deployment. The **Cinc
 |                  CINCO OS 2.5 HARDWARE CONSOLE                          |
 |                                                                         |
 |  [SELECT]           [ALGO]            [PRESET]            [OCT - / +]   |
-|  Aux Nav         Dance Variant     Select Character     Key Transpose   |
+|  Console Nav      Groove Style      Select Character     Key Transpose   |
 |                                                                         |
 |    [K1]               [K2]              [K3]                [K4]        |
 |  4d3d3d3 Macro    Tone / Cutoff     Groove Tempo         Mix Balance    |
@@ -75,7 +75,7 @@ Welcome to the cutting edge of electronic office identity deployment. The **Cinc
 |  Loop Record       Scale Select      Envelope Mode      Cinco Speech    |
 |                                                                         |
 |  [ F3 ] [ G3 ] [ A3 ] [ B3 ] [ C4 ] [ D4 ] [ E4 ] [ F4 ] ... [ G5 ]     |
-|  27-Key Capacitive Workplace Keyboard Matrix (2.25 Octaves)             |
+|  27-Key Capacitive Workplace Touch Matrix (Clean Non-Velocity Keys)      |
 +-------------------------------------------------------------------------+
 ```
 
@@ -167,23 +167,27 @@ The Cinco 2.5 workstation features non-modal, stackable performance controls tha
 +--------------------------------------------------------------------------+
 |  CONTROL   | PRIMARY ACTION                 | VISUAL REACTION            |
 +------------+--------------------------------+----------------------------+
-|  K1 KNOB   | 4d3d3d3 Filter Drive & Chorus  | Cascades 1x, 2x, 4x, 8x    |
+|  K1 KNOB   | 4d3d3d3 Macro Multiplier       | Cascades up to 16x windows |
 |  K2 KNOB   | Tone / Cutoff / Mosaic Depth   | Live Timbre Modulator      |
 |  K3 KNOB   | Tempo Calibrator (80-160 BPM)  | Updates Taskbar BPM Gauge  |
 |  K4 KNOB   | Mix Balance (Groove vs Synth)  | Proportional Level Scale   |
+|  EN_ALGO   | Groove Pattern (3 Styles)      | Switches Rhythm Engine     |
+|  EN_SELECT | Console Nav / HUD Toggle       | Toggles Diagnostic HUD     |
 |  LFO BTN   | Hat Wobble Pitch Vibrato (6Hz) | Switches to Hat Wobble     |
 |  ARP BTN   | Flarhgunnstow 16th Arp Slicer  | Switches to Flarhgunnstow  |
-|  FX BTN    | Nude Mode + Bitcrush Mosaic    | NSFW Security Alert Dialog |
+|  FX BTN    | Direct Latch Nude Mode         | 1-sec NSFW Warning Dialog  |
 |  PLAY BTN  | Eurodance 16-Step Drum Machine | Groove Transport Active    |
 |  SAVE BTN  | Commit State to Flash ROM      | Animated Oyster Receipt    |
 |  HOME BTN  | Corporate Panic Button         | Collapses Windows to 1x    |
+|  GLO BTN   | 9-Phrase Speech Soundboard     | HOME+GLO: Floppy Error     |
+|  REC BTN   | Sequencer Record Overdub       | Arms Real-Time Overdub     |
 +--------------------------------------------------------------------------+
 ```
 
 ### 1. The 4d3d3d3™ Macro (`K1` Knob)
 As `K1` is rotated clockwise from `0` to `127`:
 - **Audio Reaction:** Progressively drives filter resonance and stereo chorus depth into saturation.
-- **Visual Reaction:** At threshold values (32, 64, 96), the active dancer window cascades across the desktop in multiples of **1x $\rightarrow$ 2x $\rightarrow$ 4x $\rightarrow$ 8x windows**, replicating authentic early graphical OS window redraw lag.
+- **Visual Reaction:** The active dancer window cascades smoothly across the desktop in real time up to **16 overlapping windows** (`1 + (k4d * 15) / 120`), replicating authentic early graphical OS window redraw lag.
 - **Threshold Warning:** Turning `K1` to maximum `127` triggers an emergency dialog: *"WARNING: 4d3d3d3 exceeded recommended OSHA flarh levels."*
 
 ### 2. Hat Wobble (`LFO` Button)
@@ -199,8 +203,8 @@ As `K1` is rotated clockwise from `0` to `127`:
 - **Speech:** Vocalizes *"Flarhgunnstow."*
 
 ### 4. Nude Tayne Protocol (`FX` Button)
-- **Operation:** Tap `FX` to engage Nude Tayne mode.
-- **Visuals:** Immediately renders a 1-second **RED SECURITY PROTOCOL ALERT** dialog (*"THIS IS NOT SUITABLE FOR WORK. ARE YOU SURE?"*), switches Tayne to pixel mosaic quantization, and displays title `"NUDE TAYNE"`.
+- **Operation:** Tap `FX` to directly latch Nude Tayne mode on or off.
+- **Visuals:** Immediately renders a 1-second **RED SECURITY PROTOCOL ALERT** dialog (*"THIS IS NOT SUITABLE FOR WORK. ARE YOU SURE?"*), switches Tayne to pixel mosaic quantization, and displays title `"NUDE TAYNE"`. Tap `FX` again to directly restore standard business attire.
 - **Audio:** Engages the real-time **Audio Mosaic Bitcrusher**, decimating sample rate down to 4.4 kHz and masking lower bits for crunchy 4-bit lo-fi textures.
 - **Speech:** Warns *"Warning: this is not suitable for work."*
 
@@ -213,7 +217,29 @@ As `K1` is rotated clockwise from `0` to `127`:
 ### 6. Corporate Panic Button (`HOME` Button)
 - **Operation:** Tap `HOME` when unexpected executive personnel approach your workstation.
 - **Action:** Immediately cancels all performance layers (`wobble=0, flail=0, nude=0, k4d=0`), collapses all cascaded windows back to single 1x display, restores default Celery Man, and silences all arpeggiators.
+- **Easter Egg:** Hold `HOME` and press `GLO` to trigger the floppy drive Easter egg error (`ERR 0xCE1E`).
 - **Speech:** Fred placatingly affirms: *"Yes, Paul."*
+
+### 7. Cinco Speech Soundboard (`GLO` Button)
+- **Operation:** Tap `GLO` to cycle sequentially through all 9 iconic LPC speech phrases:
+  1. *"Yes, Paul."*
+  2. *"Now Tayne I can get into."*
+  3. *"4d3d3d3 engaged."*
+  4. *"Hat wobble."*
+  5. *"Flarhgunnstow."*
+  6. *"Printout of Oyster smiling."*
+  7. *"Celery Man."*
+  8. *"Tayne."*
+  9. *"Beta."*
+- **Terminal:** Each phrase pushes its exact transcribed text to the console display.
+- **Floppy Drive Easter Egg:** Holding `HOME` while pressing `GLO`, or pressing `GLO` every 8th time, triggers `ERR 0xCE1E`: *"CINCO ALERT: Celery stalk detected in 3.5\" floppy drive."*
+- **Diagnostic HUD Toggle:** Hold `GLO` for 500 ms, or press `GLO + EDIT`, or turn `SELECT` to toggle the green phosphor Diagnostic HUD overlay.
+
+### 8. Groove Engine Styles (`ALGO` Encoder)
+- **Operation:** Turn `ALGO` encoder clockwise or counter-clockwise to cycle rhythm styles:
+  - Pattern 0: `> Groove: Eurodance 90s`
+  - Pattern 1: `> Groove: Rave Breakbeat`
+  - Pattern 2: `> Groove: Pumping House`
 
 ---
 
@@ -242,8 +268,8 @@ In addition to identity modulation, Cinco Corporation has supplied full workplac
 
 ### 1. The "Boss Key" Spreadsheet (`EDIT` Button)
 * **Function:** Instantly disguises your console as a 1992 **Lotus 1-2-3 Release 3.1** spreadsheet (`CELERY_CORP_Q3.WK1`).
-* **Audio Behavior:** All synthesizer audio and groove sequences continue playing unhindered, allowing the employee to compose music under the guise of accounting.
-* **Exit:** Tapping any keyboard key or encoder instantly restores CINCO OS 2.5 desktop.
+* **Audio Behavior:** All synthesizer audio and groove sequences continue playing unhindered in the background, allowing the employee to compose music under the guise of accounting.
+* **Exit:** Tapping any capacitive keyboard touch key, pressing any button, or turning any rotary encoder instantly wakes the console back to CINCO OS 2.5 desktop.
 
 ### 2. Cinco Disk Defragmenter (`SEQ` Button)
 * **Function:** Switches the display to an authentic 16×6 cluster defragmentation grid (modeled after Norton SpeedDisk and MS-DOS 6.22 Defrag).
@@ -252,6 +278,7 @@ In addition to identity modulation, Cinco Corporation has supplied full workplac
   - **Blue Clusters:** Read-only Celery Man identity files.
   - **Green Clusters:** Synthesizer waveform buffers.
   - **Flashing Amber/Red Clusters:** Live Eurodance sequencer steps pulsing on kicks, claps, and octave basslines.
+* **Completion:** When cluster optimization reaches 100% (240 clusters optimized), the console logs `> DEFRAG: 240 clusters optimized. 0 errors.`, vocalizes speech confirmation (`CINCO_PHRASE_YES`), and automatically transitions back to the active dancers view.
 
 ### 3. Cinco "After Dark" Flying Celery Screensaver
 * **Function:** Engages automatically when no keyboard keys or rotary knobs are manipulated for twenty (20) seconds.
@@ -270,7 +297,7 @@ In addition to identity modulation, Cinco Corporation has supplied full workplac
 | :--- | :--- | :--- | :--- |
 | `ERR 0x4D3D` | *"WARNING: 4d3d3d3 exceeded recommended OSHA flarh levels."* | Operator rotated `K1` to maximum position 127. | Tap `HOME` button; allow workplace flarh levels to normalize. |
 | `ERR 0x0757` | *"FATAL: Oyster too wide for current clock speed."* | Groove tempo dial `K3` exceeded 145 BPM. | Turn `K3` counter-clockwise to standard Eurodance tempo (120 BPM). |
-| `ERR 0xCE1E` | *"CINCO ALERT: Celery stalk detected in 3.5\" floppy drive."* | Operator engaged `GLO` button Easter egg. | Acknowledge with `[OK]` button; do not insert actual celery into USB port. |
+| `ERR 0xCE1E` | *"ERR 0xCE1E: CINCO ALERT: Celery stalk detected in 3.5\" floppy drive."* | Operator engaged `HOME + GLO` Easter egg (or every 8th press). | Acknowledge with any key; do not insert actual celery into USB port. |
 | `ERR 0x0069` | *"THIS IS NOT SUITABLE FOR WORK. ARE YOU SURE?"* | Operator tapped `FX` button (Nude Mode). | Check surrounding cubicles for supervisor before proceeding. |
 
 ---

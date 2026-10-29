@@ -251,6 +251,21 @@ void cinco_groove_process(uint32_t n)
     }
 }
 
+void cinco_groove_set_pattern(uint8_t pat)
+{
+    perf.groove_pattern = pat % 3u;
+    if (prev_bass_note) {
+        trk_note_off(&trk[1], prev_bass_note);
+        prev_bass_note = 0;
+    }
+    for (uint32_t i = 0; i < 3; i++) {
+        if (prev_stab_notes[i]) {
+            trk_note_off(&trk[2], prev_stab_notes[i]);
+            prev_stab_notes[i] = 0;
+        }
+    }
+}
+
 uint8_t cinco_groove_get_step(void)
 {
     return step_idx;

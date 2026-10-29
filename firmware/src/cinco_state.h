@@ -79,6 +79,7 @@ void cinco_sound_set_source(uint8_t src);
 void cinco_sound_apply_env(uint8_t mode);
 void cinco_sound_apply_scale(uint8_t mode);
 void cinco_groove_init(void);
+void cinco_groove_set_pattern(uint8_t pat);
 uint8_t cinco_groove_get_step(void);
 void cinco_groove_process(uint32_t n);
 void cinco_audio_block(int32_t *out, uint32_t n);

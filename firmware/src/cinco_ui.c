@@ -84,7 +84,7 @@ void cinco_save_state(void)
     memset(&save, 0, sizeof(save));
     save.magic = CINCO_SAVE_MAGIC;
     save.source = perf.source;
-    save.variant = perf.variant;
+    save.variant = perf.groove_pattern;
     save.k4d = perf.k4d;
     save.tone = perf.tone;
     save.mosaic = perf.mosaic;
@@ -106,6 +106,7 @@ void cinco_load_state(void)
     if (n == (int)sizeof(save) && save.magic == CINCO_SAVE_MAGIC) {
         perf.source = save.source;
         perf.variant = save.variant;
+        perf.groove_pattern = save.variant % 3u;
         perf.k4d = save.k4d;
         perf.tone = save.tone;
         perf.mosaic = save.mosaic;
@@ -242,6 +243,7 @@ static void ui_draw(void)
 static void ui_input(void)
 {
     /* Encoders */
+    int32_t d_sel = panel_enc(EN_SELECT);
     int32_t d_src = panel_enc(EN_PRESET);
     int32_t d_var = panel_enc(EN_ALGO);
     int32_t d_k1 = panel_enc(EN_K1);
@@ -254,7 +256,7 @@ static void ui_input(void)
     uint32_t press = fm1_input_edges(&rel);
     uint32_t note_press = fm1_input_note_edges();
 
-    int enc_moved = (d_src != 0 || d_var != 0 || d_k1 != 0 || d_k2 != 0 || d_k3 != 0 || d_k4 != 0);
+    int enc_moved = (d_sel != 0 || d_src != 0 || d_var != 0 || d_k1 != 0 || d_k2 != 0 || d_k3 != 0 || d_k4 != 0);
     int btn_pressed = (press != 0);
     int key_pressed = (note_press != 0 || fm1_in.notes != 0);
     int activity = (enc_moved || btn_pressed || key_pressed);
@@ -309,6 +311,36 @@ static void ui_input(void)
         }
     }
 
+    /* Long press GLO check: holding GLO toggles Diagnostic HUD */
+    static uint32_t glo_hold_t0 = 0;
+    static uint8_t glo_diag_toggled = 0;
+    if (fm1_in.buttons & (1u << panel.btn[B_GLO])) {
+        if (glo_hold_t0 == 0) {
+            glo_hold_t0 = fm1_ms;
+            glo_diag_toggled = 0;
+        } else if (!glo_diag_toggled && (fm1_ms - glo_hold_t0 >= 500u)) {
+            perf.diag = !perf.diag;
+            glo_diag_toggled = 1;
+            if (perf.diag) {
+                cinco_term_push("> Diagnostic HUD enabled.");
+            } else {
+                cinco_term_push("> Diagnostic HUD disabled.");
+            }
+        }
+    } else {
+        glo_hold_t0 = 0;
+        glo_diag_toggled = 0;
+    }
+
+    if (d_sel) {
+        perf.diag = !perf.diag;
+        if (perf.diag) {
+            cinco_term_push("> Diagnostic HUD enabled.");
+        } else {
+            cinco_term_push("> Diagnostic HUD disabled.");
+        }
+    }
+
     if (d_src) {
         perf.view_mode = 0; /* Auto-exit Disk Defrag to show dancer */
         int32_t s = (int32_t)perf.source + d_src;
@@ -341,17 +373,15 @@ static void ui_input(void)
     }
 
     if (d_var) {
-        int32_t v = (int32_t)perf.variant + d_var;
-        while (v < 0) v += 4;
-        v %= 4;
-        if (v != (int32_t)perf.variant) {
-            perf.view_mode = 0; /* Auto-exit Disk Defrag */
-            perf.variant = (uint8_t)v;
-            switch (perf.variant) {
-            case 0: cinco_term_push("> Variant: 0"); break;
-            case 1: cinco_term_push("> Variant: 1"); break;
-            case 2: cinco_term_push("> Variant: 2"); break;
-            default: cinco_term_push("> Variant: 3"); break;
+        int32_t pat = ((int32_t)perf.groove_pattern + d_var) % 3;
+        while (pat < 0) pat += 3;
+        if (pat != (int32_t)perf.groove_pattern) {
+            perf.groove_pattern = (uint8_t)pat;
+            cinco_groove_set_pattern(perf.groove_pattern);
+            switch (perf.groove_pattern) {
+            case 0: cinco_term_push("> Groove: Eurodance 90s"); break;
+            case 1: cinco_term_push("> Groove: Rave Breakbeat"); break;
+            default: cinco_term_push("> Groove: Pumping House"); break;
             }
         }
     }
@@ -481,16 +511,19 @@ static void ui_input(void)
             }
         } else if (btn == B_HOME) {
             if (p) {
-                perf.view_mode = 0; /* Auto-exit Disk Defrag */
-                perf.wobble = 0;
-                perf.flail = 0;
-                perf.nude = 0;
-                perf.k4d = 0;
-                perf.diag = 0;
-                perf.source = 0;
-                cinco_sound_set_source(SRC_CELERY);
-                cinco_term_push("> System reset.");
-                cinco_speech_play(CINCO_PHRASE_YES);
+                int glo_active = ((fm1_in.buttons & (1u << panel.btn[B_GLO])) || ((press >> panel.btn[B_GLO]) & 1u));
+                if (!glo_active) {
+                    perf.view_mode = 0; /* Auto-exit Disk Defrag */
+                    perf.wobble = 0;
+                    perf.flail = 0;
+                    perf.nude = 0;
+                    perf.k4d = 0;
+                    perf.diag = 0;
+                    perf.source = 0;
+                    cinco_sound_set_source(SRC_CELERY);
+                    cinco_term_push("> System reset.");
+                    cinco_speech_play(CINCO_PHRASE_YES);
+                }
             }
         } else if (btn == B_SAVE) {
             if (p) {
@@ -556,22 +589,70 @@ static void ui_input(void)
             }
         } else if (btn == B_EDIT) {
             if (p) {
-                perf.boss_mode = !perf.boss_mode;
-                if (perf.boss_mode) {
-                    cinco_term_push("> Boss mode active.");
+                int glo_held = (fm1_in.buttons & (1u << panel.btn[B_GLO])) != 0;
+                if (glo_held) {
+                    perf.diag = !perf.diag;
+                    if (perf.diag) {
+                        cinco_term_push("> Diagnostic HUD enabled.");
+                    } else {
+                        cinco_term_push("> Diagnostic HUD disabled.");
+                    }
                 } else {
-                    cinco_term_push("> Resuming work.");
+                    perf.boss_mode = !perf.boss_mode;
+                    if (perf.boss_mode) {
+                        cinco_term_push("> Boss mode active.");
+                    } else {
+                        cinco_term_push("> Resuming work.");
+                    }
                 }
             }
         } else if (btn == B_GLO) {
             if (p) {
-                static uint8_t glo_idx = 0;
-                static const uint8_t GLO_PHRASES[3] = {CINCO_PHRASE_BETA, CINCO_PHRASE_ENTER, CINCO_PHRASE_YES};
-                cinco_speech_play(GLO_PHRASES[glo_idx]);
-                glo_idx = (uint8_t)((glo_idx + 1u) % 3u);
-                cinco_term_push("> Voice: Speech quote.");
-                perf.error_popup_t = 120;
-                cinco_str_copy(perf.error_msg, "CINCO ALERT: Celery stalk detected in floppy drive.", sizeof(perf.error_msg));
+                int edit_held = (fm1_in.buttons & (1u << panel.btn[B_EDIT])) != 0;
+                if (edit_held) {
+                    perf.diag = !perf.diag;
+                    if (perf.diag) {
+                        cinco_term_push("> Diagnostic HUD enabled.");
+                    } else {
+                        cinco_term_push("> Diagnostic HUD disabled.");
+                    }
+                } else {
+                    static uint8_t glo_idx = 0;
+                    static uint32_t glo_press_count = 0;
+                    static const uint8_t GLO_PHRASES[] = {
+                        CINCO_PHRASE_YES,      /* "Yes, Paul." */
+                        CINCO_PHRASE_ENTER,    /* "Now Tayne I can get into." */
+                        CINCO_PHRASE_4D3D,     /* "4d3d3d3 engaged." */
+                        CINCO_PHRASE_WOBBLE,   /* "Hat wobble." */
+                        CINCO_PHRASE_FLARH,    /* "Flarhgunnstow." */
+                        CINCO_PHRASE_PRINTOUT, /* "Printout of Oyster smiling." */
+                        CINCO_PHRASE_CELERY,   /* "Celery Man." */
+                        CINCO_PHRASE_TAYNE,    /* "Tayne." */
+                        CINCO_PHRASE_BETA      /* "Beta." */
+                    };
+                    static const char * const GLO_TEXTS[] = {
+                        "> Voice: \"Yes, Paul.\"",
+                        "> Voice: \"Now Tayne I can get into.\"",
+                        "> Voice: \"4d3d3d3 engaged.\"",
+                        "> Voice: \"Hat wobble.\"",
+                        "> Voice: \"Flarhgunnstow.\"",
+                        "> Voice: \"Printout of Oyster smiling.\"",
+                        "> Voice: \"Celery Man.\"",
+                        "> Voice: \"Tayne.\"",
+                        "> Voice: \"Beta.\""
+                    };
+
+                    cinco_speech_play(GLO_PHRASES[glo_idx]);
+                    cinco_term_push(GLO_TEXTS[glo_idx]);
+                    glo_idx = (uint8_t)((glo_idx + 1u) % (sizeof(GLO_PHRASES) / sizeof(GLO_PHRASES[0])));
+
+                    glo_press_count++;
+                    int home_held = (fm1_in.buttons & (1u << panel.btn[B_HOME])) != 0;
+                    if (home_held || (glo_press_count % 8u == 0u)) {
+                        perf.error_popup_t = 120;
+                        cinco_str_copy(perf.error_msg, "ERR 0xCE1E: CINCO ALERT: Celery stalk detected in 3.5\" floppy drive.", sizeof(perf.error_msg));
+                    }
+                }
             }
         } else if (btn == B_SEQ) {
             if (p) {
@@ -585,6 +666,7 @@ static void ui_input(void)
         } else if (btn == B_REC) {
             if (p) {
                 perf.rec = !perf.rec;
+                song.rec = perf.rec;
                 if (perf.rec) {
                     cinco_term_push("> Recording: Armed [REC]");
                 } else {

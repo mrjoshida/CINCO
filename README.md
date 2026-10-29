@@ -58,7 +58,7 @@ Unlike passive terminal monitors or static office tools, **Cinco 2.5 is an instr
 
 ## RETAIL HIGHLIGHTS & KEY TECHNOLOGIES
 
-* **Proprietary 4d3d3d3™ Cascading Window Architecture:** Rotate Knob 1 (`K1`) to duplicate and cascade up to 5 overlapping desktop windows in real-time across the 240×240 LCD while expanding stereo chorus width and harmonic sub-oscillators.
+* **Proprietary 4d3d3d3™ Cascading Window Architecture:** Rotate Knob 1 (`K1`) to duplicate and cascade up to 16 overlapping desktop windows in real-time across the 240×240 LCD while expanding stereo chorus width and harmonic sub-oscillators.
 * **Rotoscoped SCUMM Engine Sprites:** Every dancer is meticulously rotoscoped frame-by-frame from original footage into authentic 16-color 96×128 pixel sprites, animated at 12–15 FPS using color-keyed RLE compression.
 * **The Full Identity Roster:**
   * **Celery Man:** The classic corporate dancer in dark business attire. Drives a lush multi-oscillator analog brass synthesizer.
@@ -67,11 +67,11 @@ Unlike passive terminal monitors or static office tools, **Cinco 2.5 is an instr
 * **Interactive Macro Kinetics:**
   * **Hat Wobble (`LFO`):** Real-time millinery oscillation introducing resonant filter wobble and fedora pitch modulation.
   * **Flarhgunnstow (`ARP`):** High-frequency kinetic syncopation driving the arpeggiator and rapid footwork.
-  * **Nude Tayne (`FX`):** **[WARNING: NOT SUITABLE FOR WORK]** Requires operator confirmation; downsamples audio into severe 4-bit distortion while pixelating the dancer sprite in a 16×16 dynamic censor mosaic.
-* **Hardware Robot Speech Synthesizer (`GLO`):** Linear Predictive Coding (LPC) formant speech engine vocalizing classic acknowledgments ("Yes, Paul.", "4d3d3d3 engaged.") playable across the keyboard matrix.
+  * **Nude Tayne (`FX`):** Direct latch toggle engaging dynamic censor mosaic and lo-fi audio bitcrush saturation with a 1-second NSFW alert banner.
+* **Hardware Robot Speech Synthesizer (`GLO`):** Linear Predictive Coding (LPC) formant speech engine cycling through 9 iconic quotes ("Yes, Paul.", "Now Tayne I can get into.", "4d3d3d3 engaged.", "Hat wobble.", "Flarhgunnstow.", "Printout of Oyster smiling.", "Celery Man.", "Tayne.", "Beta."). Press `HOME + GLO` or tap 8 times to trigger the Floppy Celery Easter egg (`ERR 0xCE1E`). Hold `GLO` or press `GLO + EDIT` to toggle the Diagnostic HUD.
 * **Stealth Workplace Productivity Suite:**
-  * **Lotus 1-2-3 Boss Key (`EDIT`):** One-touch emergency cloaking mechanism. Instantly blanks the display with a convincing 1993 corporate balance sheet and mutes audio output in 1 clock cycle.
-  * **Norton Disk Defragmenter (`SEQ`):** Real-time visual 16-block memory cluster defragmentation with animated cluster allocation and automatic desktop restoration upon sector optimization.
+  * **Lotus 1-2-3 Boss Key (`EDIT`):** One-touch emergency cloaking mechanism. Instantly blanks the display with a convincing 1993 corporate balance sheet while music continues playing in the background; touch any key or turn any knob to wake back to the desktop.
+  * **Norton Disk Defragmenter (`SEQ`):** Real-time visual 16-block memory cluster defragmentation with animated cluster allocation; upon reaching 100% (240 clusters optimized), affirms completion with speech and automatically restores the dancers desktop.
   * **After Dark "Flying Celery" Screensaver:** Preserves phosphor lifespan during coffee breaks by floating pixelated celery stalks against a void black canvas.
 
 ---
@@ -114,7 +114,7 @@ The Cinco Identity Generator 2.5™ maps seamlessly onto the **M-VAVE FM-1** har
 |                  CINCO OS 2.5 HARDWARE CONSOLE                          |
 |                                                                         |
 |  [SELECT]           [ALGO]            [PRESET]            [OCT - / +]   |
-|  Sub-Menu Nav     Dance Variant     Select Character     Key Transpose   |
+|  Console Nav      Groove Style      Select Character     Key Transpose   |
 |                                                                         |
 |    [K1]               [K2]              [K3]                [K4]        |
 |   4d3d3d3             TONE              TEMPO               MIX         |
@@ -129,7 +129,7 @@ The Cinco Identity Generator 2.5™ maps seamlessly onto the **M-VAVE FM-1** har
 |  Loop Record       Scale Select      Envelope Mode      Cinco Speech    |
 |                                                                         |
 |  [ F3 ] [ G3 ] [ A3 ] [ B3 ] [ C4 ] [ D4 ] [ E4 ] [ F4 ] ... [ G5 ]     |
-|  27-Key Capacitive Workplace Keyboard Matrix (2.25 Octaves)             |
+|  27-Key Capacitive Workplace Touch Matrix (Clean Non-Velocity Keys)      |
 +-------------------------------------------------------------------------+
 ```
 
@@ -137,25 +137,25 @@ The Cinco Identity Generator 2.5™ maps seamlessly onto the **M-VAVE FM-1** har
 
 | Control Element | Primary Workplace Action | Secondary / Advanced Modulation |
 |---|---|---|
-| **Knob 1 (`K1`)** | **4d3d3d3 Macro Multiplier** | Cascades 1 to 5 windows across LCD, expands stereo chorus width and sub-oscillators (0–127). |
+| **Knob 1 (`K1`)** | **4d3d3d3 Macro Multiplier** | Cascades 1 to 16 windows across LCD, expands stereo chorus width and sub-oscillators (0–127). |
 | **Knob 2 (`K2`)** *(SFW Mode)* | **Tone / Low-Pass Cutoff** | Adjusts analog filter brightness and harmonic richness. |
 | **Knob 2 (`K2`)** *(NSFW Mode)* | **Bitcrusher & Mosaic Decimator** | Modulates audio sample-rate reduction and mosaic censorship tile size (4×4 up to 16×16). |
 | **Knob 3 (`K3`)** | **TEMPO (Groove Tempo)** | Controls internal Eurodance rhythm section tempo (80 to 160 BPM). |
 | **Knob 4 (`K4`)** | **MIX (Master Balance)** | Adjusts mix balance between lead identity voice and backing rhythm section. |
-| **Encoder (`SELECT`)**| **Console Navigation** | Scrolls terminal history or selects sub-options in dialogue prompts. |
-| **Encoder (`ALGO`)**  | **Dance Variant Selector** | Toggles character animation routines and dance variations. |
+| **Encoder (`SELECT`)**| **Console Navigation & HUD** | When moved, toggles the Diagnostic HUD overlay and navigates terminal status. |
+| **Encoder (`ALGO`)**  | **Groove Pattern Selector** | Cycles 3 rhythm groove styles (`Eurodance 90s` ➔ `Rave Breakbeat` ➔ `Pumping House`). |
 | **Encoder (`PRESET`)**| **Identity Selector** | Cycles active persona: `Celery Man` ➔ `Tayne (BETA)` ➔ `Oyster Smiling`. |
 | **Buttons (`OCT-/+`)** | **Octave Transposition** | Shifts keyboard range across 6 octaves (F1 through G7). |
-| **Button (`FX`)**     | **Toggle Nude Tayne Mode** | Invokes NSFW confirmation modal (*"This is not suitable for work. Are you sure?"*). Press again to confirm; press `HOME` to abort. |
+| **Button (`FX`)**     | **Toggle Nude Tayne Mode** | Direct latch toggle; engages dynamic censor mosaic and lo-fi audio bitcrush saturation with a 1-second NSFW alert. Tap again to restore routine. |
 | **Button (`LFO`)**    | **Hat Wobble Macro** | Engages millinery resonance, modulating pitch LFO and headwear kinetic cycle. |
 | **Button (`ARP`)**    | **Flarhgunnstow Macro** | Activates rapid rhythmic arpeggiator and full-body dance overdrive. |
 | **Button (`PLAY`)**   | **Rhythm Transport** | Starts and pauses the built-in 90s Eurodance workplace backing track. |
-| **Button (`HOME`)**   | **Corporate Panic / Reset** | Instantly dismisses all modal dialogues, resets window cascading, and clears errors. |
+| **Button (`HOME`)**   | **Corporate Panic / Reset** | Instantly dismisses all modal dialogues, resets window cascading, and clears errors. Hold `HOME` + press `GLO` for Floppy Easter egg. |
 | **Button (`SAVE`)**   | **Print Oyster Smiling** | Generates a mock dot-matrix thermal printout of Oyster on screen. |
-| **Button (`EDIT`)**   | **Lotus 1-2-3 Boss Key** | Instantly replaces the entire screen with an authentic 1993 spreadsheet and silences audio. Press again to resume work. |
-| **Button (`SEQ`)**    | **Norton Disk Defrag** | Displays an animated 16-cluster memory defragmenter. Automatically exits back to desktop upon completion. |
-| **Button (`GLO`)**    | **Cinco Speech Soundboard** | Triggers vocalized LPC speech feedback (*"Yes, Paul."*, *"4d3d3d3 engaged."*). |
-| **Keys (`F3`–`G5`)**  | **27-Key Capacitive Keyboard** | Plays synthesizer voice lead notes or pitch-tracks speech synthesis phonemes. |
+| **Button (`EDIT`)**   | **Lotus 1-2-3 Boss Key** | Instantly replaces the entire screen with an authentic 1993 spreadsheet while synthesizer audio plays in background. Any key or knob turn wakes back to desktop. |
+| **Button (`SEQ`)**    | **Norton Disk Defrag** | Displays an animated 16-cluster memory defragmenter. Automatically optimizes 240 clusters, logs completion, and returns to dancers view. |
+| **Button (`GLO`)**    | **Cinco Speech Soundboard** | Cycles through 9 iconic LPC speech phrases. Hold `GLO` or press `GLO + EDIT` to toggle Diagnostic HUD. Press `HOME + GLO` (or every 8th press) to trigger `ERR 0xCE1E`. |
+| **Keys (`F3`–`G5`)**  | **27-Key Capacitive Keyboard** | Clean, non-velocity tactile touch response triggering lead synthesizer notes or chromatic speech phonemes. |
 
 ---
 
@@ -227,6 +227,7 @@ For in-depth architectural and developer documentation, consult the Cinco intern
 Should CINCO OS 2.5 encounter unexpected workplace friction, the terminal will post one of the following official Cinco status codes:
 
 * **`ERR_0x4D3D3D3` (Charisma Overflow):** Knob 1 turned too quickly; desktop window cascade exceeded maximum cognitive capacity of supervisor.
+* **`ERR 0xCE1E` (Floppy Drive Celery Stalk):** Celery stalk detected in 3.5" floppy drive. Triggered via `HOME + GLO` Easter egg.
 * **`ERR_0x0Y5T3R` (Printout Jam):** Continuous-feed tractor paper depleted or ink ribbon dried out during Oyster smiling rendering.
 * **`ERR_0x7A4N3_B3TA` (Entertayne Deficit):** Operator failed to nod head in rhythm with Tayne's high-energy cadence.
 * **`ERR_0x0BAD_W1F3` (Interruption Severed):** Outdated incoming domestic transmission detected and permanently suppressed.
