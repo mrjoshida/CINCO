@@ -80,6 +80,7 @@ if (typeof registerProcessor === "function") {
           ex.web_boot();
           this.ex = ex;
           this.sentWrites = ex.web_flash_writes_count();
+          this.publish();
           this.port.postMessage({ type: "ready", rate: ex.web_sample_rate() });
         } catch (err) {
           this.port.postMessage({ type: "error", message: String(err && err.message || err) });
