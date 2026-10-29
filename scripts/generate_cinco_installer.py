@@ -777,7 +777,7 @@ template = """<!doctype html>
         </div>
         <div class="hw-item">
           <span class="hw-lbl">Binary Package:</span>
-          <span class="hw-val">cinco.fwsc (610 KB, FM-1_925)</span>
+          <span class="hw-val">cinco.fwsc (610 KB, FM-1_433)</span>
         </div>
         <div class="hw-item">
           <span class="hw-lbl">OS Environment:</span>
@@ -1102,7 +1102,7 @@ const log = (msg) => {
 let image = null;
 const meta = {
   version: "v2.5",
-  product: "FM-1_925",
+  product: "FM-1_433",
   pkg: "../firmware/cinco.fwsc"
 };
 

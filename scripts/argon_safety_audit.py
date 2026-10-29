@@ -207,7 +207,7 @@ def main():
             f"PACKAGING INCOMPATIBILITY: Container model is '{pkg_model}' (identity: '{product_identity}'), "
             f"but physical FM-1 device reports model '{expected_device_model}'. "
             f"Official M-VAVE web updater and tools/fm1_install.py will reject this package with an 'InstallError: model mismatch' "
-            f"unless product identity starts with 'FM-1_' (e.g. 'FM-1_925') or installer is patched."
+            f"unless product identity starts with 'FM-1_' (e.g. 'FM-1_433') or installer is patched."
         )
         print(f"  [WARNING / BLOCKER] {warning_msg}")
         warnings.append(warning_msg)
