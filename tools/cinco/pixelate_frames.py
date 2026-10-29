@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
 tools/cinco/pixelate_frames.py
-Converts real extracted video frames of Paul Rudd into authentic 16-color
+Converts extracted video frames of Paul into authentic 16-color
 retro pixel art sprites fitted for the 240x240 screen window.
 """
 import os

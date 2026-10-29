@@ -38,9 +38,9 @@ Part No. 04-4D3D3D3-925                              Retail Boxed Edition (1995)
 
 Are your enterprise personnel suffering from terminal mid-afternoon spreadsheet lethargy? Does your open-plan cubicle farm lack digitized kinetic charisma? 
 
-Welcome to **CINCO IDENTITY GENERATOR 2.5™**, the premier corporate identity synthesizing suite engineered by **Cinco Business Systems, Inc.** specifically for the **M-VAVE FM-1 Synthesizer Terminal**. Based on the historic 2010 *Tim & Eric Awesome Show, Great Job!* documentary footage (*"Celery Man"*, Season 5 Episode 10), this custom firmware turns your pocket FM synthesizer into **Paul's Computer**: an interactive, playable musical instrument running **Paul's Computer OS 2.5**.
+Welcome to **CINCO IDENTITY GENERATOR 2.5™**, the premier corporate identity synthesizing suite engineered by **Cinco Business Systems, Inc.** specifically for the **M-VAVE FM-1 Synthesizer Terminal**. Engineered to the exacting specifications of Cinco Executive Workstations, this custom firmware turns your pocket FM synthesizer into **Paul's Computer**: an interactive, high-performance musical instrument running **Paul's Computer OS 2.5**.
 
-Unlike passive video players or modal dialogue menus, **Cinco 2.5 is an instrument first**. Every sketch routine is mapped directly to hardware controls: characters are synthesizer voice models, `4d3d3d3` is an analog macro encoder, `Nude Tayne` crushes audio bit-depth and mosaic-censors pixels simultaneously, and the robotic computer voice sings speech synthesis directly from the 27-key capacitive keyboard.
+Unlike passive terminal monitors or static office tools, **Cinco 2.5 is an instrument first**. Every sequence protocol is mapped directly to hardware controls: identity routines are synthesizer voice models, `4d3d3d3` is an analog macro encoder, `Nude Tayne` crushes audio bit-depth and mosaic-censors pixels simultaneously, and the corporate computer voice sings speech synthesis directly from the 27-key capacitive keyboard.
 
 ```
 +--------------------------------------------------------------------------+
@@ -249,6 +249,6 @@ Need corporate technical assistance? Cinco engineers are standing by on the info
 
 **Cinco Business Systems, Inc.** warrants the magnetic media and firmware image against physical defects for a period of thirty (30) days from retail receipt. Cinco does **not** warrant that the operation of Paul's Computer will be uninterrupted or that Tayne will satisfy all office entertainment requirements.
 
-Under no circumstances shall Cinco Corporation, Paul Rudd, or their respective subsidiaries be liable for disciplinary workplace action, involuntary toe-tapping, spontaneous hat wobbling, sudden flarhgunnstow outbreaks, or termination of employment resulting from unauthorized engagement of `Nude Tayne` during executive board meetings.
+Under no circumstances shall Cinco Corporation, Paul (Senior Managing Executive), or their respective subsidiaries be liable for disciplinary workplace action, involuntary toe-tapping, spontaneous hat wobbling, sudden flarhgunnstow outbreaks, or termination of employment resulting from unauthorized engagement of `Nude Tayne` during executive board meetings.
 
 *(C) Copyright 1993–1995, 2010 Cinco Business Systems, Inc. All Rights Reserved. Portions derived from Felucca (C) 2026 Leo Kuroshita / Hügelton Instruments under GNU GPL-3.0.*

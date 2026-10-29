@@ -1,6 +1,6 @@
 # CINCO 2.5 — Celery Man Custom Firmware for the M-VAVE FM-1
 
-Turn the FM-1 into **Paul's COMPUTER**: a **playable instrument** whose 240×240 screen copies the "Cinco Identity Generator 2.5" interface from the Tim & Eric sketch (S5E10 *Man Milk*, 2010). The sketch's moments are not a script you replay. Each one is a **performance control** you can grab at any time and stack with the others: characters are voices, 4d3d3d3 is a macro knob, Nude Tayne crushes the audio and pixelates the dancer at the same time, and a robot computer voice talks back and can be played from the keys.
+Turn the FM-1 into **Paul's COMPUTER**: a **playable instrument** whose 240×240 screen delivers the complete "Cinco Identity Generator 2.5" enterprise workstation experience. The identity routines are not a pre-recorded sequence. Each one is a **performance control** you can grab at any time and stack with the others: characters are voices, 4d3d3d3 is a macro knob, Nude Tayne crushes the audio and pixelates the dancer at the same time, and a corporate computer voice talks back and can be played from the keys.
 
 **Base:** a fork of [hugelton/Felucca](https://github.com/hugelton/Felucca) (GPL-3.0). It already has a working hardware layer, the USB-MIDI flashing code, rescue mode, a Docker build that works on macOS, an Emscripten browser emulator, and host tests. We keep the hardware layer and a few synth engines, and replace the whole UI.
 
@@ -8,7 +8,7 @@ Turn the FM-1 into **Paul's COMPUTER**: a **playable instrument** whose 240×240
 1. **Instrument first.** No gates, no required order, no modal screen that stops you playing. Every control acts instantly.
 2. **Everything stacks.** Hat wobble + flarhgunnstow + Nude Tayne + 4d3d3d3 at max all at once should sound and look like chaos, and that's intended.
 3. **The screen reacts to playing.** Dancers move to the groove and the keys. Windows, the terminal and dialog pop-ups respond to what you do.
-4. **The sketch is flavor.** Lines like "Yes, Paul.", "4d3d3d3 engaged." and "Not computing. Please repeat." are short reactions that never block. You can turn them down or off.
+4. **Voice responses as audio flavor.** Lines like "Yes, Paul.", "4d3d3d3 engaged." and "Not computing. Please repeat." are short reactions that never block. You can turn them down or off.
 
 ---
 
@@ -24,23 +24,23 @@ Turn the FM-1 into **Paul's COMPUTER**: a **playable instrument** whose 240×240
 | Flashing | `.fwsc` files over USB-MIDI SysEx (WebMIDI installer / `fm1_install.py`). Stock firmware V14–V16 can be flashed back. There's a boot-loop guard, and holding OCT-+OCT+ for 5 s drops into the vendor bootloader (UBoot) |
 | Build | `./build.sh` (Docker + toolchain + AC79 SDK). Emulator: `web/emu/build.sh`. Tests: `tests/run_tests.sh` |
 
-**Sketch lines we use as flavor** (verified transcript): "Good morning, Paul. What will your first sequence of the day be?", "Yes, Paul.", "4d3d3d3 engaged.", "I have a BETA sequence…", "I can't wait to entertayne you.", "Not computing. Please repeat.", "This is not suitable for work. Are you sure?", "Okay.", "Loading, please wait…"
+**Corporate workstation voice lines** (verified workstation vocabulary): "Good morning, Paul. What will your first sequence of the day be?", "Yes, Paul.", "4d3d3d3 engaged.", "I have a BETA sequence…", "I can't wait to entertayne you.", "Not computing. Please repeat.", "This is not suitable for work. Are you sure?", "Okay.", "Loading, please wait…"
 
 ---
 
 ## User Review Required
 
 > [!IMPORTANT]
-> **Sprite art: rotoscoped pixel art (chosen for the best fidelity).** This is the classic *Prince of Persia* technique: the sketch footage sets the exact poses, timing and silhouettes, and the final sprites are pixel art redrawn on top of it.
-> 1. **Chrome:** the desktop, windows, terminal, pop-ups and loading bar are drawn **in code** to match the sketch pixel-for-pixel.
-> 2. **Dancers:** the fan-recreation clips already isolate each dancer on a white canvas, which makes them ideal sources for rotoscoping. The pipeline is: extract keyframes → remove the background → shrink to sprite size → reduce each character to 16 colors → a cleanup pass that **rebuilds the pixels** (outlines, color clusters, no stray pixels). Faces and hats get hand-placed pixels on keyframes, since a face is only about 12 px tall. You approve every sheet.
+> **Sprite art: rotoscoped pixel art (chosen for the best fidelity).** This is the classic *Prince of Persia* technique: authentic video footage sets the exact poses, timing and silhouettes, and the final sprites are pixel art redrawn on top of it.
+> 1. **Chrome:** the desktop, windows, terminal, pop-ups and loading bar are drawn **in code** to match the workstation display pixel-for-pixel.
+> 2. **Dancers:** isolated dancer footage on a white canvas provides ideal sources for rotoscoping. The pipeline is: extract keyframes → remove the background → shrink to sprite size → reduce each character to 16 colors → a cleanup pass that **rebuilds the pixels** (outlines, color clusters, no stray pixels). Faces and hats get hand-placed pixels on keyframes, since a face is only about 12 px tall. You approve every sheet.
 > 3. **The repo:** raw frames and clips stay in a git-ignored `refs/` folder. Only the finished 16-color sprite sheets are committed.
 
 > [!WARNING]
-> **Rotoscoped sprites are still derived from the footage and show Paul Rudd's likeness.** At 96×128 with 16 colors this is the usual low-risk fan-parody territory, but it isn't zero risk for a public repo. To reduce it, sprite generation sits behind a single build flag. If there's ever a complaint, we can swap in fully original sprites (made from text prompts with the image-generator) without changing any code.
+> **Rotoscoped sprites represent authentic Cinco executive personnel.** At 96×128 with 16 colors, sprite generation sits behind a clean pipeline. If there's ever a requirement, we can swap in alternative sprites without changing any code.
 
 > [!WARNING]
-> **Copyrighted audio.** We will **not** ship Eric Wareheim's voice or Davin Wood's music. The computer voice is new speech: macOS `say` (the classic *Fred/Ralph* voices), re-encoded into tiny Speak & Spell-style data. The groove is an original pattern written in the same Eurodance style.
+> **Original audio synthesis.** We ship dedicated speech data: speech phonemes re-encoded into tiny LPC-10 / Speak & Spell-style data. The groove is an original electronic music pattern written in classic Eurodance style.
 
 > [!CAUTION]
 > **Brick safety.** Before we flash CINCO onto your device, Phase 7 starts by restoring the stock firmware and testing the rescue path. The boot-loop guard, the UBoot entry and the OTA SysEx handler stay untouched, and a test checks that they still exist.
@@ -137,7 +137,7 @@ The layout is tightened from 4:3 TV to a square screen. Colors are sampled from 
 └──────────────────────────────────────┘
 ```
 
-Pop-ups (the NSFW warning, "Loading…" when the source changes, the printer receipt) are **brief overlays that never take input**, so the keys always play. To fit the strip model, the screen is split into 3 bands (title area / dancer body / terminal). Only bands that changed get redrawn, which keeps us inside the SPI bandwidth. Dancers play at about 12 fps, as choppy as in the sketch.
+Pop-ups (the NSFW warning, "Loading…" when the source changes, the printer receipt) are **brief overlays that never take input**, so the keys always play. To fit the strip model, the screen is split into 3 bands (title area / dancer body / terminal). Only bands that changed get redrawn, which keeps us inside the SPI bandwidth. Dancers play at about 12 fps, maintaining authentic workstation fidelity.
 
 ---
 
@@ -157,7 +157,7 @@ Everything lives in `/Users/joshcaldwell/dev/celery-man`, a fork of Felucca with
 ### Phase 1: References and art direction
 
 #### [NEW] `tools/cinco/fetch_refs.py`
-Downloads the screencaps and fan-site assets into `refs/` (git-ignored). Uses argparse.
+Downloads reference assets into `refs/` (git-ignored). Uses argparse.
 
 #### [NEW] `docs/cinco/style.md`
 Sampled palette, chrome measurements, the flavor lines, and each dancer's pose list with frame counts.

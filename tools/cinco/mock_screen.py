@@ -2,7 +2,7 @@
 """
 tools/cinco/mock_screen.py
 Renders high-fidelity, authentic 240x240 CINCO 2.5 screens using real rotoscoped
-and pixelated character sprites from the sketch.
+and pixelated character sprites from the Cinco Identity Generator 2.5 suite.
 """
 
 import os
