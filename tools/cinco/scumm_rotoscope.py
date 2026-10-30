@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
 tools/cinco/scumm_rotoscope.py
-Converts real video clips of Celery Man / Tayne into authentic LucasArts/SCUMM style
+Converts real video clips of Celery Man / Tayne into authentic 16-color retro
 pixel-art sprite sheets and looping GIFs.
 
 Techniques:

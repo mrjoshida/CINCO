@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
 tools/cinco/gen_sprites.py
-Converts SCUMM/LucasArts-style sprite frames from assets/scumm_sprites/ into
+Converts 16-color rotoscoped sprite frames from assets/scumm_sprites/ into
 compact 4-bit RLE C arrays in firmware/src/cinco_assets.h.
 """
 

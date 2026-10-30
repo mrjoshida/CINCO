@@ -106,7 +106,7 @@ The console display renders a faithful recreation of **CINCO OS 2.5**:
 | +---------------------------------------------------------------------+ |
 | |                                                                     | |
 | |                         /\_/\                                       | |
-| |                        ( o.o )   [ 118px LucasArts SCUMM ]          | |
+| |                        ( o.o )   [ 118px 16-Color        ]          | |
 | |                         > ^ <    [ Rotoscoped Dancer     ]          | |
 | |                        /|   |\                                      | |
 | |                                                                     | |

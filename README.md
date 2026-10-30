@@ -59,7 +59,7 @@ Unlike passive terminal monitors or static office tools, **Cinco 2.5 is an instr
 ## RETAIL HIGHLIGHTS & KEY TECHNOLOGIES
 
 * **Proprietary 4d3d3d3™ Cascading Window Architecture:** Rotate Knob 1 (`K1`) to duplicate and cascade up to 16 overlapping desktop windows in real-time across the 240×240 LCD while expanding stereo chorus width and harmonic sub-oscillators.
-* **Rotoscoped SCUMM Engine Sprites:** Every dancer is meticulously rotoscoped frame-by-frame from original footage into authentic 16-color 96×128 pixel sprites, animated at 12–15 FPS using color-keyed RLE compression.
+* **Rotoscoped 16-Color Pixel Dancers:** Every dancer is meticulously rotoscoped frame-by-frame from original footage into authentic 16-color 96×128 pixel sprites, animated at 12–15 FPS using color-keyed RLE compression.
 * **The Full Identity Roster:**
   * **Celery Man:** The classic corporate dancer in dark business attire. Drives a lush multi-oscillator analog brass synthesizer.
   * **Oyster Smiling:** A soothing, meditative portrait providing moral support during quarterly ledger reconciliations.
@@ -97,7 +97,7 @@ Unlike passive terminal monitors or static office tools, **Cinco 2.5 is an instr
 
 ---
 
-### Digitized Rotoscoped SCUMM Sprites
+### Digitized Rotoscoped Sprites
 
 | Celery Man | Tayne (BETA) | Tayne Hat Wobble | Tayne Flarhgunnstow | Oyster Smiling |
 |:---:|:---:|:---:|:---:|:---:|
