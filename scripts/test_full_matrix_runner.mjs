@@ -91,6 +91,7 @@ async function run() {
         "0_2_0": "Celery Man - FLARHGUNNSTOW!",
         "0_2_1": "NUDE CELERY - FLARHGUNNSTOW",
 
+
         // Oyster (1)
         "1_0_0": "Oyster Smiling",
         "1_0_1": "NUDE OYSTER",
@@ -100,7 +101,7 @@ async function run() {
         "1_2_1": "NUDE OYSTER - FLARHGUNNSTOW",
 
         // Tayne (2)
-        "2_0_0": "Tayne (BETA)",
+        "2_0_0": "Tayne Classic",
         "2_0_1": "NUDE TAYNE",
         "2_1_0": "Tayne - Hat Wobble",
         "2_1_1": "NUDE TAYNE - Hat Wobble",
@@ -108,12 +109,12 @@ async function run() {
         "2_2_1": "NUDE TAYNE - FLARHGUNNSTOW",
 
         // Talk (3)
-        "3_0_0": "Speech Synthesizer",
-        "3_0_1": "NUDE SPEECH SYNTH",
-        "3_1_0": "Celery Man - Hat Wobble",
-        "3_1_1": "NUDE CELERY - Hat Wobble",
-        "3_2_0": "Celery Man - FLARHGUNNSTOW!",
-        "3_2_1": "NUDE CELERY - FLARHGUNNSTOW",
+        "3_0_0": "Computer Voice",
+        "3_0_1": "NUDE COMPUTER VOICE",
+        "3_1_0": "Computer Voice - Wobble",
+        "3_1_1": "NUDE VOICE - Hat Wobble",
+        "3_2_0": "Computer Voice - FLARH!",
+        "3_2_1": "NUDE VOICE - FLARHGUNNSTOW",
     };
 
     const matrixResults = [];
@@ -209,7 +210,7 @@ async function run() {
         { mode: 1, name: "Natural Minor", quant: 1, scale: 2 },
         { mode: 2, name: "Major", quant: 1, scale: 1 },
         { mode: 3, name: "Minor Pentatonic", quant: 1, scale: 6 },
-        { mode: 4, name: "Blues / Dorian", quant: 1, scale: 3 },
+        { mode: 4, name: "Blues / Dorian", quant: 1, scale: 12 },
     ];
 
     const scaleResults = [];
@@ -244,7 +245,7 @@ async function run() {
         const curScale = ex.web_cinco_get_scale_mode();
         const atk = ex.web_trk0_p(1);
         const scale = ex.web_trk0_p(26);
-        const pass = (curEnv === 1 && curScale === 4 && atk === 75 && scale === 3);
+        const pass = (curEnv === 1 && curScale === 4 && atk === 75 && scale === 12);
         persistResults.push({
             source: CHAR_NAMES[src],
             curEnv,

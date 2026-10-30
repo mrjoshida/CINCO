@@ -56,6 +56,10 @@ jobs:
           python3 scripts/test_full_matrix.py
           python3 scripts/test_defrag_toggle.py
           python3 scripts/test_display_budget.py
+          node scripts/test_firmware_features.mjs build/emu/felucca.wasm
+          node scripts/test_defrag_sequencer.mjs build/emu/felucca.wasm
+          node scripts/test_paul_interruption_fix.mjs build/emu/felucca.wasm
+          node scripts/test_emu_script_syntax.mjs
 
       - name: Deploy to GitHub Pages branch
         uses: peaceiris/actions-gh-pages@v4

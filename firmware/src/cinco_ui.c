@@ -332,8 +332,8 @@ static void ui_input(void)
         if (perf.coffee_level > 0)
             perf.coffee_level--;
     } else {
-        /* Idle check: 20 seconds of inactivity triggers screensaver (inhibited in Disk Defrag Sequencer) */
-        if (perf.view_mode != 1 && (fm1_ms - perf.last_activity_ms > 20000u)) {
+        /* Idle check: 90 seconds of inactivity triggers screensaver (inhibited in Disk Defrag Sequencer) */
+        if (perf.view_mode != 1 && (fm1_ms - perf.last_activity_ms > 90000u)) {
             perf.screensaver = 1;
         }
         /* In idle, slowly refill coffee */

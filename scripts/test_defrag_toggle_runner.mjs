@@ -90,7 +90,7 @@ async function run() {
     }
 
     // Helper to test exit from defrag
-    function testDefragExit(testName, actionFn, actionDesc) {
+    function testDefragExit(testName, actionFn, actionDesc, expectExit = false) {
         ex.web_cinco_set_view(1);
         renderMs(15, false);
         const viewBefore = ex.web_cinco_get_view();
@@ -101,7 +101,7 @@ async function run() {
         const viewAfter = ex.web_cinco_get_view();
         const titleAfter = readCString(mem, ex.web_cinco_get_title());
 
-        const pass = (viewBefore === 1 && viewAfter === 0 && titleBefore === "Disk Defragmenter - C:" && titleAfter !== "Disk Defragmenter - C:");
+        const pass = expectExit ? (viewBefore === 1 && viewAfter === 0 && titleAfter !== "Disk Defragmenter - C:") : (viewBefore === 1 && viewAfter === 1 && titleAfter === "Disk Defragmenter - C:");
         results.push({
             name: testName,
             action: actionDesc,
@@ -113,7 +113,7 @@ async function run() {
         });
     }
 
-    // Test 2: B_FX clears defrag
+    // Test 2: B_FX persists defrag
     testDefragExit("B_FX Exit", () => pressButton(BTN_MAP.B_FX), "Press B_FX (NSFW toggle)");
 
     // Test 3: B_LFO clears defrag
@@ -123,7 +123,7 @@ async function run() {
     testDefragExit("B_ARP Exit", () => pressButton(BTN_MAP.B_ARP), "Press B_ARP (Flarhgunnstow)");
 
     // Test 5: B_HOME clears defrag
-    testDefragExit("B_HOME Exit", () => pressButton(BTN_MAP.B_HOME), "Press B_HOME (Reset/Home)");
+    testDefragExit("B_HOME Exit", () => pressButton(BTN_MAP.B_HOME), "Press B_HOME (Reset/Home)", true);
 
     // Test 6: B_SAVE clears defrag
     testDefragExit("B_SAVE Exit", () => pressButton(BTN_MAP.B_SAVE), "Press B_SAVE (Printout/Save)");

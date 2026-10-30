@@ -58,21 +58,21 @@ class TestDefragToggle(unittest.TestCase):
         res = self.results.get("B_FX Exit")
         self.assertIsNotNone(res, "B_FX Exit result not found")
         self.assertEqual(res.get("viewBefore"), 1)
-        self.assertEqual(res.get("viewAfter"), 0)
+        self.assertEqual(res.get("viewAfter"), 1)
         self.assertTrue(res.get("pass"))
 
     def test_b_lfo_exit_defrag(self):
         res = self.results.get("B_LFO Exit")
         self.assertIsNotNone(res, "B_LFO Exit result not found")
         self.assertEqual(res.get("viewBefore"), 1)
-        self.assertEqual(res.get("viewAfter"), 0)
+        self.assertEqual(res.get("viewAfter"), 1)
         self.assertTrue(res.get("pass"))
 
     def test_b_arp_exit_defrag(self):
         res = self.results.get("B_ARP Exit")
         self.assertIsNotNone(res, "B_ARP Exit result not found")
         self.assertEqual(res.get("viewBefore"), 1)
-        self.assertEqual(res.get("viewAfter"), 0)
+        self.assertEqual(res.get("viewAfter"), 1)
         self.assertTrue(res.get("pass"))
 
     def test_b_home_exit_defrag(self):
@@ -86,21 +86,21 @@ class TestDefragToggle(unittest.TestCase):
         res = self.results.get("B_SAVE Exit")
         self.assertIsNotNone(res, "B_SAVE Exit result not found")
         self.assertEqual(res.get("viewBefore"), 1)
-        self.assertEqual(res.get("viewAfter"), 0)
+        self.assertEqual(res.get("viewAfter"), 1)
         self.assertTrue(res.get("pass"))
 
     def test_preset_enc_cw_exit_defrag(self):
         res = self.results.get("Preset Enc CW")
         self.assertIsNotNone(res, "Preset Enc CW result not found")
         self.assertEqual(res.get("viewBefore"), 1)
-        self.assertEqual(res.get("viewAfter"), 0)
+        self.assertEqual(res.get("viewAfter"), 1)
         self.assertTrue(res.get("pass"))
 
     def test_preset_enc_ccw_exit_defrag(self):
         res = self.results.get("Preset Enc CCW")
         self.assertIsNotNone(res, "Preset Enc CCW result not found")
         self.assertEqual(res.get("viewBefore"), 1)
-        self.assertEqual(res.get("viewAfter"), 0)
+        self.assertEqual(res.get("viewAfter"), 1)
         self.assertTrue(res.get("pass"))
 
 

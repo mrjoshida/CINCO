@@ -450,7 +450,7 @@ In addition to identity modulation, Cinco Corporation has supplied full workplac
   - Press `SEQ` or `HOME` to return to the active dancers desktop. Unlike early prototypes, the defragmenter never auto-exits; it remains active as a full sequencer workstation until you choose to exit.
 
 ### 3. Cinco "After Dark" Flying Celery Screensaver
-* **Function:** Engages automatically when no keyboard keys or rotary knobs are manipulated for twenty (20) seconds.
+* **Function:** Engages automatically when no keyboard keys or rotary knobs are manipulated for ninety (90) seconds.
 * **Visuals:** Blank starfield with four (4) animated pixel celery stalks with flapping wings tumbling across the terminal (`"Cinco After Dark (c) 1991"`).
 * **Wake:** Touching any physical control wakes the console immediately without latency or missed musical notes.
 
