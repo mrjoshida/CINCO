@@ -25,8 +25,14 @@
   --win-blue-light: #1084d0;
   --win-selection: #000080;
   --win-text: #000000;
-  --body: #1d1d1f; --tray: #141415; --part: #2a2a2d; --edge: #3a3a3e; --label: #d6d6d8;
-  --lit: #fff4d6; --green: #5fe08a; color-scheme: light;
+  --body: #d4d0c8;
+  --tray: #b8b6a8;
+  --part: #dfdfdf;
+  --edge: #808080;
+  --label: #000080;
+  --lit: #00ff44;
+  --green: #00ff88;
+  color-scheme: light;
 }
 
 * { box-sizing: border-box; }
@@ -313,7 +319,8 @@ a:hover { text-decoration: underline; }
 }
 
 .client-inset {
-  background: #101012;
+  background: #c0c0c0;
+  border: 2px inset;
   border-top: 2px solid var(--win-dark);
   border-left: 2px solid var(--win-dark);
   border-right: 2px solid var(--win-light);
@@ -373,34 +380,119 @@ a:hover { text-decoration: underline; }
 }
 
 .face { transition: fill .05s; }
-.dim .face.btn { fill: #3a3934; }
-.lit .face.btn { fill: var(--lit); }
-.lit text { fill: #1d1d1f; }
-.green .face.btn { fill: var(--green); }
-.green text { fill: #0d2414; }
-.face.key { fill: #0c0c0d; stroke: var(--edge); stroke-width: 1.5; }
-.slit { fill: #3a3a3c; transition: fill .05s; }
-.dim .slit { fill: #77777b; }
-.lit .slit { fill: #ececee; filter: drop-shadow(0 0 3px rgba(255, 255, 255, .6)); }
 
-@keyframes breath-btn { 0%, 100% { fill: #3a3934; } 50% { fill: #d8cfb6; } }
-@keyframes breath-slit { 0%, 100% { fill: #3a3a3c; } 50% { fill: #c8c8ca; } }
-@keyframes breath-btn-lo { 0%, 100% { fill: #3a3934; } 50% { fill: #aca592; } }
-@keyframes breath-slit-lo { 0%, 100% { fill: #3a3a3c; } 50% { fill: #a1a1a3; } }
-.breath .face.btn { animation: breath-btn 1.13s ease-in-out infinite; }
-.breath .slit { animation: breath-slit 1.13s ease-in-out infinite; }
-.dimlo .breath .face.btn { animation-name: breath-btn-lo; }
-.dimlo .breath .slit { animation-name: breath-slit-lo; }
-@media (prefers-reduced-motion: reduce) {
-  .breath .face.btn, .breath .slit { animation: none; }
-  .breath .face.btn { fill: #aca592; }
-  .breath .slit { fill: #a1a1a3; }
+/* Windows 98 3D Tactile Push Buttons */
+.btn-g .face.btn { fill: #dfdfdf; }
+.btn-g .btn-bevel-hi { stroke: #ffffff; }
+.btn-g .btn-bevel-sh { stroke: #404040; }
+
+.btn-g.held .face.btn,
+.btn-g.lit .face.btn,
+.btn-g.latched .face.btn {
+  fill: #b4b4b4;
 }
 
-.mid .slit { fill: #9a9a9e; }
-.dimlo .mid .slit { fill: #8a8a8e; }
-.held .face { stroke: var(--lit); stroke-width: 3; }
-.latched .face { stroke: #79b8ff; stroke-width: 3; }
+.btn-g.held .btn-bevel-hi,
+.btn-g.lit .btn-bevel-hi,
+.btn-g.latched .btn-bevel-hi {
+  stroke: #404040;
+}
+
+.btn-g.held .btn-bevel-sh,
+.btn-g.lit .btn-bevel-sh,
+.btn-g.latched .btn-bevel-sh {
+  stroke: #ffffff;
+}
+
+.btn-g.held text,
+.btn-g.latched text {
+  transform: translate(1px, 1px);
+}
+
+/* Embedded 1990s Jewel LED Pip */
+.led-rim {
+  stroke: #404040;
+  stroke-width: 0.8;
+}
+
+.led-pip {
+  fill: #252818;
+  transition: fill .05s, filter .05s;
+}
+
+.led-pip.rec {
+  fill: #301010;
+}
+
+.lit .led-pip {
+  fill: #00ff44;
+  filter: drop-shadow(0 0 3px #00ff44) drop-shadow(0 0 5px rgba(0, 255, 68, 0.7));
+}
+
+.green .led-pip {
+  fill: #00ff88;
+  filter: drop-shadow(0 0 3px #00ff88) drop-shadow(0 0 5px rgba(0, 255, 136, 0.7));
+}
+
+.lit .led-pip.rec {
+  fill: #ff2200;
+  filter: drop-shadow(0 0 3px #ff2200) drop-shadow(0 0 6px rgba(255, 34, 0, 0.8));
+}
+
+.dim .led-pip { fill: #384224; }
+.dim .led-pip.rec { fill: #4a1515; }
+
+@keyframes breath-pip {
+  0%, 100% { fill: #252818; filter: none; }
+  50% { fill: #00ff44; filter: drop-shadow(0 0 3px #00ff44); }
+}
+@keyframes breath-pip-rec {
+  0%, 100% { fill: #301010; filter: none; }
+  50% { fill: #ff2200; filter: drop-shadow(0 0 3px #ff2200); }
+}
+.breath .led-pip { animation: breath-pip 1.13s ease-in-out infinite; }
+.breath .led-pip.rec { animation-name: breath-pip-rec; }
+
+/* 1998 Computer Keyboard Matrix Keys */
+.key-g .face.key {
+  fill: #f8f7f0;
+  transition: fill .05s;
+}
+.key-g.black .face.key {
+  fill: #2b2d32;
+}
+
+.key-g.held .face.key { fill: #dedcd4; }
+.key-g.black.held .face.key { fill: #1c1d20; }
+
+.key-g.held .key-bevel-hi { stroke: #808080; }
+.key-g.held .key-bevel-sh { stroke: #ffffff; }
+.key-g.black.held .key-bevel-hi { stroke: #151618; }
+.key-g.black.held .key-bevel-sh { stroke: #4a4d55; }
+
+/* Center Slit LEDs on Keys */
+.slit { fill: #606064; transition: fill .05s, filter .05s; }
+.dim .slit { fill: #88888c; }
+.lit .slit, .held .slit {
+  fill: #ffaa00;
+  filter: drop-shadow(0 0 3px #ffaa00) drop-shadow(0 0 5px rgba(255, 170, 0, 0.7));
+}
+.mid .slit {
+  fill: #00eeff;
+  filter: drop-shadow(0 0 3px #00eeff);
+}
+@keyframes breath-slit {
+  0%, 100% { fill: #606064; filter: none; }
+  50% { fill: #ffaa00; filter: drop-shadow(0 0 4px #ffaa00); }
+}
+.breath .slit { animation: breath-slit 1.13s ease-in-out infinite; }
+.dimlo .breath .slit { animation-name: breath-slit; }
+@media (prefers-reduced-motion: reduce) {
+  .breath .led-pip, .breath .slit { animation: none; }
+}
+
+.held .face.btn { stroke: #404040; stroke-width: 1; }
+.latched .face.btn { stroke: #000080; stroke-width: 1.5; }
 
 /* Keyboard Instructions Bar */
 .keys-bar {
@@ -2021,12 +2113,12 @@ const B = {
 
 const EN = {
   SELECT: 0,
-  ALGORITHM: 1, PARAM: 1,
-  PRESETS: 2, PRESET: 2,
-  "KNOB 1": 3, MACRO: 3,
-  "KNOB 2": 4, CUTOFF: 4, TONE: 4,
-  "KNOB 3": 5, TEMPO: 5,
-  "KNOB 4": 6, RESONANCE: 6, MIX: 6
+  ALGO: 1, ALGORITHM: 1, PARAM: 1,
+  PRESET: 2, PRESETS: 2,
+  K1: 3, "KNOB 1": 3, MACRO: 3,
+  K2: 4, "KNOB 2": 4, CUTOFF: 4, TONE: 4,
+  K3: 5, "KNOB 3": 5, TEMPO: 5,
+  K4: 6, "KNOB 4": 6, RESONANCE: 6, MIX: 6
 };
 
 const PLAY_GREEN = 14;
@@ -2040,8 +2132,16 @@ const STORE = "felucca-emu-flash", KNOBS_ON = "felucca-emu-knobs", KNOB_MODE = "
 // The authentic physical M-VAVE FM-1 Hardware Layout
 const ROW1 = ["FX", "SCL", "ENV", "LFO", "EDIT", "GLO"];
 const ROW2 = ["HOME", "SAVE", "ARP", "SEQ", "PLAY", "REC"];
-const KNOBS = ["MASTER", "SELECT", "PRESETS", "ALGORITHM", "KNOB 1", "KNOB 2", "KNOB 3", "KNOB 4"];
-const KNOB_SUBS = { "KNOB 1": "MACRO", "KNOB 2": "CUTOFF", "KNOB 3": "TEMPO", "KNOB 4": "RESONANCE" };
+const KNOBS = ["MASTER", "SELECT", "ALGO", "PRESET", "K1", "K2", "K3", "K4"];
+const KNOB_SUBS = {
+  SELECT: "CHAR",
+  ALGO: "GROOVE", ALGORITHM: "GROOVE",
+  PRESET: "", PRESETS: "",
+  K1: "4d3d3d3", "KNOB 1": "4d3d3d3",
+  K2: "CUTOFF", "KNOB 2": "CUTOFF",
+  K3: "TEMPO", "KNOB 3": "TEMPO",
+  K4: "MIX", "KNOB 4": "MIX"
+};
 
 const LAYOUTS = {
   wide: {
@@ -2101,14 +2201,69 @@ function build(name) {
   for (const d of device.querySelectorAll(".hit")) d.remove();
   knobs.length = buttons.length = keys.length = 0;
 
-  // Enclosure chassis
-  el("rect", { x: 4, y: 4, width: L.w - 8, height: L.h - 8, rx: 40, fill: "var(--body)" });
-  for (const [x, y, w, h] of L.trays) el("rect", { x, y, width: w, height: h, rx: 14, fill: "var(--tray)" });
+  // Molded 3D raised chassis rect (fill: #d4d0c8, stroke #ffffff on top/left, #404040 on bottom/right)
+  el("rect", { x: 4, y: 4, width: L.w - 8, height: L.h - 8, rx: 16, fill: "var(--body)", stroke: "#ffffff", "stroke-width": 2 });
+  el("path", { d: `M ${L.w - 4} 20 L ${L.w - 4} ${L.h - 20} Q ${L.w - 4} ${L.h - 4} ${L.w - 20} ${L.h - 4} L 20 ${L.h - 4}`, fill: "none", stroke: "#404040", "stroke-width": 2 });
 
-  // 240x240 LCD display inset
+  // 4 corner chassis screw rivets (+) in 3D bevel
+  const screw = (cx, cy) => {
+    const g = el("g", {});
+    el("circle", { cx, cy, r: 7.5, fill: "#b5b3a3", stroke: "#404040", "stroke-width": 1 }, g);
+    el("circle", { cx, cy, r: 6, fill: "#d4d0c8", stroke: "#ffffff", "stroke-width": 1 }, g);
+    el("line", { x1: cx - 3.5, y1: cy, x2: cx + 3.5, y2: cy, stroke: "#505050", "stroke-width": 1.5, "stroke-linecap": "round" }, g);
+    el("line", { x1: cx, y1: cy - 3.5, x2: cx, y2: cy + 3.5, stroke: "#505050", "stroke-width": 1.5, "stroke-linecap": "round" }, g);
+  };
+  screw(24, 24);
+  screw(L.w - 24, 24);
+  screw(24, L.h - 24);
+  screw(L.w - 24, L.h - 24);
+
+  // Molded cooling louvers/vents in top corners (4 recessed horizontal slits)
+  const louvers = (x, y, w) => {
+    const g = el("g", {});
+    for (let i = 0; i < 4; i++) {
+      const ly = y + i * 5;
+      el("rect", { x, y: ly, width: w, height: 2.5, rx: 1, fill: "#88867a" }, g);
+      el("line", { x1: x, y1: ly, x2: x + w, y2: ly, stroke: "#404040", "stroke-width": 0.8 }, g);
+      el("line", { x1: x, y1: ly + 2.5, x2: x + w, y2: ly + 2.5, stroke: "#ffffff", "stroke-width": 0.8 }, g);
+    }
+  };
+  louvers(L.w > 700 ? 54 : 42, 18, 50);
+  louvers(L.w - (L.w > 700 ? 104 : 92), 18, 50);
+
+  // Debossed corporate branding silkscreen with 1px white bottom highlight
+  const bx = (L.w > 700 ? 766 : L.w / 2);
+  const by1 = (L.w > 700 ? 21 : 32);
+  const by2 = (L.w > 700 ? 33 : 44);
+  el("text", { x: bx, y: by1 + 1, "text-anchor": "middle", "font-family": SANS, "font-size": 11, "font-weight": 700, fill: "#ffffff", "letter-spacing": ".07em" }).textContent = "CINCO BUSINESS SYSTEMS — FM-1 SYNTHESIZER WORKSTATION";
+  el("text", { x: bx, y: by1, "text-anchor": "middle", "font-family": SANS, "font-size": 11, "font-weight": 700, fill: "#000080", "letter-spacing": ".07em" }).textContent = "CINCO BUSINESS SYSTEMS — FM-1 SYNTHESIZER WORKSTATION";
+  el("text", { x: bx, y: by2 + 1, "text-anchor": "middle", "font-family": SANS, "font-size": 9.5, "font-weight": 700, fill: "#ffffff", "letter-spacing": ".05em" }).textContent = "MODEL NO. FM-1_555 | REV 2.5";
+  el("text", { x: bx, y: by2, "text-anchor": "middle", "font-family": SANS, "font-size": 9.5, "font-weight": 700, fill: "#000080", "letter-spacing": ".05em" }).textContent = "MODEL NO. FM-1_555 | REV 2.5";
+
+  // Trays: Recessed 3D sunken wells (fill: #b5b3a3, top/left shadow #404040, bottom/right highlight #ffffff)
+  for (const [x, y, w, h] of L.trays) {
+    el("rect", { x, y, width: w, height: h, rx: 12, fill: "#b5b3a3" });
+    el("path", { d: `M ${x + w - 12} ${y} L ${x + 12} ${y} Q ${x} ${y} ${x} ${y + 12} L ${x} ${y + h - 12}`, fill: "none", stroke: "#404040", "stroke-width": 2 });
+    el("path", { d: `M ${x + 12} ${y + h} L ${x + w - 12} ${y + h} Q ${x + w} ${y + h} ${x + w} ${y + h - 12} L ${x + w} ${y + 12}`, fill: "none", stroke: "#ffffff", "stroke-width": 2 });
+  }
+
+  // 240x240 LCD display inset: Framed in authentic Windows 98 sunken CRT-monitor well with 3D beveled frame
   const [sx, sy, ss] = L.screen;
-  el("rect", { x: sx, y: sy, width: ss, height: ss, rx: 18, fill: "#0b0b0c" });
   const inset = ss / 32;
+
+  // Outer bezel frame
+  el("rect", { x: sx - 4, y: sy - 18, width: ss + 8, height: ss + 24, rx: 8, fill: "#b5b3a3", stroke: "#ffffff", "stroke-width": 1.5 });
+  el("path", { d: `M ${sx + ss + 4} ${sy - 10} L ${sx + ss + 4} ${sy + ss + 6} L ${sx - 4} ${sy + ss + 6}`, fill: "none", stroke: "#404040", "stroke-width": 2 });
+
+  // Top badge: CINCO COLOR DISPLAY TERMINAL — 240×240
+  el("text", { x: sx + ss / 2, y: sy - 5, "text-anchor": "middle", "font-family": SANS, "font-size": 8.5, "font-weight": 700, fill: "#ffffff", "letter-spacing": ".05em" }).textContent = "CINCO COLOR DISPLAY TERMINAL — 240×240";
+  el("text", { x: sx + ss / 2, y: sy - 6, "text-anchor": "middle", "font-family": SANS, "font-size": 8.5, "font-weight": 700, fill: "#000080", "letter-spacing": ".05em" }).textContent = "CINCO COLOR DISPLAY TERMINAL — 240×240";
+
+  // 3D beveled sunken well frame (#808080 -> #404040 -> #000000)
+  el("rect", { x: sx - 1, y: sy - 1, width: ss + 2, height: ss + 2, rx: 6, fill: "#808080" });
+  el("rect", { x: sx, y: sy, width: ss, height: ss, rx: 4, fill: "#404040" });
+  el("rect", { x: sx + inset - 2, y: sy + inset - 2, width: ss - 2 * inset + 4, height: ss - 2 * inset + 4, rx: 2, fill: "#000000" });
+
   Object.assign(canvas.style, {
     left: `${(sx + inset) / L.w * 100}%`, top: `${(sy + inset) / L.h * 100}%`,
     width: `${(ss - 2 * inset) / L.w * 100}%`, height: `${(ss - 2 * inset) / L.h * 100}%`
@@ -2121,27 +2276,79 @@ function build(name) {
     });
   }
 
-  // Knobs: Round rotary dials with pointer rotation and DotGothic16 silkscreen labels
+  // Knobs: Peak 1990s audio gear / Windows 98 3D rotary dials
   KNOBS.forEach((n, i) => {
     const [x, y, r] = L.knobs[i], g = el("g", {});
-    el("circle", { cx: x, cy: y, r: r + 5, fill: "var(--tray)" }, g);
-    el("circle", { cx: x, cy: y, r, fill: "var(--part)", stroke: "var(--edge)", "stroke-width": 2 }, g);
-    const ind = el("line", { x1: x, y1: y - r + 5, x2: x, y2: y - r + 14, stroke: "var(--label)", "stroke-width": 3, "stroke-linecap": "round" }, g);
-    label(g, x, y - r - 12, n, 16, DOT);
+    // Outer sunken circular well (fill: #9f9d90; stroke: #404040; stroke-width: 1.5;)
+    el("circle", { cx: x, cy: y, r: r + 6, fill: "#9f9d90", stroke: "#404040", "stroke-width": 1.5 }, g);
+    el("path", { d: `M ${x - r - 5} ${y} A ${r + 6} ${r + 6} 0 0 1 ${x + r + 5} ${y}`, fill: "none", stroke: "#303030", "stroke-width": 1.5 }, g);
+    el("path", { d: `M ${x + r + 5} ${y} A ${r + 6} ${r + 6} 0 0 1 ${x - r - 5} ${y}`, fill: "none", stroke: "#ffffff", "stroke-width": 1.5 }, g);
+
+    // Raised 3D cylindrical dial cap: base circle in #dfdfdf with smooth 3D bevel
+    el("circle", { cx: x, cy: y, r, fill: "#dfdfdf" }, g);
+    el("path", { d: `M ${x - r * 0.7} ${y + r * 0.7} A ${r} ${r} 0 0 1 ${x + r * 0.7} ${y - r * 0.7}`, fill: "none", stroke: "#ffffff", "stroke-width": 2 }, g);
+    el("path", { d: `M ${x + r * 0.7} ${y - r * 0.7} A ${r} ${r} 0 0 1 ${x - r * 0.7} ${y + r * 0.7}`, fill: "none", stroke: "#404040", "stroke-width": 2 }, g);
+
+    // Radial tick marks / knurling detents around perimeter
+    for (let a = 0; a < 360; a += 30) {
+      const rad = a * Math.PI / 180;
+      const x1 = x + Math.cos(rad) * (r - 1.5);
+      const y1 = y + Math.sin(rad) * (r - 1.5);
+      const x2 = x + Math.cos(rad) * (r - 4.5);
+      const y2 = y + Math.sin(rad) * (r - 4.5);
+      el("line", { x1, y1, x2, y2, stroke: "#808080", "stroke-width": 1 }, g);
+    }
+
+    // Center medallion cap with 3D beveled ring
+    const mr = r * 0.52;
+    el("circle", { cx: x, cy: y, r: mr, fill: "#cccccc", stroke: "#808080", "stroke-width": 1 }, g);
+    el("circle", { cx: x, cy: y, r: mr - 1, fill: "#dfdfdf" }, g);
+    el("path", { d: `M ${x - mr * 0.7} ${y + mr * 0.7} A ${mr} ${mr} 0 0 1 ${x + mr * 0.7} ${y - mr * 0.7}`, fill: "none", stroke: "#ffffff", "stroke-width": 1.2 }, g);
+    el("path", { d: `M ${x + mr * 0.7} ${y - mr * 0.7} A ${mr} ${mr} 0 0 1 ${x - mr * 0.7} ${y + mr * 0.7}`, fill: "none", stroke: "#505050", "stroke-width": 1.2 }, g);
+
+    // Bold indicator pointer (line from y - r + 3 to y - r * 0.45, stroke: #000080; stroke-width: 3.5; stroke-linecap: round;)
+    const ind = el("line", { x1: x, y1: y - r + 3, x2: x, y2: y - r * 0.45, stroke: "#000080", "stroke-width": 3.5, "stroke-linecap": "round" }, g);
+
+    // Primary label with 1px white bottom highlight
+    el("text", { x, y: y - r - 9, "text-anchor": "middle", "font-family": DOT, "font-size": 14, "font-weight": 700, fill: "#ffffff", "letter-spacing": ".04em" }, g).textContent = n;
+    el("text", { x, y: y - r - 10, "text-anchor": "middle", "font-family": DOT, "font-size": 14, "font-weight": 700, fill: "#000080", "letter-spacing": ".04em" }, g).textContent = n;
+
+    // Sub-label in crisp 11px uppercase (4d3d3d3, CUTOFF, TEMPO, MIX, CHAR, GROOVE)
     const sub = KNOB_SUBS[n];
-    if (sub) label(g, x, y + r + 16, sub, 12, DOT);
-    el("circle", { cx: x, cy: y, r: r + 12, fill: "transparent" }, g);
+    if (sub) {
+      el("text", { x, y: y + r + 16, "text-anchor": "middle", "font-family": SANS, "font-size": 11, "font-weight": 700, fill: "#ffffff", "letter-spacing": ".04em" }, g).textContent = sub;
+      el("text", { x, y: y + r + 15, "text-anchor": "middle", "font-family": SANS, "font-size": 11, "font-weight": 700, fill: "#000080", "letter-spacing": ".04em" }, g).textContent = sub;
+    }
+
+    el("circle", { cx: x, cy: y, r: r + 14, fill: "transparent" }, g);
     const fullName = sub ? `${n} (${sub})` : n;
     knobs.push({ g, ind, x, y, name: fullName, key: n, role: n === "MASTER" ? "master" : EN[n] });
   });
 
-  // Buttons: Authentic silkscreen labels
+  // Buttons: Authentic Windows 98 3D Tactile Push Buttons with Jewel LED Pip
   const button = ([x, y, w, h], n, sub) => {
-    const g = el("g", {});
-    el("rect", { x, y, width: w, height: h, rx: 8, fill: "var(--part)", stroke: "var(--edge)", "stroke-width": 1.5, class: "face btn" }, g);
-    const ink = n === "REC" ? "#ff453a" : undefined;
-    if (sub) { label(g, x + w / 2, y + h / 2 - 2, n, 10.8, SANS, ink); label(g, x + w / 2, y + h / 2 + 11, sub, 9.9); }
-    else label(g, x + w / 2, y + h / 2 + 4.5, n, 12.6, SANS, ink);
+    const g = el("g", { class: "btn-g" });
+    // 3D outer bevel highlight (top/left)
+    el("path", { d: `M ${x + w - 4} ${y} L ${x + 4} ${y} Q ${x} ${y} ${x} ${y + 4} L ${x} ${y + h - 4}`, fill: "none", stroke: "#ffffff", "stroke-width": 2, class: "btn-bevel-hi" }, g);
+    // 3D outer bevel shadow (bottom/right)
+    el("path", { d: `M ${x + 4} ${y + h} L ${x + w - 4} ${y + h} Q ${x + w} ${y + h} ${x + w} ${y + h - 4} L ${x + w} ${y + 4}`, fill: "none", stroke: "#404040", "stroke-width": 2, class: "btn-bevel-sh" }, g);
+    // Button face
+    el("rect", { x: x + 1, y: y + 1, width: w - 2, height: h - 2, rx: 4, fill: "var(--part)", class: "face btn" }, g);
+
+    // Embedded 1990s Jewel LED Pip
+    const pipX = x + 8, pipY = y + 8, pipR = 3;
+    const isRec = n === "REC";
+    el("circle", { cx: pipX, cy: pipY, r: pipR + 1, fill: "#808080", class: "led-rim" }, g);
+    el("circle", { cx: pipX, cy: pipY, r: pipR, fill: isRec ? "#301010" : "#252818", class: "led-pip" + (isRec ? " rec" : "") }, g);
+
+    // Labels
+    const ink = isRec ? "#aa0000" : "#000000";
+    if (sub) {
+      label(g, x + w / 2, y + h / 2 - 2, n, 11, SANS, ink);
+      label(g, x + w / 2, y + h / 2 + 10, sub, 9.5, SANS, ink);
+    } else {
+      label(g, x + w / 2, y + h / 2 + 4.5, n, 12.5, SANS, ink);
+    }
     buttons.push({ g, bit: B[n], name: sub ? `${n} / ${sub}` : n });
   };
 
@@ -2153,18 +2360,31 @@ function build(name) {
     button([gx + i * dx, gy + dy, gw, gh], ROW2[i], ROW2[i] === "PLAY" ? "STOP" : "");
   }
 
-  // Keybed: 27 Capacitive touch pads with note markers and center slit LEDs
+  // Keybed: Authentic 1998 Computer Keyboard Matrix (27 Capacitive touch pads F3..G5)
   const [x0, y0, w, h] = L.keybed;
-  el("rect", { x: x0, y: y0, width: w, height: h, rx: 18, fill: "var(--tray)" });
+  // Sunken tray bed with 3D inset border
+  el("rect", { x: x0, y: y0, width: w, height: h, rx: 12, fill: "#b5b3a3" });
+  el("path", { d: `M ${x0 + w - 12} ${y0} L ${x0 + 12} ${y0} Q ${x0} ${y0} ${x0} ${y0 + 12} L ${x0} ${y0 + h - 12}`, fill: "none", stroke: "#404040", "stroke-width": 2 });
+  el("path", { d: `M ${x0 + 12} ${y0 + h} L ${x0 + w - 12} ${y0 + h} Q ${x0 + w} ${y0 + h} ${x0 + w} ${y0 + h - 12} L ${x0 + w} ${y0 + 12}`, fill: "none", stroke: "#ffffff", "stroke-width": 2 });
+
   const pitch = (w - 24) / 16, kw = pitch * 0.78, kh = h * 0.425, sw = Math.max(3, kw * 0.14);
   const key = (cx, cy, k) => {
-    const g = el("g", {}), y = cy - kh / 2;
-    el("rect", { x: cx - kw / 2, y, width: kw, height: kh, rx: kw / 2, class: "face key" }, g);
+    const isBlack = BLACK.includes(k);
+    const g = el("g", { class: "key-g" + (isBlack ? " black" : "") }), y = cy - kh / 2;
+    // 3D key cap face
+    el("rect", { x: cx - kw / 2, y, width: kw, height: kh, rx: 4, class: "face key" + (isBlack ? " black" : "") }, g);
+    // 3D bevels
+    el("path", { d: `M ${cx + kw / 2 - 2} ${y} L ${cx - kw / 2 + 2} ${y} Q ${cx - kw / 2} ${y} ${cx - kw / 2} ${y + 2} L ${cx - kw / 2} ${y + kh - 2}`, fill: "none", stroke: isBlack ? "#4a4d55" : "#ffffff", "stroke-width": 1.5, class: "key-bevel-hi" }, g);
+    el("path", { d: `M ${cx - kw / 2 + 2} ${y + kh} L ${cx + kw / 2 - 2} ${y + kh} Q ${cx + kw / 2} ${y + kh} ${cx + kw / 2} ${y + kh - 2} L ${cx + kw / 2} ${y + 2}`, fill: "none", stroke: isBlack ? "#151618" : "#808080", "stroke-width": 1.5, class: "key-bevel-sh" }, g);
+
+    // Center Slit LED
     el("rect", { x: cx - sw / 2, y: y + kw * 0.4, width: sw, height: kh - kw * 0.8, rx: sw / 2, class: "slit" }, g);
+    // Hit area
     el("rect", { x: cx - pitch / 2, y: cy - h * 0.24, width: pitch, height: h * 0.48, fill: "transparent" }, g);
+
     const name = keyName(k);
-    if (name.startsWith("C") || name.startsWith("F")) {
-      label(g, cx, y + kh - 4, name, 8, SANS, "#66666a");
+    if (name.startsWith("C") || name.startsWith("F") || name === "G5") {
+      label(g, cx, y + kh - 4, name, 8.5, SANS, isBlack ? "#888890" : "#000080");
     }
     keys[k] = { g, name };
   };
@@ -2340,7 +2560,7 @@ const KEYMAP = {};
 KEYMAP.BracketLeft = { btn: B["OCT-"] };
 KEYMAP.BracketRight = { btn: B["OCT+"] };
 
-const ARROWS = { ArrowUp: ["SELECT", 1], ArrowDown: ["SELECT", -1], ArrowRight: ["ALGORITHM", 1], ArrowLeft: ["ALGORITHM", -1] };
+const ARROWS = { ArrowUp: ["SELECT", 1], ArrowDown: ["SELECT", -1], ArrowRight: ["ALGO", 1], ArrowLeft: ["ALGO", -1] };
 
 addEventListener("keydown", (e) => {
   if (e.key === "F7") {
@@ -2358,7 +2578,7 @@ addEventListener("keydown", (e) => {
   ensureAudioRunning();
   if (ARROWS[e.code]) {
     const [r, n] = ARROWS[e.code];
-    turn(knobs.find((k) => k.role === EN[r] || k.key === r), n);
+    turn(knobs.find((k) => (EN[r] !== undefined && k.role === EN[r]) || k.key === r || (k.name && k.name.startsWith(r))), n);
     e.preventDefault();
     return;
   }
@@ -2400,7 +2620,7 @@ function drawScreen(fb) {
 }
 
 const lin = (h) => [1, 3, 5].map((i) => (parseInt(h.slice(i, i + 2), 16) / 255) ** 2.2);
-const ANIM = { btn: [lin("#3a3934"), lin("#3a3934"), lin("#fff4d6")], slit: [lin("#3a3a3c"), lin("#77777b"), lin("#ececee")] };
+const ANIM = { btn: [lin("#dfdfdf"), lin("#b4b4b4"), lin("#00ff44")], slit: [lin("#606064"), lin("#88888c"), lin("#ffaa00")] };
 
 function animFill(kind, q) {
   const [dark, glow, lit] = ANIM[kind], s = Math.min(q & 127, 64) / 64, base = q & 128 ? glow : dark;
@@ -2837,7 +3057,7 @@ function pressBtn(name) {
 
 function turnKnob(roleName, steps) {
   ensureAudioRunning();
-  const k = knobs.find((x) => x.role === EN[roleName] || x.key === roleName || x.name === roleName || (x.name && x.name.startsWith(roleName)));
+  const k = knobs.find((x) => (EN[roleName] !== undefined && x.role === EN[roleName]) || x.key === roleName || x.name === roleName || (x.name && x.name.startsWith(roleName)));
   if (k) turn(k, steps);
 }
 
