@@ -104,6 +104,24 @@ if (typeof registerProcessor === "function") {
     publish() {
       const ex = this.ex, mem = ex.memory.buffer;
       const msg = { type: "frame" };
+      const curView = ex.web_cinco_get_view ? ex.web_cinco_get_view() : 0;
+      const curRow = ex.web_cinco_get_seq_row ? ex.web_cinco_get_seq_row() : 0;
+      const curStep = ex.web_cinco_get_groove_step ? ex.web_cinco_get_groove_step() : 0;
+      const curGroove = ex.web_cinco_get_groove ? ex.web_cinco_get_groove() : 0;
+
+      let stateChanged = false;
+      if (curView !== this.sentView || curRow !== this.sentRow || curStep !== this.sentStep || curGroove !== this.sentGroove) {
+        this.sentView = curView;
+        this.sentRow = curRow;
+        this.sentStep = curStep;
+        this.sentGroove = curGroove;
+        stateChanged = true;
+      }
+      msg.view = curView;
+      msg.seq_row = curRow;
+      msg.seq_step = curStep;
+      msg.groove = curGroove;
+
       const leds = [ex.web_lit_buttons(), ex.web_lit_keys(), ex.web_dim_buttons(), ex.web_dim_keys(), ex.web_dim_level(),
                     ex.web_breath_buttons(), ex.web_breath_keys(), ex.web_mid_keys ? ex.web_mid_keys() : 0];
       const an = ex.web_anim_levels ? ex.web_anim_levels() : 0;   // the power-on sweep: each LED's level
@@ -130,7 +148,7 @@ if (typeof registerProcessor === "function") {
         this.sentWrites = writes;
         msg.sectors = storeSectors(new Uint8Array(mem, ex.web_nor(), ex.web_nor_size()));
       }
-      if (msg.leds || msg.fb || msg.sectors || msg.load !== undefined) this.port.postMessage(msg, transfer);
+      if (msg.leds || msg.fb || msg.sectors || msg.load !== undefined || stateChanged) this.port.postMessage(msg, transfer);
     }
 
     // A click's down and up can arrive within one render quantum, but the FM-1's contacts never close for less than

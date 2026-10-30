@@ -290,6 +290,10 @@ static void ui_input(void)
     int key_pressed = (note_press != 0 || fm1_in.notes != 0);
     int activity = (enc_moved || btn_pressed || key_pressed);
 
+    if (perf.view_mode == 1) {
+        perf.screensaver = 0;
+    }
+
     if (activity) {
         /* If screensaver active, wake up on any activity */
         if (perf.screensaver) {
@@ -328,8 +332,8 @@ static void ui_input(void)
         if (perf.coffee_level > 0)
             perf.coffee_level--;
     } else {
-        /* Idle check: 20 seconds of inactivity triggers screensaver */
-        if (fm1_ms - perf.last_activity_ms > 20000u) {
+        /* Idle check: 20 seconds of inactivity triggers screensaver (inhibited in Disk Defrag Sequencer) */
+        if (perf.view_mode != 1 && (fm1_ms - perf.last_activity_ms > 20000u)) {
             perf.screensaver = 1;
         }
         /* In idle, slowly refill coffee */
@@ -398,6 +402,7 @@ static void ui_input(void)
     if (perf.view_mode == 1) {
         /* Defragmenter Step Sequencer: Key Step/Row Input */
         if (note_press) {
+            perf.last_activity_ms = fm1_ms;
             for (uint32_t k = 0; k < 27u; k++) {
                 if ((note_press >> k) & 1u) {
                     if (!key_black(k)) {
@@ -425,6 +430,7 @@ static void ui_input(void)
 
         /* Defragmenter Step Sequencer: Encoders */
         if (d_sel) {
+            perf.last_activity_ms = fm1_ms;
             int32_t r = ((int32_t)perf.seq_row + d_sel) % 6;
             if (r < 0) r += 6;
             perf.seq_row = (uint8_t)r;
@@ -434,6 +440,7 @@ static void ui_input(void)
         }
 
         if (d_k1) {
+            perf.last_activity_ms = fm1_ms;
             static const uint16_t FILL_PATTERNS[7] = {
                 0x0000, /* 0: Clear */
                 0x1111, /* 1: 4-on-floor */
@@ -461,6 +468,7 @@ static void ui_input(void)
         }
 
         if (d_k2) {
+            perf.last_activity_ms = fm1_ms;
             int32_t po = (int32_t)perf.seq_pitch_offset + d_k2;
             if (po < -24) po = -24;
             if (po > 24) po = 24;
@@ -471,6 +479,7 @@ static void ui_input(void)
         }
 
         if (d_var) {
+            perf.last_activity_ms = fm1_ms;
             static const char * const GROOVE_NAMES[8] = {
                 "Eurodance 90s", "Rave Breakbeat", "Pumping House", "Acid Trance 303",
                 "Happy Hardcore", "Speed Garage", "Belgian Techno", "Italo Disco"
@@ -646,16 +655,20 @@ static void ui_input(void)
             if (p) {
                 int glo_active = ((fm1_in.buttons & (1u << panel.btn[B_GLO])) || ((press >> panel.btn[B_GLO]) & 1u));
                 if (!glo_active) {
-                    perf.view_mode = 0; /* Auto-exit Disk Defrag */
-                    perf.wobble = 0;
-                    perf.flail = 0;
-                    perf.nude = 0;
-                    perf.k4d = 0;
-                    perf.diag = 0;
-                    perf.source = 0;
-                    cinco_sound_set_source(SRC_CELERY);
-                    cinco_term_push("> System reset.");
-                    cinco_speech_play(CINCO_PHRASE_YES);
+                    if (perf.view_mode == 1) {
+                        perf.view_mode = 0;
+                        cinco_term_push("> Dancer view active.");
+                    } else {
+                        perf.wobble = 0;
+                        perf.flail = 0;
+                        perf.nude = 0;
+                        perf.k4d = 0;
+                        perf.diag = 0;
+                        perf.source = 0;
+                        cinco_sound_set_source(SRC_CELERY);
+                        cinco_term_push("> System reset.");
+                        cinco_speech_play(CINCO_PHRASE_YES);
+                    }
                 }
             }
         } else if (btn == B_SAVE) {
@@ -812,15 +825,11 @@ static void ui_input(void)
 /* LED drivers */
 static void ui_leds(void)
 {
-    /* Map performance state to LEDs:
-     * LED 0 (Play): light if perf.groove
-     * LED 1 (LFO): light if perf.wobble
-     * LED 2 (Arp): light if perf.flail
-     * LED 3 (FX): light if perf.nude */
-    fm1_led[0] = perf.groove ? 1u : 0u;
-    fm1_led[1] = perf.wobble ? 1u : 0u;
-    fm1_led[2] = perf.flail  ? 1u : 0u;
-    fm1_led[3] = perf.nude   ? 1u : 0u;
+    fm1_led_key(panel.btn[B_SEQ], (perf.view_mode == 1));
+    fm1_led_key(panel.btn[B_PLAY], perf.groove != 0);
+    fm1_led_key(panel.btn[B_LFO], perf.wobble != 0);
+    fm1_led_key(panel.btn[B_ARP], perf.flail != 0);
+    fm1_led_key(panel.btn[B_FX], perf.nude != 0);
 }
 
 #endif /* CINCO_UI_C */

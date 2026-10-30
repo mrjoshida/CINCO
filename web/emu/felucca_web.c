@@ -72,6 +72,18 @@ static const int8_t FM1_KEYMAP[6][FM1_NCOL] = {      /* as hal/fm1_input.h: key 
 static uint8_t fm1_led[FM1_NCOL], fm1_led_dim[FM1_NCOL], fm1_led_breath[FM1_NCOL], fm1_led_mid[FM1_NCOL];
 static uint32_t web_dim_lo;
 static void fm1_led_dim_level(uint32_t lo) { web_dim_lo = lo; }
+static void fm1_led_key(uint32_t id, int on)
+{
+    uint32_t p, r;
+    for (p = 0; p < FM1_NCOL; p++)
+        for (r = 1; r < 5u; r++)
+            if (FM1_KEYMAP[r][p] == (int8_t)id) {
+                if (on)
+                    fm1_led[p] |= (uint8_t)(1u << r);
+                else
+                    fm1_led[p] &= (uint8_t)~(1u << r);
+            }
+}
 /* the power-on LED sweep (hal/fm1_input.h fm1_led_anim_start, the picture hal/fm1_led_anim.h): its frame from the
  * clock (a scan frame 1.1 ms), the page draws each LED's level (web_anim_levels); at its end, or on a key or a button
  * down, the last picture (the glow everywhere, or dark) and the UI's LEDs from the next frame, as the scan does */
@@ -572,4 +584,6 @@ EXPORT int32_t web_cinco_get_seq_pitch_offset(void) { return perf.seq_pitch_offs
 EXPORT void web_cinco_set_seq_pitch_offset(int32_t po) { perf.seq_pitch_offset = (int8_t)po; }
 EXPORT void web_cinco_save_state(void) { cinco_save_state(); }
 EXPORT void web_cinco_load_state(void) { cinco_load_state(); }
+EXPORT uint32_t web_cinco_get_groove(void) { return perf.groove; }
+EXPORT uint32_t web_cinco_get_groove_step(void) { return perf.groove ? cinco_groove_get_step() : 0; }
 
