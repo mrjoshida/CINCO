@@ -33,367 +33,88 @@ static const uint8_t stab_chords[4][3] = {
     {55, 58, 62}
 };
 
+/* 8 styles x 6 tracks defragmenter pattern templates */
+static const uint16_t GROOVE_TEMPLATES[8][6] = {
+    /* 0: Eurodance 90s */
+    { 0x1111, 0x1010, 0xAAAA, 0x4444, 0xFFFF, 0x4444 },
+    /* 1: Rave Breakbeat */
+    { 0x0481, 0x1010, 0xAAAA, 0x4144, 0x1489, 0x0041 },
+    /* 2: Pumping House */
+    { 0x1111, 0x1010, 0xFFFF, 0x4444, 0x4144, 0x4444 },
+    /* 3: Acid Trance 303 */
+    { 0x1111, 0x1010, 0xAAAA, 0x4444, 0xFFFF, 0x0101 },
+    /* 4: Happy Hardcore */
+    { 0x1111, 0x5410, 0xFFFF, 0x4444, 0xAAAA, 0x4924 },
+    /* 5: Speed Garage */
+    { 0x0441, 0x1010, 0xFFFF, 0x4040, 0x4441, 0x2124 },
+    /* 6: Belgian Techno */
+    { 0x1111, 0x1010, 0xFFFF, 0x4444, 0x4D4D, 0x8888 },
+    /* 7: Italo Disco */
+    { 0x0101, 0x1010, 0xFFFF, 0x4444, 0xFFFF, 0x1111 }
+};
+
+void cinco_groove_load_template(uint8_t pat)
+{
+    uint8_t p = pat % CINCO_GROOVE_COUNT;
+    for (uint32_t r = 0; r < 6u; r++) {
+        perf.seq_grid[r] = GROOVE_TEMPLATES[p][r];
+    }
+}
+
 static void cinco_groove_step(uint8_t step, uint8_t bar)
 {
-    uint8_t pat = perf.groove_pattern % CINCO_GROOVE_COUNT;
-    uint8_t root = bass_roots[bar & 3u];
+    uint16_t mask = (uint16_t)(1u << (step & 15u));
 
-    switch (pat) {
-    case 0: {
-        /* 0: Eurodance 90s */
-        /* Kick: Steps 0, 4, 8, 12 */
-        if ((step & 3u) == 0u) {
-            trk_note_on(&trk[3], 36, 120);
-        }
-        /* Clap: Steps 4, 12 */
-        if (step == 4u || step == 12u) {
-            trk_note_on(&trk[3], 39, 115);
-        }
-        /* Open Hat: Steps 2, 6, 10, 14 */
-        if ((step & 3u) == 2u) {
-            trk_note_on(&trk[3], 46, 105);
-        }
-        /* Closed Hat: Offbeat 16th notes (1, 3, 5, 7, 9, 11, 13, 15) */
-        if (step & 1u) {
-            trk_note_on(&trk[3], 42, 95);
-        }
+    /* Row 0 (Kick) */
+    if (perf.seq_grid[0] & mask) {
+        trk_note_on(&trk[3], 36, 120);
+    }
 
-        /* Bassline on Track 1 (ENG_ANALOG) */
+    /* Row 1 (Snare) */
+    if (perf.seq_grid[1] & mask) {
+        trk_note_on(&trk[3], (step == 4u || step == 12u) ? 39 : 38, 115);
+    }
+
+    /* Row 2 (C.Hat) */
+    if (perf.seq_grid[2] & mask) {
+        trk_note_on(&trk[3], 42, 95);
+    }
+
+    /* Row 3 (O.Hat) */
+    if (perf.seq_grid[3] & mask) {
+        trk_note_on(&trk[3], 46, 105);
+    }
+
+    /* Row 4 (Bass) */
+    if (perf.seq_grid[4] & mask) {
         if (prev_bass_note) {
             trk_note_off(&trk[1], prev_bass_note);
+            prev_bass_note = 0;
         }
-        /* 16th-note octave pump: even steps = low root, odd steps = high root */
+        int32_t r = (int32_t)bass_roots[bar & 3u] + perf.seq_pitch_offset;
+        if (r < 12) r = 12;
+        if (r > 108) r = 108;
+        uint8_t root = (uint8_t)r;
         uint8_t b_note = (step & 1u) ? (root + 12u) : root;
         prev_bass_note = b_note;
         trk_note_on(&trk[1], b_note, 110);
+    }
 
-        /* Rave stabs on Track 2 (ENGI_FM6) */
+    /* Row 5 (Stabs) */
+    if (perf.seq_grid[5] & mask) {
         for (uint32_t i = 0; i < 3; i++) {
             if (prev_stab_notes[i]) {
                 trk_note_off(&trk[2], prev_stab_notes[i]);
                 prev_stab_notes[i] = 0;
             }
         }
-        /* Offbeat minor chords on steps 2, 6, 10, 14 */
-        if ((step & 3u) == 2u) {
-            for (uint32_t i = 0; i < 3; i++) {
-                prev_stab_notes[i] = stab_chords[bar & 3u][i];
-                trk_note_on(&trk[2], prev_stab_notes[i], 102);
-            }
-        }
-        break;
-    }
-
-    case 1: {
-        /* 1: Rave Breakbeat */
-        /* Syncopated Kick: 0, 7, 10 */
-        if (step == 0u || step == 7u || step == 10u) {
-            trk_note_on(&trk[3], 36, 120);
-        }
-        /* Snare: 4, 12 */
-        if (step == 4u || step == 12u) {
-            trk_note_on(&trk[3], 38, 118);
-        }
-        /* Hat: 2, 6, 8, 14 */
-        if (step == 2u || step == 6u || step == 8u || step == 14u) {
-            trk_note_on(&trk[3], 46, 100);
-        }
-
-        /* Bassline */
-        if (prev_bass_note) {
-            trk_note_off(&trk[1], prev_bass_note);
-            prev_bass_note = 0;
-        }
-        if (step == 0u || step == 3u || step == 7u || step == 10u || step == 12u) {
-            prev_bass_note = root;
-            trk_note_on(&trk[1], root, 115);
-        }
-
-        /* Rave Stabs */
         for (uint32_t i = 0; i < 3; i++) {
-            if (prev_stab_notes[i]) {
-                trk_note_off(&trk[2], prev_stab_notes[i]);
-                prev_stab_notes[i] = 0;
-            }
+            int32_t sn = (int32_t)stab_chords[bar & 3u][i] + perf.seq_pitch_offset;
+            if (sn < 12) sn = 12;
+            if (sn > 120) sn = 120;
+            prev_stab_notes[i] = (uint8_t)sn;
+            trk_note_on(&trk[2], prev_stab_notes[i], 102);
         }
-        if (step == 0u || step == 6u) {
-            for (uint32_t i = 0; i < 3; i++) {
-                prev_stab_notes[i] = stab_chords[bar & 3u][i];
-                trk_note_on(&trk[2], prev_stab_notes[i], 105);
-            }
-        }
-        break;
-    }
-
-    case 2: {
-        /* 2: Pumping House */
-        /* 4 on the floor kick */
-        if ((step & 3u) == 0u) {
-            trk_note_on(&trk[3], 36, 122);
-        }
-        /* Clap: 4, 12 */
-        if (step == 4u || step == 12u) {
-            trk_note_on(&trk[3], 39, 110);
-        }
-        /* Open Hat on offbeats: 2, 6, 10, 14 */
-        if ((step & 3u) == 2u) {
-            trk_note_on(&trk[3], 46, 110);
-        }
-        /* Shaker on all 16ths */
-        trk_note_on(&trk[3], 42, (step & 1u) ? 80 : 60);
-
-        /* House bass on 2, 6, 8, 14 */
-        if (prev_bass_note) {
-            trk_note_off(&trk[1], prev_bass_note);
-            prev_bass_note = 0;
-        }
-        if ((step & 3u) == 2u || step == 8u) {
-            uint8_t b_note = root + 12u;
-            prev_bass_note = b_note;
-            trk_note_on(&trk[1], b_note, 108);
-        }
-
-        /* Chords */
-        for (uint32_t i = 0; i < 3; i++) {
-            if (prev_stab_notes[i]) {
-                trk_note_off(&trk[2], prev_stab_notes[i]);
-                prev_stab_notes[i] = 0;
-            }
-        }
-        if ((step & 3u) == 2u) {
-            for (uint32_t i = 0; i < 3; i++) {
-                prev_stab_notes[i] = stab_chords[bar & 3u][i];
-                trk_note_on(&trk[2], prev_stab_notes[i], 100);
-            }
-        }
-        break;
-    }
-
-    case 3: {
-        /* 3: Acid Trance 303 (16th bassline, driving 909 kick, trance chords) */
-        /* Driving 909 Kick: 0, 4, 8, 12 */
-        if ((step & 3u) == 0u) {
-            trk_note_on(&trk[3], 36, 125);
-        }
-        /* Clap: 4, 12 */
-        if (step == 4u || step == 12u) {
-            trk_note_on(&trk[3], 39, 110);
-        }
-        /* Open Hat: 2, 6, 10, 14 */
-        if ((step & 3u) == 2u) {
-            trk_note_on(&trk[3], 46, 110);
-        }
-        /* Closed Hat on 16ths */
-        if (step & 1u) {
-            trk_note_on(&trk[3], 42, 95);
-        }
-
-        /* 16th acid bassline on Track 1 */
-        if (prev_bass_note) {
-            trk_note_off(&trk[1], prev_bass_note);
-            prev_bass_note = 0;
-        }
-        static const uint8_t acid_pattern[16] = {0, 12, 0, 3, 0, 7, 12, 10, 0, 12, 3, 5, 0, 7, 12, 10};
-        uint8_t b_note = root + acid_pattern[step];
-        prev_bass_note = b_note;
-        trk_note_on(&trk[1], b_note, (step % 4 == 0) ? 122 : 105);
-
-        /* Trance chords on steps 0, 8 */
-        for (uint32_t i = 0; i < 3; i++) {
-            if (prev_stab_notes[i]) {
-                trk_note_off(&trk[2], prev_stab_notes[i]);
-                prev_stab_notes[i] = 0;
-            }
-        }
-        if (step == 0u || step == 8u) {
-            for (uint32_t i = 0; i < 3; i++) {
-                prev_stab_notes[i] = stab_chords[bar & 3u][i];
-                trk_note_on(&trk[2], prev_stab_notes[i], 95);
-            }
-        }
-        break;
-    }
-
-    case 4: {
-        /* 4: Happy Hardcore (fast 16th breaks, bouncy octave bass, euphoric rave chords) */
-        /* Kick: 0, 4, 8, 12 */
-        if ((step & 3u) == 0u) {
-            trk_note_on(&trk[3], 36, 127);
-        }
-        /* Break snare: 4, 10, 12, 14 */
-        if (step == 4u || step == 10u || step == 12u || step == 14u) {
-            trk_note_on(&trk[3], 38, 115);
-        }
-        /* Open Hat: 2, 6, 10, 14 */
-        if ((step & 3u) == 2u) {
-            trk_note_on(&trk[3], 46, 105);
-        }
-        /* Rapid 16th closed hats */
-        trk_note_on(&trk[3], 42, 90);
-
-        /* Bouncy octave bass on offbeats */
-        if (prev_bass_note) {
-            trk_note_off(&trk[1], prev_bass_note);
-            prev_bass_note = 0;
-        }
-        if (step & 1u) {
-            uint8_t b_note = (step & 2u) ? (root + 12u) : root;
-            prev_bass_note = b_note;
-            trk_note_on(&trk[1], b_note, 120);
-        }
-
-        /* Euphoric rave chords: 2, 5, 8, 11, 14 */
-        for (uint32_t i = 0; i < 3; i++) {
-            if (prev_stab_notes[i]) {
-                trk_note_off(&trk[2], prev_stab_notes[i]);
-                prev_stab_notes[i] = 0;
-            }
-        }
-        if (step == 2u || step == 5u || step == 8u || step == 11u || step == 14u) {
-            for (uint32_t i = 0; i < 3; i++) {
-                prev_stab_notes[i] = stab_chords[bar & 3u][i];
-                trk_note_on(&trk[2], prev_stab_notes[i], 108);
-            }
-        }
-        break;
-    }
-
-    case 5: {
-        /* 5: Speed Garage (syncopated kick 0/6/10, snare 4/12, Reese bass, organ stabs) */
-        /* Syncopated kick: 0, 6, 10 */
-        if (step == 0u || step == 6u || step == 10u) {
-            trk_note_on(&trk[3], 36, 125);
-        }
-        /* Snare: 4, 12 */
-        if (step == 4u || step == 12u) {
-            trk_note_on(&trk[3], 38, 118);
-        }
-        /* Hats */
-        if (step == 2u || step == 4u || step == 6u || step == 8u || step == 10u || step == 12u || step == 14u) {
-            trk_note_on(&trk[3], 42, 100);
-        } else {
-            trk_note_on(&trk[3], 42, 70);
-        }
-        if (step == 6u || step == 14u) {
-            trk_note_on(&trk[3], 46, 105);
-        }
-
-        /* Reese bass */
-        if (prev_bass_note) {
-            trk_note_off(&trk[1], prev_bass_note);
-            prev_bass_note = 0;
-        }
-        if (step == 0u || step == 6u || step == 10u || step == 14u) {
-            prev_bass_note = root;
-            trk_note_on(&trk[1], root, 120);
-        }
-
-        /* Organ stabs: 2, 5, 8, 13 */
-        for (uint32_t i = 0; i < 3; i++) {
-            if (prev_stab_notes[i]) {
-                trk_note_off(&trk[2], prev_stab_notes[i]);
-                prev_stab_notes[i] = 0;
-            }
-        }
-        if (step == 2u || step == 5u || step == 8u || step == 13u) {
-            for (uint32_t i = 0; i < 3; i++) {
-                prev_stab_notes[i] = stab_chords[bar & 3u][i];
-                trk_note_on(&trk[2], prev_stab_notes[i], 108);
-            }
-        }
-        break;
-    }
-
-    case 6: {
-        /* 6: Belgian Techno (industrial 4-on-the-floor, dark driving bass, metallic clang) */
-        /* Industrial 4-on-the-floor kick */
-        if ((step & 3u) == 0u) {
-            trk_note_on(&trk[3], 36, 127);
-        }
-        /* Clap: 4, 12 */
-        if (step == 4u || step == 12u) {
-            trk_note_on(&trk[3], 39, 110);
-        }
-        /* Metallic clang (Rim / Bell) on 2, 6, 10, 14 */
-        if ((step & 3u) == 2u) {
-            trk_note_on(&trk[3], 37, 115);
-        }
-        if (step == 14u) {
-            trk_note_on(&trk[3], 56, 110);
-        }
-        /* Closed hat: every 16th */
-        trk_note_on(&trk[3], 42, (step & 1u) ? 90 : 75);
-
-        /* Dark driving bass on 0, 2, 3, 6, 8, 10, 11, 14 */
-        if (prev_bass_note) {
-            trk_note_off(&trk[1], prev_bass_note);
-            prev_bass_note = 0;
-        }
-        if (step == 0u || step == 2u || step == 3u || step == 6u ||
-            step == 8u || step == 10u || step == 11u || step == 14u) {
-            prev_bass_note = root;
-            trk_note_on(&trk[1], root, 115);
-        }
-
-        /* Industrial stabs on 3, 7, 11, 15 */
-        for (uint32_t i = 0; i < 3; i++) {
-            if (prev_stab_notes[i]) {
-                trk_note_off(&trk[2], prev_stab_notes[i]);
-                prev_stab_notes[i] = 0;
-            }
-        }
-        if ((step & 3u) == 3u) {
-            for (uint32_t i = 0; i < 3; i++) {
-                prev_stab_notes[i] = stab_chords[bar & 3u][i];
-                trk_note_on(&trk[2], prev_stab_notes[i], 100);
-            }
-        }
-        break;
-    }
-
-    case 7:
-    default: {
-        /* 7: Italo Disco (Moroder 16th octave bass, electro kick 0/8, 80s chords) */
-        /* Electro kick: 0, 8 */
-        if (step == 0u || step == 8u) {
-            trk_note_on(&trk[3], 36, 124);
-        }
-        /* Snare: 4, 12 */
-        if (step == 4u || step == 12u) {
-            trk_note_on(&trk[3], 38, 115);
-        }
-        /* Open Hat: 2, 6, 10, 14 */
-        if ((step & 3u) == 2u) {
-            trk_note_on(&trk[3], 46, 105);
-        }
-        /* Closed hat: every 16th */
-        trk_note_on(&trk[3], 42, 80);
-
-        /* Moroder 16th octave bass */
-        if (prev_bass_note) {
-            trk_note_off(&trk[1], prev_bass_note);
-            prev_bass_note = 0;
-        }
-        static const uint8_t moroder_oct[4] = {0, 0, 12, 0};
-        uint8_t b_note = root + moroder_oct[step & 3u];
-        prev_bass_note = b_note;
-        trk_note_on(&trk[1], b_note, 112);
-
-        /* 80s synth chords on 0, 4, 8, 12 */
-        for (uint32_t i = 0; i < 3; i++) {
-            if (prev_stab_notes[i]) {
-                trk_note_off(&trk[2], prev_stab_notes[i]);
-                prev_stab_notes[i] = 0;
-            }
-        }
-        if ((step & 3u) == 0u) {
-            for (uint32_t i = 0; i < 3; i++) {
-                prev_stab_notes[i] = stab_chords[bar & 3u][i];
-                trk_note_on(&trk[2], prev_stab_notes[i], 100);
-            }
-        }
-        break;
-    }
     }
 }
 
@@ -407,6 +128,8 @@ void cinco_groove_init(void)
     prev_stab_notes[0] = 0;
     prev_stab_notes[1] = 0;
     prev_stab_notes[2] = 0;
+
+    cinco_groove_load_template(perf.groove_pattern);
 
     /* Configure Track 3: DRUM */
     set_engine_of(&trk[3], ENGI_DRUM);
@@ -488,6 +211,7 @@ void cinco_groove_process(uint32_t n)
 void cinco_groove_set_pattern(uint8_t pat)
 {
     perf.groove_pattern = pat % CINCO_GROOVE_COUNT;
+    cinco_groove_load_template(perf.groove_pattern);
     if (prev_bass_note) {
         trk_note_off(&trk[1], prev_bass_note);
         prev_bass_note = 0;

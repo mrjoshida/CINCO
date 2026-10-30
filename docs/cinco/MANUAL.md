@@ -323,14 +323,37 @@ In addition to identity modulation, Cinco Corporation has supplied full workplac
 * **Audio Behavior:** All synthesizer audio and groove sequences continue playing unhindered in the background, allowing the employee to compose music under the guise of accounting.
 * **Exit:** Tapping any capacitive keyboard touch key, pressing any button, or turning any rotary encoder instantly wakes the console back to CINCO OS 2.5 desktop.
 
-### 2. Cinco Disk Defragmenter (`SEQ` Button)
-* **Function:** Switches the display to an authentic 16×6 cluster defragmentation grid (modeled after Norton SpeedDisk and MS-DOS 6.22 Defrag).
-* **Cluster Key:**
-  - **White Clusters:** Unallocated memory sectors.
-  - **Blue Clusters:** Read-only Celery Man identity files.
-  - **Green Clusters:** Synthesizer waveform buffers.
-  - **Flashing Amber/Red Clusters:** Live Eurodance sequencer steps pulsing on kicks, claps, and octave basslines.
-* **Completion:** When cluster optimization reaches 100% (240 clusters optimized), the console logs `> DEFRAG: 240 clusters optimized. 0 errors.`, vocalizes speech confirmation (`CINCO_PHRASE_YES`), and automatically transitions back to the active dancers view.
+### 2. Interactive Norton Disk Defragmenter Step Sequencer (`SEQ` Button)
+* **Function:** Switches the console into a fully interactive **16-Step Visual Rhythm & Bass Workstation** modeled after Norton SpeedDisk and MS-DOS 6.22 Defrag.
+* **16-Step Matrix (6 Track Rows × 16 Step Columns):**
+  - **Row 0: `KICK`** (Track 3 Drum Engine, Note 36)
+  - **Row 1: `SNARE`** (Track 3 Drum Engine, Notes 38/39)
+  - **Row 2: `C.HAT`** (Track 3 Drum Engine, Note 42)
+  - **Row 3: `O.HAT`** (Track 3 Drum Engine, Note 46)
+  - **Row 4: `BASS`** (Track 1 Analog Engine, Transposable Octave Pump)
+  - **Row 5: `STAB`** (Track 2 FM6 Engine, 90s Poly Chords)
+* **Touch Keyboard Matrix Controls in Defrag Mode:**
+  - **16 White Keys:** Directly toggle **Steps 1 through 16** on the active track row. White clusters immediately flip between free (`C_WHITE`) and allocated sector states with live console feedback (`> Step 4 ON [BASS]`).
+  - **6 Black Keys:** Instant track selection! Black keys 0 through 5 select `KICK`, `SNARE`, `C.HAT`, `O.HAT`, `BASS`, or `STAB`.
+  - **Silent Auditioning:** In Defrag mode, live synthesizer keyboard notes are automatically muted so you can punch in patterns during playback without acoustic interference.
+* **Rotary Dial & Encoder Behaviors in Defrag Mode:**
+  - **`SELECT` Encoder:** Moves the active track row cursor up or down (`KICK` ↔ `SNARE` ↔ `C.HAT` ↔ `O.HAT` ↔ `BASS` ↔ `STAB`). An arrow cursor `>` indicates the currently selected track on the CRT display.
+  - **`K1` Knob (Cluster Allocation / Pattern Fill Generator):** Turn clockwise or counter-clockwise to inject rhythmic cluster fills onto the selected row: `Clear (0x0000)`, `4-on-the-Floor (0x1111)`, `Offbeat (0x4444)`, `8th-Notes (0x5555)`, `16th-Notes (0xFFFF)`, `Syncopated Break (0x1449)`, `Trance Gallop (0x4994)`, or `Invert (~grid)`.
+  - **`K2` Knob (Root Pitch Transposition):** Transposes root pitch across a 4-octave range (-24 to +24 semitones) for the `BASS` and `STAB` rows.
+  - **`K3` Knob (Clock Speed / Tempo):** Calibrates scan rate from 80 to 160 BPM.
+  - **`K4` Knob (Mix Balance):** Controls master rhythm and sequencer audio level.
+  - **`ALGO` Encoder (Template Loader):** Cycles through all 8 iconic 90s dance templates (`Eurodance`, `Rave Breakbeat`, `Pumping House`, `Acid Trance`, `Happy Hardcore`, `Speed Garage`, `Belgian Techno`, `Italo Disco`) and instantly loads their cluster configuration into the live editable grid!
+* **Visual Cluster Legend & Real-Time Playhead:**
+  - **White Blocks:** Free unallocated memory sectors (Step OFF).
+  - **Blue Blocks:** Allocated drum sectors (`KICK`, `SNARE`, `HATS`).
+  - **Green Blocks:** Allocated analog bassline sectors (`BASS`).
+  - **Amber Blocks:** Allocated FM harmonic chord sectors (`STAB`).
+  - **Flashing Red Playhead:** Real-time reading/writing head sweeping across active clusters during playback.
+  - **Yellow Playhead:** Reading head scanning over unallocated free sectors.
+  - **Allocation Gauge:** Displays exact percentage of memory allocated (`0%` to `100%`) alongside active row title.
+* **Persistence & Mode Exit:**
+  - Press `SAVE` to commit your custom 16-step defrag sequence directly to SPI NOR flash memory.
+  - Press `SEQ` or `HOME` to return to the active dancers desktop. Unlike early prototypes, the defragmenter never auto-exits; it remains active as a full sequencer workstation until you choose to exit.
 
 ### 3. Cinco "After Dark" Flying Celery Screensaver
 * **Function:** Engages automatically when no keyboard keys or rotary knobs are manipulated for twenty (20) seconds.

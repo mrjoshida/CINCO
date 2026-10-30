@@ -157,9 +157,6 @@ static void cinco_draw_defrag_grid(int32_t ox, int32_t oy, int32_t ww, int32_t w
     int32_t cw_y = oy + 21;
     int32_t cw_w = ww - 8;
 
-    uint8_t kick_hit = ((step & 3u) == 0u);
-    uint8_t clap_hit = (step == 4u || step == 12u);
-
     /* Wait for any pending DMA transfer using cv_px */
     lcd_sync();
 
@@ -174,20 +171,24 @@ static void cinco_draw_defrag_grid(int32_t ox, int32_t oy, int32_t ww, int32_t w
 
     for (int r = 0; r < 6; r++) {
         for (int c = 0; c < 16; c++) {
+            int active = (perf.seq_grid[r] >> c) & 1;
             uint16_t color;
-            /* Amber/Red blocks pulse on active drum & bass hits */
-            if (r == 4 && c == step) {
-                color = C_AMBER; /* Bass pump */
-            } else if (r == 5 && c == step) {
-                color = (kick_hit || clap_hit) ? C_RED : C_AMBER; /* Drum hit */
-            } else if (r == 3 && c == step && (kick_hit || clap_hit)) {
-                color = C_RED;
-            } else if (r == 0 || (r == 1 && c < 12) || (r == 2 && c < 6)) {
-                color = C_PROG_BLUE; /* System / Celery files */
-            } else if ((r == 1 && c >= 12) || (r == 2 && c >= 6 && c < 14) || (r == 3 && c < 10)) {
-                color = C_GREEN; /* Synth engine buffers */
+            if (c == (int)step) {
+                if (active) {
+                    color = C_RED; /* Active playhead: flash bright C_RED! */
+                } else {
+                    color = C_YELLOW; /* Inactive playhead: reading-head highlight */
+                }
+            } else if (active) {
+                if (r <= 3) {
+                    color = C_PROG_BLUE; /* Rows 0..3: DOS Cyan/Blue system cluster */
+                } else if (r == 4) {
+                    color = C_GREEN; /* Row 4: Optimized cluster */
+                } else {
+                    color = C_AMBER; /* Row 5: Harmonic cluster */
+                }
             } else {
-                color = C_WHITE; /* Free clusters */
+                color = C_WHITE; /* Inactive: Free cluster */
             }
 
             uint16_t col_sw = swap16(color);
@@ -212,21 +213,38 @@ static void cinco_draw_defrag_grid(int32_t ox, int32_t oy, int32_t ww, int32_t w
     int32_t gx = cw_x + (cw_w - 208) / 2;
     int32_t gy = cw_y + 8;
     lcd_blit((uint32_t)gx, (uint32_t)gy, 208, 84, cv_px);
+
+    /* Draw active row cursor marker next to perf.seq_row on the left */
+    lcd_fill((uint32_t)(cw_x + 1), (uint32_t)gy, 7, 84, C_WIN_FACE);
+    int32_t cy = gy + (int32_t)(perf.seq_row % 6u) * 14 + 3;
+    cinco_draw_string(gx - 6, cy, ">", C_BLACK);
 }
 
 static void cinco_draw_defrag_progress(int32_t ox, int32_t oy, int32_t ww, int32_t wh, uint32_t bpm, uint32_t progress)
 {
     (void)wh;
+    (void)bpm;
     int32_t cw_x = ox + 4;
     int32_t cw_y = oy + 21;
     int32_t cw_w = ww - 8;
     int32_t bar_w = cw_w - 24;
 
+    uint32_t total_active = 0;
+    for (int r = 0; r < 6; r++) {
+        uint16_t g = perf.seq_grid[r];
+        for (int c = 0; c < 16; c++) {
+            if ((g >> c) & 1u)
+                total_active++;
+        }
+    }
+    progress = (total_active * 100u) / 96u;
+
     /* Status text at cw_y + 98 */
-    lcd_fill((uint32_t)(cw_x + 12), (uint32_t)(cw_y + 98), (uint32_t)bar_w, 10, C_WIN_FACE);
-    char defrag_buf[40];
-    snprintf(defrag_buf, sizeof(defrag_buf), "Defrag: %u BPM [%lu%% Optimized]", (unsigned)bpm, (unsigned long)progress);
-    cinco_draw_string(cw_x + 12, cw_y + 98, defrag_buf, C_BLACK);
+    lcd_fill((uint32_t)(cw_x + 8), (uint32_t)(cw_y + 98), (uint32_t)(cw_w - 16), 10, C_WIN_FACE);
+    char defrag_buf[48];
+    snprintf(defrag_buf, sizeof(defrag_buf), "Defrag Seq: %s [%u%% Allocated]",
+             SEQ_ROW_NAMES[perf.seq_row % 6u], (unsigned)progress);
+    cinco_draw_string(cw_x + 8, cw_y + 98, defrag_buf, C_BLACK);
 
     /* Visual defrag progress bar at cw_y + 112 */
     lcd_fill((uint32_t)(cw_x + 12), (uint32_t)(cw_y + 112), (uint32_t)bar_w, 10, C_WHITE);
@@ -246,30 +264,22 @@ static uint8_t defrag_prev_mode = 0;
 
 static uint32_t cinco_get_defrag_progress(uint32_t bpm)
 {
-    if (defrag_start_ms == 0 || !defrag_prev_mode) {
-        defrag_start_ms = fm1_ms;
-        defrag_prev_mode = 1;
+    (void)bpm;
+    uint32_t total_active = 0;
+    for (int r = 0; r < 6; r++) {
+        uint16_t g = perf.seq_grid[r];
+        for (int c = 0; c < 16; c++) {
+            if ((g >> c) & 1u)
+                total_active++;
+        }
     }
-    uint32_t elapsed = fm1_ms - defrag_start_ms;
-    /* Duration: ~8000ms at 120 BPM */
-    uint32_t duration_ms = 960000u / (bpm ? bpm : 120u);
-    if (duration_ms < 4000u) duration_ms = 4000u;
-    uint32_t progress = (elapsed * 100u) / duration_ms;
-    if (progress > 100u) progress = 100u;
-    return progress;
+    return (total_active * 100u) / 96u;
 }
 
 static void cinco_check_defrag_complete(uint32_t progress)
 {
-    if (progress >= 100u) {
-        perf.view_mode = 0;
-        defrag_prev_mode = 0;
-        defrag_start_ms = 0;
-        view_initialized = 0;
-        ui.force = 1;
-        cinco_term_push("> DEFRAG: 240 clusters optimized. 0 errors.");
-        cinco_speech_play(CINCO_PHRASE_YES);
-    }
+    (void)progress;
+    /* User stays in defrag step sequencer mode until B_SEQ or B_HOME */
 }
 
 static void cinco_draw_defrag_content(int32_t ox, int32_t oy, int32_t ww, int32_t wh)
@@ -577,6 +587,8 @@ static uint32_t last_rendered_taskbar = 0xFFFFFFFFu;
 static uint8_t last_rendered_coffee = 0xFF;
 static uint8_t last_rendered_defrag_step = 255;
 static uint32_t last_rendered_defrag_prog = 0xFFFFFFFFu;
+static uint16_t last_rendered_seq_grid[6] = {0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF};
+static uint8_t last_rendered_seq_row = 255;
 static uint32_t last_rendered_defrag_ms = 0;
 static uint8_t overlay_active = 0;
 
@@ -1015,7 +1027,9 @@ static void cinco_view_render(void)
                     uint32_t ms_per_step = 15000u / bpm;
                     if (ms_per_step == 0) ms_per_step = 1;
                     last_rendered_defrag_step = perf.groove ? cinco_groove_get_step() : (uint8_t)((fm1_ms / ms_per_step) & 15u);
-                    last_rendered_defrag_prog = 50u + ((fm1_ms * bpm / 1200u) % 49u);
+                    last_rendered_defrag_prog = cinco_get_defrag_progress(bpm);
+                    last_rendered_seq_row = perf.seq_row;
+                    memcpy(last_rendered_seq_grid, perf.seq_grid, sizeof(perf.seq_grid));
                     last_rendered_defrag_ms = fm1_ms;
                 } else {
                     int32_t cx = ox + 4 + (ww - 8 - anim->w) / 2;
@@ -1072,15 +1086,19 @@ static void cinco_view_render(void)
             if (ms_per_step == 0) ms_per_step = 1;
             uint8_t step = perf.groove ? cinco_groove_get_step() : (uint8_t)((fm1_ms / ms_per_step) & 15u);
             uint8_t step_changed = (step != last_rendered_defrag_step);
+            uint8_t grid_changed = (memcmp(last_rendered_seq_grid, perf.seq_grid, sizeof(perf.seq_grid)) != 0) ||
+                                   (perf.seq_row != last_rendered_seq_row);
             uint8_t time_up = (fm1_ms - last_rendered_defrag_ms >= 500u);
 
-            if (step_changed) {
+            if (step_changed || grid_changed) {
                 cinco_draw_defrag_grid(ox, oy, ww, wh, step);
                 last_rendered_defrag_step = step;
+                memcpy(last_rendered_seq_grid, perf.seq_grid, sizeof(perf.seq_grid));
+                last_rendered_seq_row = perf.seq_row;
             }
-            if (time_up) {
+            if (time_up || grid_changed) {
                 uint32_t progress = cinco_get_defrag_progress(bpm);
-                if (progress != last_rendered_defrag_prog) {
+                if (progress != last_rendered_defrag_prog || grid_changed) {
                     cinco_draw_defrag_progress(ox, oy, ww, wh, bpm, progress);
                     last_rendered_defrag_prog = progress;
                     last_rendered_defrag_ms = fm1_ms;

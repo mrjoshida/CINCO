@@ -555,3 +555,12 @@ EXPORT void web_cinco_clear_popups(void) {
     perf.error_popup_t = 0;
     perf.receipt_t = 0;
 }
+EXPORT uint32_t web_cinco_get_seq_grid(uint32_t row) { return row < 6u ? perf.seq_grid[row] : 0u; }
+EXPORT void web_cinco_set_seq_grid(uint32_t row, uint32_t val) { if (row < 6u) perf.seq_grid[row] = (uint16_t)val; }
+EXPORT uint32_t web_cinco_get_seq_row(void) { return perf.seq_row; }
+EXPORT void web_cinco_set_seq_row(uint32_t row) { if (row < 6u) perf.seq_row = (uint8_t)row; }
+EXPORT int32_t web_cinco_get_seq_pitch_offset(void) { return perf.seq_pitch_offset; }
+EXPORT void web_cinco_set_seq_pitch_offset(int32_t po) { perf.seq_pitch_offset = (int8_t)po; }
+EXPORT void web_cinco_save_state(void) { cinco_save_state(); }
+EXPORT void web_cinco_load_state(void) { cinco_load_state(); }
+

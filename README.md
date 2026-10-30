@@ -153,7 +153,7 @@ The Cinco Identity Generator 2.5™ maps seamlessly onto the **M-VAVE FM-1** har
 | **Button (`HOME`)**   | **Corporate Panic / Reset** | Instantly dismisses all modal dialogues, resets window cascading, and clears errors. Hold `HOME` + press `GLO` for Floppy Easter egg. |
 | **Button (`SAVE`)**   | **Print Oyster Smiling** | Generates a mock dot-matrix thermal printout of Oyster on screen. |
 | **Button (`EDIT`)**   | **Lotus 1-2-3 Boss Key** | Instantly replaces the entire screen with an authentic 1993 spreadsheet while synthesizer audio plays in background. Any key or knob turn wakes back to desktop. |
-| **Button (`SEQ`)**    | **Norton Disk Defrag** | Displays an animated 16-cluster memory defragmenter. Automatically optimizes 240 clusters, logs completion, and returns to dancers view. |
+| **Button (`SEQ`)**    | **Norton Disk Defrag Sequencer** | Switches to an interactive 16-step visual step sequencer (6 tracks: Kick, Snare, C.Hat, O.Hat, Bass, Stabs). 16 white keys toggle steps 1–16, black keys select tracks. Encoders/knobs control pattern fills, pitch transposition, and template loading. Tap `SEQ` again or `HOME` to return. |
 | **Button (`GLO`)**    | **Cinco Speech Soundboard** | Cycles through 9 iconic LPC speech phrases. Hold `GLO` or press `GLO + EDIT` to toggle Diagnostic HUD. Press `HOME + GLO` (or every 8th press) to trigger `ERR 0xCE1E`. |
 | **Keys (`F3`–`G5`)**  | **27-Key Capacitive Keyboard** | Clean, non-velocity tactile touch response triggering lead synthesizer notes or chromatic speech phonemes. |
 

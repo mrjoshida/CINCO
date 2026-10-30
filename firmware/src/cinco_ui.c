@@ -70,8 +70,24 @@ static uint8_t pat_last[NTRK];
 #ifndef OBJ_SETTINGS
 #define OBJ_SETTINGS 0
 #endif
-static int st_load(uint32_t obj, void *dst, uint32_t max) { (void)obj; (void)dst; (void)max; return -1; }
-static int st_save(uint32_t obj, const void *src, uint32_t len) { (void)obj; (void)src; (void)len; return -1; }
+static uint8_t emu_storage[256];
+static int emu_storage_len = 0;
+static int st_load(uint32_t obj, void *dst, uint32_t max)
+{
+    (void)obj;
+    if (emu_storage_len <= 0) return -1;
+    uint32_t n = (uint32_t)emu_storage_len < max ? (uint32_t)emu_storage_len : max;
+    memcpy(dst, emu_storage, n);
+    return (int)n;
+}
+static int st_save(uint32_t obj, const void *src, uint32_t len)
+{
+    (void)obj;
+    if (len > sizeof(emu_storage)) len = sizeof(emu_storage);
+    memcpy(emu_storage, src, len);
+    emu_storage_len = (int)len;
+    return (int)len;
+}
 #endif
 
 void cinco_save_state(void)
@@ -93,6 +109,11 @@ void cinco_save_state(void)
     save.mix = perf.mix;
     save.groove = perf.groove;
     save.octave = song.octave;
+    for (uint32_t i = 0; i < 6u; i++) {
+        save.seq_grid[i] = perf.seq_grid[i];
+    }
+    save.seq_row = perf.seq_row;
+    save.seq_pitch_offset = perf.seq_pitch_offset;
     st_save(OBJ_SETTINGS, &save, sizeof(save));
 }
 
@@ -120,6 +141,11 @@ void cinco_load_state(void)
         cinco_sound_set_preset(perf.source);
         cinco_sound_set_algo(perf.variant);
         cinco_groove_set_pattern(perf.groove_pattern);
+        for (uint32_t i = 0; i < 6u; i++) {
+            perf.seq_grid[i] = save.seq_grid[i];
+        }
+        perf.seq_row = save.seq_row < 6u ? save.seq_row : 0u;
+        perf.seq_pitch_offset = save.seq_pitch_offset;
         cinco_term_push("> Saved state restored.");
     }
 }
@@ -335,17 +361,7 @@ static void ui_input(void)
         glo_diag_toggled = 0;
     }
 
-    if (d_sel) {
-        perf.diag = !perf.diag;
-        if (perf.diag) {
-            cinco_term_push("> Diagnostic HUD enabled.");
-        } else {
-            cinco_term_push("> Diagnostic HUD disabled.");
-        }
-    }
-
     if (d_src) {
-        perf.view_mode = 0; /* Auto-exit Disk Defrag to show dancer */
         int32_t s = (int32_t)perf.source + d_src;
         while (s < 0) s += CINCO_PRESET_COUNT;
         s %= CINCO_PRESET_COUNT;
@@ -392,77 +408,176 @@ static void ui_input(void)
         }
     }
 
-    if (d_var) {
-        int play_held = (fm1_in.buttons & (1u << panel.btn[B_PLAY])) != 0;
-        int glo_held = (fm1_in.buttons & (1u << panel.btn[B_GLO])) != 0;
-        if (play_held || glo_held) {
-            int32_t pat = (int32_t)perf.groove_pattern + d_var;
-            while (pat < 0) pat += CINCO_GROOVE_COUNT;
-            pat %= CINCO_GROOVE_COUNT;
-            if (pat != (int32_t)perf.groove_pattern) {
-                perf.groove_pattern = (uint8_t)pat;
-                cinco_groove_set_pattern(perf.groove_pattern);
-                switch (perf.groove_pattern) {
-                case 0: cinco_term_push("> Groove: Eurodance 90s"); break;
-                case 1: cinco_term_push("> Groove: Rave Breakbeat"); break;
-                case 2: cinco_term_push("> Groove: Pumping House"); break;
-                case 3: cinco_term_push("> Groove: Acid Trance 303"); break;
-                case 4: cinco_term_push("> Groove: Happy Hardcore"); break;
-                case 5: cinco_term_push("> Groove: Speed Garage"); break;
-                case 6: cinco_term_push("> Groove: Belgian Techno"); break;
-                case 7: cinco_term_push("> Groove: Italo Disco"); break;
-                default: break;
-                }
-            }
-        } else {
-            int32_t algo = (int32_t)perf.variant + d_var;
-            while (algo < 0) algo += CINCO_ALGO_COUNT;
-            algo %= CINCO_ALGO_COUNT;
-            if (algo != (int32_t)perf.variant) {
-                perf.variant = (uint8_t)algo;
-                cinco_sound_set_algo(perf.variant);
-                switch (perf.variant) {
-                case 0: cinco_term_push("> Algo: Dual-Saw Poly Brass"); break;
-                case 1: cinco_term_push("> Algo: Hard Sync Lead"); break;
-                case 2: cinco_term_push("> Algo: Sub-Octave Acid Bass"); break;
-                case 3: cinco_term_push("> Algo: CZ Resonant Trapezoid"); break;
-                case 4: cinco_term_push("> Algo: FM 4-Op Linear Cascade"); break;
-                case 5: cinco_term_push("> Algo: FM Dual-Modulator Bell"); break;
-                case 6: cinco_term_push("> Algo: Formant Vowel Choir"); break;
-                case 7: cinco_term_push("> Algo: 8-Bit Chip Lofi"); break;
-                default: break;
+    if (perf.view_mode == 1) {
+        /* Defragmenter Step Sequencer: Key Step/Row Input */
+        if (note_press) {
+            for (uint32_t k = 0; k < 27u; k++) {
+                if ((note_press >> k) & 1u) {
+                    if (!key_black(k)) {
+                        uint32_t c = key_place(k);
+                        if (c < 16u) {
+                            perf.seq_grid[perf.seq_row % 6u] ^= (1u << c);
+                            int on = (perf.seq_grid[perf.seq_row % 6u] >> c) & 1u;
+                            char msg[32];
+                            snprintf(msg, sizeof(msg), "> Step %u %s [%s]",
+                                     (unsigned)(c + 1u), on ? "ON" : "OFF", SEQ_ROW_NAMES[perf.seq_row % 6u]);
+                            cinco_term_push(msg);
+                        }
+                    } else {
+                        uint32_t r = key_place(k);
+                        if (r < 6u) {
+                            perf.seq_row = (uint8_t)r;
+                            char msg[32];
+                            snprintf(msg, sizeof(msg), "> Defrag Track: [%s]", SEQ_ROW_NAMES[perf.seq_row % 6u]);
+                            cinco_term_push(msg);
+                        }
+                    }
                 }
             }
         }
-    }
 
-    if (d_k1) {
-        uint8_t old_k4d = perf.k4d;
-        int32_t v = (int32_t)perf.k4d + d_k1 * 2;
-        if (v < 0) v = 0;
-        if (v > 127) v = 127;
-        perf.k4d = (uint8_t)v;
-        if (old_k4d <= 32 && perf.k4d > 32) {
-            cinco_term_push("> 4d3d3d3 engaged.");
-            cinco_speech_play(CINCO_PHRASE_4D3D);
+        /* Defragmenter Step Sequencer: Encoders */
+        if (d_sel) {
+            int32_t r = ((int32_t)perf.seq_row + d_sel) % 6;
+            if (r < 0) r += 6;
+            perf.seq_row = (uint8_t)r;
+            char msg[32];
+            snprintf(msg, sizeof(msg), "> Defrag Track: [%s]", SEQ_ROW_NAMES[perf.seq_row]);
+            cinco_term_push(msg);
         }
-        if (perf.k4d == 127 && old_k4d != 127) {
-            perf.error_popup_t = 120;
-            cinco_str_copy(perf.error_msg, "WARNING: 4d3d3d3 exceeded recommended OSHA flarh levels.", sizeof(perf.error_msg));
-        }
-    }
 
-    if (d_k2) {
-        if (perf.nude) {
-            int32_t v = (int32_t)perf.mosaic + d_k2;
+        if (d_k1) {
+            static const uint16_t FILL_PATTERNS[7] = {
+                0x0000, /* 0: Clear */
+                0x1111, /* 1: 4-on-floor */
+                0x4444, /* 2: Offbeat */
+                0x5555, /* 3: 8th notes */
+                0xFFFF, /* 4: 16th notes */
+                0x1449, /* 5: Syncopated */
+                0x4994  /* 6: Gallop */
+            };
+            static const char * const FILL_NAMES[8] = {
+                "Clear", "4-on-Floor", "Offbeat", "8th Notes",
+                "16th Notes", "Syncopated", "Gallop", "Invert"
+            };
+            static int32_t fill_sel = 0;
+            fill_sel = (fill_sel + d_k1) % 8;
+            if (fill_sel < 0) fill_sel += 8;
+            if (fill_sel == 7) {
+                perf.seq_grid[perf.seq_row % 6u] = (uint16_t)(~perf.seq_grid[perf.seq_row % 6u] & 0xFFFFu);
+            } else {
+                perf.seq_grid[perf.seq_row % 6u] = FILL_PATTERNS[fill_sel];
+            }
+            char msg[32];
+            snprintf(msg, sizeof(msg), "> Fill: %s", FILL_NAMES[fill_sel]);
+            cinco_term_push(msg);
+        }
+
+        if (d_k2) {
+            int32_t po = (int32_t)perf.seq_pitch_offset + d_k2;
+            if (po < -24) po = -24;
+            if (po > 24) po = 24;
+            perf.seq_pitch_offset = (int8_t)po;
+            char msg[36];
+            snprintf(msg, sizeof(msg), "> Root Transpose: %+d semitones", (int)perf.seq_pitch_offset);
+            cinco_term_push(msg);
+        }
+
+        if (d_var) {
+            static const char * const GROOVE_NAMES[8] = {
+                "Eurodance 90s", "Rave Breakbeat", "Pumping House", "Acid Trance 303",
+                "Happy Hardcore", "Speed Garage", "Belgian Techno", "Italo Disco"
+            };
+            int32_t gp = ((int32_t)perf.groove_pattern + d_var) % 8;
+            if (gp < 0) gp += 8;
+            perf.groove_pattern = (uint8_t)gp;
+            cinco_groove_load_template(perf.groove_pattern);
+            char msg[40];
+            snprintf(msg, sizeof(msg), "> Loaded Template: %s", GROOVE_NAMES[perf.groove_pattern]);
+            cinco_term_push(msg);
+        }
+    } else {
+        if (d_sel) {
+            perf.diag = !perf.diag;
+            if (perf.diag) {
+                cinco_term_push("> Diagnostic HUD enabled.");
+            } else {
+                cinco_term_push("> Diagnostic HUD disabled.");
+            }
+        }
+
+        if (d_var) {
+            int play_held = (fm1_in.buttons & (1u << panel.btn[B_PLAY])) != 0;
+            int glo_held = (fm1_in.buttons & (1u << panel.btn[B_GLO])) != 0;
+            if (play_held || glo_held) {
+                int32_t pat = (int32_t)perf.groove_pattern + d_var;
+                while (pat < 0) pat += CINCO_GROOVE_COUNT;
+                pat %= CINCO_GROOVE_COUNT;
+                if (pat != (int32_t)perf.groove_pattern) {
+                    perf.groove_pattern = (uint8_t)pat;
+                    cinco_groove_set_pattern(perf.groove_pattern);
+                    switch (perf.groove_pattern) {
+                    case 0: cinco_term_push("> Groove: Eurodance 90s"); break;
+                    case 1: cinco_term_push("> Groove: Rave Breakbeat"); break;
+                    case 2: cinco_term_push("> Groove: Pumping House"); break;
+                    case 3: cinco_term_push("> Groove: Acid Trance 303"); break;
+                    case 4: cinco_term_push("> Groove: Happy Hardcore"); break;
+                    case 5: cinco_term_push("> Groove: Speed Garage"); break;
+                    case 6: cinco_term_push("> Groove: Belgian Techno"); break;
+                    case 7: cinco_term_push("> Groove: Italo Disco"); break;
+                    default: break;
+                    }
+                }
+            } else {
+                int32_t algo = (int32_t)perf.variant + d_var;
+                while (algo < 0) algo += CINCO_ALGO_COUNT;
+                algo %= CINCO_ALGO_COUNT;
+                if (algo != (int32_t)perf.variant) {
+                    perf.variant = (uint8_t)algo;
+                    cinco_sound_set_algo(perf.variant);
+                    switch (perf.variant) {
+                    case 0: cinco_term_push("> Algo: Dual-Saw Poly Brass"); break;
+                    case 1: cinco_term_push("> Algo: Hard Sync Lead"); break;
+                    case 2: cinco_term_push("> Algo: Sub-Octave Acid Bass"); break;
+                    case 3: cinco_term_push("> Algo: CZ Resonant Trapezoid"); break;
+                    case 4: cinco_term_push("> Algo: FM 4-Op Linear Cascade"); break;
+                    case 5: cinco_term_push("> Algo: FM Dual-Modulator Bell"); break;
+                    case 6: cinco_term_push("> Algo: Formant Vowel Choir"); break;
+                    case 7: cinco_term_push("> Algo: 8-Bit Chip Lofi"); break;
+                    default: break;
+                    }
+                }
+            }
+        }
+
+        if (d_k1) {
+            uint8_t old_k4d = perf.k4d;
+            int32_t v = (int32_t)perf.k4d + d_k1 * 2;
             if (v < 0) v = 0;
             if (v > 127) v = 127;
-            perf.mosaic = (uint8_t)v;
-        } else {
-            int32_t v = (int32_t)perf.tone + d_k2;
-            if (v < 0) v = 0;
-            if (v > 127) v = 127;
-            perf.tone = (uint8_t)v;
+            perf.k4d = (uint8_t)v;
+            if (old_k4d <= 32 && perf.k4d > 32) {
+                cinco_term_push("> 4d3d3d3 engaged.");
+                cinco_speech_play(CINCO_PHRASE_4D3D);
+            }
+            if (perf.k4d == 127 && old_k4d != 127) {
+                perf.error_popup_t = 120;
+                cinco_str_copy(perf.error_msg, "WARNING: 4d3d3d3 exceeded recommended OSHA flarh levels.", sizeof(perf.error_msg));
+            }
+        }
+
+        if (d_k2) {
+            if (perf.nude) {
+                int32_t v = (int32_t)perf.mosaic + d_k2;
+                if (v < 0) v = 0;
+                if (v > 127) v = 127;
+                perf.mosaic = (uint8_t)v;
+            } else {
+                int32_t v = (int32_t)perf.tone + d_k2;
+                if (v < 0) v = 0;
+                if (v > 127) v = 127;
+                perf.tone = (uint8_t)v;
+            }
         }
     }
 
@@ -503,7 +618,6 @@ static void ui_input(void)
 
         if (btn == B_FX) {
             if (p) {
-                perf.view_mode = 0; /* Auto-exit Disk Defrag to show dancer */
                 perf.nude = !perf.nude;
                 if (perf.nude) {
                     perf.nsfw_popup_t = 60;
@@ -515,7 +629,6 @@ static void ui_input(void)
             }
         } else if (btn == B_LFO) {
             if (p) {
-                perf.view_mode = 0; /* Auto-exit Disk Defrag to show dancer */
                 perf.wobble = !perf.wobble;
                 if (perf.wobble) {
                     perf.flail = 0;
@@ -527,7 +640,6 @@ static void ui_input(void)
             }
         } else if (btn == B_ARP) {
             if (p) {
-                perf.view_mode = 0; /* Auto-exit Disk Defrag to show dancer */
                 perf.flail = !perf.flail;
                 if (perf.flail) {
                     perf.wobble = 0;
@@ -577,7 +689,6 @@ static void ui_input(void)
             }
         } else if (btn == B_SAVE) {
             if (p) {
-                perf.view_mode = 0; /* Auto-exit Disk Defrag to show receipt */
                 perf.receipt_t = 80;
                 perf.nsfw_popup_t = 0;
                 cinco_save_state();

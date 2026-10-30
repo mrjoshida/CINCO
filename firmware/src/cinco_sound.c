@@ -78,6 +78,9 @@ void cinco_perf_init(void)
     perf.env_mode = 0;
     perf.scale_mode = 0;
     perf.groove_pattern = 0;
+    perf.seq_row = 0;
+    perf.seq_pitch_offset = 0;
+    for (int sgi = 0; sgi < 6; sgi++) perf.seq_grid[sgi] = 0;
     perf.anim_tick = 0;
     perf.frame_idx = 0;
     perf.last_frame_ms = 0;

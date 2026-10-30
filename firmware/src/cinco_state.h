@@ -57,6 +57,11 @@ typedef struct {
     int16_t prev_celery_x[4];  /* flying celery prev x */
     int16_t prev_celery_y[4];  /* flying celery prev y */
 
+    /* Disk Defragmenter Sequencer */
+    uint16_t seq_grid[6];       /* 6 tracks x 16 steps (bits 0..15). Row 0: Kick, 1: Snare, 2: C.Hat, 3: O.Hat, 4: Bass, 5: Stab */
+    uint8_t  seq_row;           /* Active row cursor (0..5) */
+    int8_t   seq_pitch_offset;  /* Pitch transposition for Bass/Stab (-12..+12) */
+
     /* Animation clock */
     uint32_t anim_tick;
     uint8_t  frame_idx;
@@ -86,11 +91,16 @@ void cinco_sound_apply_env(uint8_t mode);
 void cinco_sound_apply_scale(uint8_t mode);
 void cinco_groove_init(void);
 void cinco_groove_set_pattern(uint8_t pat);
+void cinco_groove_load_template(uint8_t pat);
 uint8_t cinco_groove_get_step(void);
 void cinco_groove_process(uint32_t n);
 void cinco_audio_block(int32_t *out, uint32_t n);
 void cinco_save_state(void);
 void cinco_load_state(void);
+
+static const char * const SEQ_ROW_NAMES[6] = {
+    "KICK", "SNARE", "C.HAT", "O.HAT", "BASS", "STAB"
+};
 
 #define CINCO_SAVE_MAGIC 0x4F434E49 /* "INCO" */
 typedef struct __attribute__((packed)) {
@@ -105,7 +115,10 @@ typedef struct __attribute__((packed)) {
     uint8_t  groove;
     int8_t   octave;
     uint8_t  groove_pattern;  /* Groove Style 0..7 */
-    uint8_t  reserved[18];
+    uint16_t seq_grid[6];     /* 12 bytes */
+    uint8_t  seq_row;         /* 1 byte */
+    int8_t   seq_pitch_offset;/* 1 byte */
+    uint8_t  reserved[4];     /* 4 bytes (Total: 32 bytes) */
 } cinco_save_t;
 _Static_assert(sizeof(cinco_save_t) == 32u, "cinco_save_t size");
 

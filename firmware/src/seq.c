@@ -13,6 +13,7 @@
  * held length as TIE steps (rec_note, rec_hold, rec_release). With the ARP on, the notes the arp
  * plays are recorded, not the keys held (what plays back is what was heard). A key or MIDI note plays a
  * chord when the track's CHRD is on (chord.c): its notes go through the same input as so many keys. */
+#include "cinco_state.h"
 static const uint16_t SCALE_MASK[] = {
     0xFFF,                                   /* CHR */
     (1 << 0) | (1 << 2) | (1 << 4) | (1 << 5) | (1 << 7) | (1 << 9) | (1 << 11),   /* MAJ */
@@ -839,7 +840,7 @@ static void keyboard_block(void)
                     perf_key_press(k, 1);
                 continue;
             }
-            if ((mute >> k) & 1u)                 /* NAME (ui_name.c): every key types, none sounds; SONG: A..D */
+            if (perf.view_mode == 1 || ((mute >> k) & 1u))                 /* NAME (ui_name.c): every key types, none sounds; SONG: A..D */
                 kb_note[k] = KB_SILENT;
             else if (song.grid == 1u)             /* the DRUM grid: a lane key plays its lane, the rest are the UI's */
                 kb_note[k] = grid_key_note(k);
