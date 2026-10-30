@@ -2265,17 +2265,11 @@ function updateSeqUI(view, row, step) {
     if (!document.body.classList.contains("seq-mode")) {
       document.body.classList.add("seq-mode");
       if (mainWin) mainWin.classList.add("seq-mode");
-      if (typeof openWindow === "function") openWindow("win-defrag", "task-pill-defrag");
     }
   } else {
     if (document.body.classList.contains("seq-mode")) {
       document.body.classList.remove("seq-mode");
       if (mainWin) mainWin.classList.remove("seq-mode");
-    }
-    if (defragWin && defragWin.style.display !== "none") {
-      defragWin.style.display = "none";
-      const pill = document.getElementById("task-pill-defrag");
-      if (pill) pill.style.display = "none";
     }
   }
 
