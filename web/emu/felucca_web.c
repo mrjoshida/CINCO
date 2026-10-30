@@ -519,6 +519,12 @@ EXPORT uint32_t web_cinco_get_title(void) { return (uint32_t)perf.current_title;
 EXPORT uint32_t web_cinco_get_mosaic(void) { return perf.current_mosaic; }
 EXPORT uint32_t web_cinco_get_source(void) { return perf.source; }
 EXPORT void web_cinco_set_source(uint32_t s) { cinco_sound_set_source((uint8_t)s); }
+EXPORT uint32_t web_cinco_get_preset(void) { return perf.source; }
+EXPORT void web_cinco_set_preset(uint32_t p) { cinco_sound_set_preset((uint8_t)p); }
+EXPORT uint32_t web_cinco_get_algo(void) { return perf.variant; }
+EXPORT void web_cinco_set_algo(uint32_t a) { cinco_sound_set_algo((uint8_t)a); }
+EXPORT uint32_t web_cinco_get_groove_pattern(void) { return perf.groove_pattern; }
+EXPORT void web_cinco_set_groove_pattern(uint32_t p) { cinco_groove_set_pattern((uint8_t)p); }
 EXPORT uint32_t web_cinco_get_nude(void) { return perf.nude; }
 EXPORT void web_cinco_set_nude(uint32_t n) { perf.nude = (uint8_t)n; }
 EXPORT uint32_t web_cinco_get_wobble(void) { return perf.wobble; }
@@ -530,6 +536,9 @@ EXPORT void web_cinco_set_env_mode(uint32_t m) { cinco_sound_apply_env((uint8_t)
 EXPORT uint32_t web_cinco_get_scale_mode(void) { return perf.scale_mode; }
 EXPORT void web_cinco_set_scale_mode(uint32_t m) { cinco_sound_apply_scale((uint8_t)m); }
 EXPORT int32_t web_trk0_p(uint32_t param) { return param < P_COUNT ? trk[0].p[param] : -1; }
+EXPORT uint32_t web_param_dist(void) { return P_DIST; }
+EXPORT uint32_t web_param_e5(void) { return P_E5; }
+EXPORT uint32_t web_param_level(void) { return P_LEVEL; }
 EXPORT void web_lcd_stats_reset(void) {
     web_lcd_pixels = 0;
     web_lcd_calls = 0;

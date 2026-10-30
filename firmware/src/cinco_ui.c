@@ -84,7 +84,8 @@ void cinco_save_state(void)
     memset(&save, 0, sizeof(save));
     save.magic = CINCO_SAVE_MAGIC;
     save.source = perf.source;
-    save.variant = perf.groove_pattern;
+    save.variant = perf.variant;
+    save.groove_pattern = perf.groove_pattern;
     save.k4d = perf.k4d;
     save.tone = perf.tone;
     save.mosaic = perf.mosaic;
@@ -104,9 +105,9 @@ void cinco_load_state(void)
     cinco_save_t save;
     int n = st_load(OBJ_SETTINGS, &save, sizeof(save));
     if (n == (int)sizeof(save) && save.magic == CINCO_SAVE_MAGIC) {
-        perf.source = save.source;
-        perf.variant = save.variant;
-        perf.groove_pattern = save.variant % 3u;
+        perf.source = save.source % 8u;
+        perf.variant = save.variant % 8u;
+        perf.groove_pattern = save.groove_pattern % 8u;
         perf.k4d = save.k4d;
         perf.tone = save.tone;
         perf.mosaic = save.mosaic;
@@ -116,7 +117,9 @@ void cinco_load_state(void)
         song.octave = save.octave;
         song.g[G_BPM] = (int16_t)save.tempo;
         song.playing = save.groove;
-        cinco_sound_set_source(perf.source);
+        cinco_sound_set_preset(perf.source);
+        cinco_sound_set_algo(perf.variant);
+        cinco_groove_set_pattern(perf.groove_pattern);
         cinco_term_push("> Saved state restored.");
     }
 }
@@ -198,7 +201,7 @@ static void settings_later(void) { }
 static void autosave_boot(uint32_t clean)
 {
     (void)clean;
-    cinco_sound_set_source(perf.source);
+    cinco_sound_set_preset(perf.source);
 }
 static void autosave_poll(void) { }
 
@@ -222,7 +225,7 @@ static void draw_splash(void)
     cinco_sound_init();
     cinco_groove_init();
     cinco_speech_init();
-    cinco_sound_set_source(perf.source);
+    cinco_sound_set_preset(perf.source);
     cinco_speech_play(CINCO_PHRASE_BOOT);
     cinco_view_render();
 }
@@ -344,44 +347,91 @@ static void ui_input(void)
     if (d_src) {
         perf.view_mode = 0; /* Auto-exit Disk Defrag to show dancer */
         int32_t s = (int32_t)perf.source + d_src;
-        while (s < 0) s += SRC_COUNT;
-        s %= SRC_COUNT;
+        while (s < 0) s += CINCO_PRESET_COUNT;
+        s %= CINCO_PRESET_COUNT;
         if (s != (int32_t)perf.source) {
             perf.source = (uint8_t)s;
             perf.frame_idx = 0;
-            cinco_sound_set_source(perf.source);
+            cinco_sound_set_preset(perf.source);
             switch (perf.source) {
-            case SRC_CELERY:
-                cinco_term_push("> Celery Man loaded.");
+            case 0:
+                cinco_term_push("> Preset: Celery Man");
                 cinco_speech_play(CINCO_PHRASE_CELERY);
                 break;
-            case SRC_OYSTER:
-                cinco_term_push("> Oyster loaded.");
+            case 1:
+                cinco_term_push("> Preset: Oyster Smiling");
                 cinco_speech_play(CINCO_PHRASE_OYSTER);
                 break;
-            case SRC_TAYNE:
-                cinco_term_push("> Tayne loaded.");
+            case 2:
+                cinco_term_push("> Preset: Tayne Classic");
                 cinco_speech_play(CINCO_PHRASE_TAYNE);
                 break;
-            case SRC_TALK:
-                cinco_term_push("> Voice synth ready.");
+            case 3:
+                cinco_term_push("> Preset: Computer Voice");
                 cinco_speech_play(CINCO_PHRASE_ENTER);
                 break;
-            default: break;
+            case 4:
+                cinco_term_push("> Preset: Celery 4D Supersaw");
+                cinco_speech_play(CINCO_PHRASE_4D3D);
+                break;
+            case 5:
+                cinco_term_push("> Preset: Oyster Velvet Chime");
+                cinco_speech_play(CINCO_PHRASE_YES);
+                break;
+            case 6:
+                cinco_term_push("> Preset: Tayne BETA Rave");
+                cinco_speech_play(CINCO_PHRASE_BETA);
+                break;
+            case 7:
+                cinco_term_push("> Preset: Nude Tayne Acid 303");
+                cinco_speech_play(CINCO_PHRASE_NSFW);
+                break;
+            default:
+                break;
             }
         }
     }
 
     if (d_var) {
-        int32_t pat = ((int32_t)perf.groove_pattern + d_var) % 3;
-        while (pat < 0) pat += 3;
-        if (pat != (int32_t)perf.groove_pattern) {
-            perf.groove_pattern = (uint8_t)pat;
-            cinco_groove_set_pattern(perf.groove_pattern);
-            switch (perf.groove_pattern) {
-            case 0: cinco_term_push("> Groove: Eurodance 90s"); break;
-            case 1: cinco_term_push("> Groove: Rave Breakbeat"); break;
-            default: cinco_term_push("> Groove: Pumping House"); break;
+        int play_held = (fm1_in.buttons & (1u << panel.btn[B_PLAY])) != 0;
+        int glo_held = (fm1_in.buttons & (1u << panel.btn[B_GLO])) != 0;
+        if (play_held || glo_held) {
+            int32_t pat = (int32_t)perf.groove_pattern + d_var;
+            while (pat < 0) pat += CINCO_GROOVE_COUNT;
+            pat %= CINCO_GROOVE_COUNT;
+            if (pat != (int32_t)perf.groove_pattern) {
+                perf.groove_pattern = (uint8_t)pat;
+                cinco_groove_set_pattern(perf.groove_pattern);
+                switch (perf.groove_pattern) {
+                case 0: cinco_term_push("> Groove: Eurodance 90s"); break;
+                case 1: cinco_term_push("> Groove: Rave Breakbeat"); break;
+                case 2: cinco_term_push("> Groove: Pumping House"); break;
+                case 3: cinco_term_push("> Groove: Acid Trance 303"); break;
+                case 4: cinco_term_push("> Groove: Happy Hardcore"); break;
+                case 5: cinco_term_push("> Groove: Speed Garage"); break;
+                case 6: cinco_term_push("> Groove: Belgian Techno"); break;
+                case 7: cinco_term_push("> Groove: Italo Disco"); break;
+                default: break;
+                }
+            }
+        } else {
+            int32_t algo = (int32_t)perf.variant + d_var;
+            while (algo < 0) algo += CINCO_ALGO_COUNT;
+            algo %= CINCO_ALGO_COUNT;
+            if (algo != (int32_t)perf.variant) {
+                perf.variant = (uint8_t)algo;
+                cinco_sound_set_algo(perf.variant);
+                switch (perf.variant) {
+                case 0: cinco_term_push("> Algo: Dual-Saw Poly Brass"); break;
+                case 1: cinco_term_push("> Algo: Hard Sync Lead"); break;
+                case 2: cinco_term_push("> Algo: Sub-Octave Acid Bass"); break;
+                case 3: cinco_term_push("> Algo: CZ Resonant Trapezoid"); break;
+                case 4: cinco_term_push("> Algo: FM 4-Op Linear Cascade"); break;
+                case 5: cinco_term_push("> Algo: FM Dual-Modulator Bell"); break;
+                case 6: cinco_term_push("> Algo: Formant Vowel Choir"); break;
+                case 7: cinco_term_push("> Algo: 8-Bit Chip Lofi"); break;
+                default: break;
+                }
             }
         }
     }

@@ -2134,9 +2134,9 @@ const ROW1 = ["FX", "SCL", "ENV", "LFO", "EDIT", "GLO"];
 const ROW2 = ["HOME", "SAVE", "ARP", "SEQ", "PLAY", "REC"];
 const KNOBS = ["MASTER", "SELECT", "ALGO", "PRESET", "K1", "K2", "K3", "K4"];
 const KNOB_SUBS = {
-  SELECT: "CHAR",
-  ALGO: "GROOVE", ALGORITHM: "GROOVE",
-  PRESET: "", PRESETS: "",
+  SELECT: "HUD",
+  ALGO: "ALGO", ALGORITHM: "ALGO",
+  PRESET: "VOICE", PRESETS: "VOICE",
   K1: "4d3d3d3", "KNOB 1": "4d3d3d3",
   K2: "CUTOFF", "KNOB 2": "CUTOFF",
   K3: "TEMPO", "KNOB 3": "TEMPO",
@@ -3592,7 +3592,7 @@ document.getElementById("btn-dos-exit")?.addEventListener("click", () => {
 const MANUAL_SECTIONS = {
   "toc-welcome": "<h3>Welcome to Cinco Identity Generator 2.5™</h3><p>This workstation runs custom Cinco OS 2.5 firmware for the M-VAVE FM-1 Synthesizer Terminal, featuring 4d3d3d3 window cascading, rotoscoped SCUMM dancers, and LPC speech synthesis.</p>",
   "toc-controls": "<h3>Workstation & Synthesizer Controls</h3><p>Use keys Z through / for the lower manual, Q through O for the upper manual. Number keys 1-6 trigger row 1 buttons (FX, SCL, ENV, LFO, EDIT, GLO). Press [ and ] for octave shifts.</p>",
-  "toc-identities": "<h3>Cinco Identity Routines</h3><p>Rotate PRESETS encoder to toggle dancer routines: Celery Man (default 4d3d3d3 sequence), Oyster Smiling, and Tayne (Beta). Press GLO for phonetic LPC speech generation.</p>",
+  "toc-identities": "<h3>Cinco Identity Routines & Sound Engines</h3><p>Rotate PRESET encoder to select across 8 curated identities (Celery Man, Oyster Smiling, Tayne Classic, Computer Voice, Celery 4D, Oyster Velvet, Tayne BETA, Nude Tayne). Rotate ALGO encoder to choose between 8 live synthesis algorithms on the keyboard (Dual-Saw Brass, Hard Sync, Sub Bass, CZ Resonant, FM Cascade, FM Bell, Formant Choir, 8-Bit Lofi), or hold PLAY to cycle 8 90s dance groove styles. Press GLO for phonetic LPC speech generation.</p>",
   "toc-kinetics": "<h3>Kinetic Modulation (4d3d3d3)</h3><p>Engage Hat Wobble with LFO key (4). Flarhgunnstow arpeggiation mode engages with ARP key (9). Kick up the 4d3d3d3 with Macro Knob 1.</p>",
   "toc-boss": "<h3>Lotus 1-2-3 Stealth Boss Key</h3><p>Press EDIT key or Tools &gt; Lotus 1-2-3 to instantly summon corporate spreadsheet cover mode. Total corporate allocation: $32,820,000.</p>",
   "toc-osha": "<h3>OSHA Compliance Guidelines</h3><p>15-minute executive espresso recesses are mandatory under Cinco corporate policy. Maintain safe distance from Celery Man kinetic routines.</p>"

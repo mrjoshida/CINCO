@@ -17,6 +17,10 @@ enum {
     SRC_COUNT  = 4
 };
 
+#define CINCO_PRESET_COUNT 8
+#define CINCO_ALGO_COUNT 8
+#define CINCO_GROOVE_COUNT 8
+
 /* Unified performance state: single source of truth for sound + view */
 typedef struct {
     uint8_t source;            /* SRC_CELERY, SRC_OYSTER, SRC_TAYNE, SRC_TALK */
@@ -76,6 +80,8 @@ void cinco_speech_init(void);
 void cinco_speech_process(int32_t *out, uint32_t n);
 void cinco_sound_init(void);
 void cinco_sound_set_source(uint8_t src);
+void cinco_sound_set_preset(uint8_t preset);
+void cinco_sound_set_algo(uint8_t algo);
 void cinco_sound_apply_env(uint8_t mode);
 void cinco_sound_apply_scale(uint8_t mode);
 void cinco_groove_init(void);
@@ -89,8 +95,8 @@ void cinco_load_state(void);
 #define CINCO_SAVE_MAGIC 0x4F434E49 /* "INCO" */
 typedef struct __attribute__((packed)) {
     uint32_t magic;
-    uint8_t  source;
-    uint8_t  variant;
+    uint8_t  source;          /* Preset 0..7 */
+    uint8_t  variant;         /* Synth Algo 0..7 */
     uint8_t  k4d;
     uint8_t  tone;
     uint8_t  mosaic;
@@ -98,7 +104,8 @@ typedef struct __attribute__((packed)) {
     uint8_t  mix;
     uint8_t  groove;
     int8_t   octave;
-    uint8_t  reserved[19];
+    uint8_t  groove_pattern;  /* Groove Style 0..7 */
+    uint8_t  reserved[18];
 } cinco_save_t;
 _Static_assert(sizeof(cinco_save_t) == 32u, "cinco_save_t size");
 

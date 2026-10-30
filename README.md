@@ -137,14 +137,14 @@ The Cinco Identity Generator 2.5™ maps seamlessly onto the **M-VAVE FM-1** har
 
 | Control Element | Primary Workplace Action | Secondary / Advanced Modulation |
 |---|---|---|
-| **Knob 1 (`K1`)** | **4d3d3d3 Macro Multiplier** | Cascades 1 to 16 windows across LCD, expands stereo chorus width and sub-oscillators (0–127). |
-| **Knob 2 (`K2`)** *(SFW Mode)* | **Tone / Low-Pass Cutoff** | Adjusts analog filter brightness and harmonic richness. |
+| **Knob 1 (`K1`)** | **4d3d3d3 Macro & Resonance** | Cascades 1 to 16 windows across LCD, scales filter resonance with analog passband compensation (0–127), and engages subtle overdrive when > 100. |
+| **Knob 2 (`K2`)** *(SFW Mode)* | **Tone / Low-Pass Cutoff** | Adjusts filter cutoff, phase distortion DCW, or FM modulator index across active synthesis algorithm. |
 | **Knob 2 (`K2`)** *(NSFW Mode)* | **Bitcrusher & Mosaic Decimator** | Modulates audio sample-rate reduction and mosaic censorship tile size (4×4 up to 16×16). |
-| **Knob 3 (`K3`)** | **TEMPO (Groove Tempo)** | Controls internal Eurodance rhythm section tempo (80 to 160 BPM). |
+| **Knob 3 (`K3`)** | **TEMPO (Groove Tempo)** | Controls internal 90s dance rhythm section tempo (80 to 160 BPM). |
 | **Knob 4 (`K4`)** | **MIX (Master Balance)** | Adjusts mix balance between lead identity voice and backing rhythm section. |
 | **Encoder (`SELECT`)**| **Console Navigation & HUD** | When moved, toggles the Diagnostic HUD overlay and navigates terminal status. |
-| **Encoder (`ALGO`)**  | **Groove Pattern Selector** | Cycles 3 rhythm groove styles (`Eurodance 90s` ➔ `Rave Breakbeat` ➔ `Pumping House`). |
-| **Encoder (`PRESET`)**| **Identity Selector** | Cycles active persona: `Celery Man` ➔ `Tayne (BETA)` ➔ `Oyster Smiling`. |
+| **Encoder (`ALGO`)**  | **Synthesis Algorithm Selector** | Cycles 8 live keyboard synth engines (`Dual-Saw Brass`, `Hard Sync`, `Sub Bass`, `CZ Resonant`, `FM Cascade`, `FM Bell`, `Formant Choir`, `8-Bit Lofi`). Hold **`PLAY`** or **`GLO`** to cycle 8 90s Dance Styles (`Eurodance`, `Breakbeat`, `House`, `Acid Trance`, `Happy Hardcore`, `Speed Garage`, `Techno`, `Italo Disco`). |
+| **Encoder (`PRESET`)**| **Curated Identity Patch** | Cycles 8 curated Cinco character presets: `Celery Man`, `Oyster Smiling`, `Tayne Classic`, `Computer Voice`, `Celery 4D`, `Oyster Velvet`, `Tayne BETA`, `Nude Tayne`. |
 | **Buttons (`OCT-/+`)** | **Octave Transposition** | Shifts keyboard range across 6 octaves (F1 through G7). |
 | **Button (`FX`)**     | **Toggle Nude Tayne Mode** | Direct latch toggle; engages dynamic censor mosaic and lo-fi audio bitcrush saturation with a 1-second NSFW alert. Tap again to restore routine. |
 | **Button (`LFO`)**    | **Hat Wobble Macro** | Engages millinery resonance, modulating pitch LFO and headwear kinetic cycle. |

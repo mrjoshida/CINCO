@@ -587,15 +587,16 @@ static inline uint32_t cinco_get_layout_state(int32_t nwindows)
     s |= (uint32_t)(perf.boss_mode & 1u) << 1;
     s |= (uint32_t)(perf.view_mode & 1u) << 2;
     s |= (uint32_t)((nwindows - 1) & 0x0Fu) << 3;
-    s |= (uint32_t)(perf.source & 0x03u) << 7;
-    s |= (uint32_t)(perf.nude & 1u) << 9;
-    s |= (uint32_t)(perf.wobble & 1u) << 10;
-    s |= (uint32_t)(perf.flail & 1u) << 11;
-    s |= (uint32_t)(perf.nsfw_popup_t > 0 ? 1u : 0u) << 12;
-    s |= (uint32_t)(perf.receipt_t > 0 ? 1u : 0u) << 13;
-    s |= (uint32_t)(perf.diag > 0 ? 1u : 0u) << 14;
-    s |= (uint32_t)(perf.error_popup_t > 0 ? 1u : 0u) << 15;
-    s |= (uint32_t)(perf.mosaic & 0x7Fu) << 16;
+    s |= (uint32_t)(perf.source & 0x07u) << 7;
+    s |= (uint32_t)(perf.nude & 1u) << 10;
+    s |= (uint32_t)(perf.wobble & 1u) << 11;
+    s |= (uint32_t)(perf.flail & 1u) << 12;
+    s |= (uint32_t)(perf.nsfw_popup_t > 0 ? 1u : 0u) << 13;
+    s |= (uint32_t)(perf.receipt_t > 0 ? 1u : 0u) << 14;
+    s |= (uint32_t)(perf.diag > 0 ? 1u : 0u) << 15;
+    s |= (uint32_t)(perf.error_popup_t > 0 ? 1u : 0u) << 16;
+    s |= (uint32_t)(perf.mosaic & 0x3Fu) << 17;
+    s |= (uint32_t)(perf.variant & 0x07u) << 23;
     return s;
 }
 
@@ -864,61 +865,78 @@ static void cinco_view_render(void)
     } else {
         /* Check motion overrides */
         if (perf.flail) {
-            switch (perf.source) {
+            switch (perf.source & 3u) {
             case SRC_TAYNE:
                 anim = &cinco_anim_tayne_flarh;
-                title = perf.nude ? "NUDE TAYNE - FLARHGUNNSTOW" : "Tayne - FLARHGUNNSTOW!";
                 break;
             case SRC_OYSTER:
                 anim = &cinco_anim_oyster;
-                title = perf.nude ? "NUDE OYSTER - FLARHGUNNSTOW" : "Oyster - FLARHGUNNSTOW!";
                 break;
             case SRC_CELERY:
             case SRC_TALK:
             default:
                 anim = &cinco_anim_celery;
-                title = perf.nude ? "NUDE CELERY - FLARHGUNNSTOW" : "Celery Man - FLARHGUNNSTOW!";
                 break;
+            }
+            switch (perf.source % CINCO_PRESET_COUNT) {
+            case 0: title = perf.nude ? "NUDE CELERY - FLARHGUNNSTOW" : "Celery Man - FLARHGUNNSTOW!"; break;
+            case 1: title = perf.nude ? "NUDE OYSTER - FLARHGUNNSTOW" : "Oyster - FLARHGUNNSTOW!"; break;
+            case 2: title = perf.nude ? "NUDE TAYNE - FLARHGUNNSTOW" : "Tayne - FLARHGUNNSTOW!"; break;
+            case 3: title = perf.nude ? "NUDE VOICE - FLARHGUNNSTOW" : "Computer Voice - FLARH!"; break;
+            case 4: title = perf.nude ? "NUDE 4D - FLARHGUNNSTOW" : "4D Supersaw - FLARH!"; break;
+            case 5: title = perf.nude ? "NUDE CHIME - FLARHGUNNSTOW" : "Velvet Chime - FLARH!"; break;
+            case 6: title = perf.nude ? "NUDE RAVE - FLARHGUNNSTOW" : "BETA Rave - FLARH!"; break;
+            case 7: default: title = perf.nude ? "NUDE 303 - FLARHGUNNSTOW" : "Acid 303 - FLARH!"; break;
             }
         } else if (perf.wobble) {
-            switch (perf.source) {
+            switch (perf.source & 3u) {
             case SRC_TAYNE:
                 anim = &cinco_anim_tayne_hatwobble;
-                title = perf.nude ? "NUDE TAYNE - Hat Wobble" : "Tayne - Hat Wobble";
                 break;
             case SRC_OYSTER:
                 anim = &cinco_anim_oyster;
-                title = perf.nude ? "NUDE OYSTER - Hat Wobble" : "Oyster - Hat Wobble";
                 break;
             case SRC_CELERY:
             case SRC_TALK:
             default:
                 anim = &cinco_anim_celery;
-                title = perf.nude ? "NUDE CELERY - Hat Wobble" : "Celery Man - Hat Wobble";
                 break;
             }
+            switch (perf.source % CINCO_PRESET_COUNT) {
+            case 0: title = perf.nude ? "NUDE CELERY - Hat Wobble" : "Celery Man - Hat Wobble"; break;
+            case 1: title = perf.nude ? "NUDE OYSTER - Hat Wobble" : "Oyster - Hat Wobble"; break;
+            case 2: title = perf.nude ? "NUDE TAYNE - Hat Wobble" : "Tayne - Hat Wobble"; break;
+            case 3: title = perf.nude ? "NUDE VOICE - Hat Wobble" : "Computer Voice - Wobble"; break;
+            case 4: title = perf.nude ? "NUDE 4D - Hat Wobble" : "4D Supersaw - Wobble"; break;
+            case 5: title = perf.nude ? "NUDE CHIME - Hat Wobble" : "Velvet Chime - Wobble"; break;
+            case 6: title = perf.nude ? "NUDE RAVE - Hat Wobble" : "BETA Rave - Wobble"; break;
+            case 7: default: title = perf.nude ? "NUDE 303 - Hat Wobble" : "Acid 303 - Wobble"; break;
+            }
         } else {
-            switch (perf.source) {
+            switch (perf.source & 3u) {
             case SRC_CELERY:
                 anim = &cinco_anim_celery;
-                title = perf.nude ? "NUDE CELERY MAN" : "Celery Man";
                 break;
             case SRC_OYSTER:
                 anim = &cinco_anim_oyster;
-                title = perf.nude ? "NUDE OYSTER" : "Oyster Smiling";
                 break;
             case SRC_TAYNE:
                 anim = &cinco_anim_tayne;
-                title = perf.nude ? "NUDE TAYNE" : "Tayne (BETA)";
                 break;
             case SRC_TALK:
-                anim = &cinco_anim_celery;
-                title = perf.nude ? "NUDE SPEECH SYNTH" : "Speech Synthesizer";
-                break;
             default:
                 anim = &cinco_anim_celery;
-                title = "Celery Man";
                 break;
+            }
+            switch (perf.source % CINCO_PRESET_COUNT) {
+            case 0: title = perf.nude ? "NUDE CELERY MAN" : "Celery Man"; break;
+            case 1: title = perf.nude ? "NUDE OYSTER" : "Oyster Smiling"; break;
+            case 2: title = perf.nude ? "NUDE TAYNE" : "Tayne Classic"; break;
+            case 3: title = perf.nude ? "NUDE COMPUTER VOICE" : "Computer Voice"; break;
+            case 4: title = perf.nude ? "NUDE CELERY 4D" : "Celery 4D Supersaw"; break;
+            case 5: title = perf.nude ? "NUDE OYSTER CHIME" : "Oyster Velvet Chime"; break;
+            case 6: title = perf.nude ? "NUDE TAYNE BETA" : "Tayne BETA Rave"; break;
+            case 7: default: title = perf.nude ? "NUDE TAYNE 303" : "Nude Tayne Acid 303"; break;
             }
         }
 
@@ -939,7 +957,7 @@ static void cinco_view_render(void)
     /* Update animation frame index */
     uint32_t now = fm1_ms;
     uint32_t fps = anim->fps ? anim->fps : 8u;
-    if (perf.flail && (perf.source == SRC_OYSTER || perf.source == SRC_CELERY || perf.source == SRC_TALK)) {
+    if (perf.flail && ((perf.source & 3u) == SRC_OYSTER || (perf.source & 3u) == SRC_CELERY || (perf.source & 3u) == SRC_TALK)) {
         fps *= 2u;
     }
     uint32_t frame_duration = 1000u / fps;

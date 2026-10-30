@@ -127,33 +127,65 @@ The console display renders a faithful recreation of **CINCO OS 2.5**:
 
 ---
 
-## CHAPTER 4: THE IDENTITY ROSTER (AVAILABLE PERSONALITIES)
+## CHAPTER 4: THE IDENTITY ROSTER (8 CURATED PRESETS)
 
-Turn the **`PRESET`** rotary encoder to cycle through available employee identity profiles:
+Turn the **`PRESET`** rotary encoder to cycle through 8 curated employee identity profiles:
 
-### 1. Celery Man (`SRC_CELERY`)
-* **Associated Sound Engine:** `ENG_ANALOG`
-* **Synthesis Architecture:** Dual detuned Sawtooth + Pulse waveforms routed through a resonant 24dB ladder lowpass filter with a rapid 350 ms exponential decay envelope.
-* **Musical Character:** Stiff, punchy 1980s corporate analog brass with an aggressive acoustic blip. Excellent for assertive boardroom key riffs.
+### 1. Celery Man (`Preset 0`)
+* **Dancer Identity:** Celery Man
+* **Associated Sound Engine:** `ENG_ANALOG` (Dual-Saw Poly Brass)
+* **Synthesis Architecture:** Dual detuned Sawtooth waveforms routed through a resonant 24dB ladder lowpass filter with a snappy 350 ms exponential decay envelope.
+* **Musical Character:** Punchy 1980s corporate analog brass with an assertive acoustic blip. Excellent for boardroom key riffs.
 * **Vocal Confirmation:** *"Celery Man."*
 
-### 2. Oyster Smiling (`SRC_OYSTER`)
-* **Associated Sound Engine:** `ENG_PHASE`
-* **Synthesis Architecture:** Casio CZ-style Phase Distortion synthesis with shimmering resonant upper harmonics and 60% stereo chorus send.
-* **Musical Character:** Glassy, ethereal electric keys and crystalline bells. Ideal for serene contemplative spreadsheet interludes.
-* **Vocal Confirmation:** *"Oyster."*
+### 2. Oyster Smiling (`Preset 1`)
+* **Dancer Identity:** Oyster Smiling
+* **Associated Sound Engine:** `ENG_PHASE` (CZ Resonant Trapezoid)
+* **Synthesis Architecture:** Casio CZ-style Phase Distortion synthesis with shimmering resonant upper harmonics and stereo chorus send.
+* **Musical Character:** Glassy, crystalline electric keys and ethereal bells. Ideal for serene contemplative spreadsheet interludes.
+* **Vocal Confirmation:** *"Printout of Oyster smiling."*
 
-### 3. Tayne BETA (`SRC_TAYNE`)
-* **Associated Sound Engine:** `ENG_FM6`
-* **Synthesis Architecture:** 6-Operator 1990s Yamaha FM configuration with snappy carrier attack and dynamic modulator index mapping.
-* **Musical Character:** Slapped digital synth bass and bright FM house brass. Highly energetic.
+### 3. Tayne Classic (`Preset 2`)
+* **Dancer Identity:** Tayne
+* **Associated Sound Engine:** `ENG_ANALOG` (Sub-Octave Acid Bass)
+* **Synthesis Architecture:** Deep saw oscillator combined with sub-octave square wave and snappy lowpass filter decay.
+* **Musical Character:** Punchy 90s slap and sub bass with an aggressive low-end punch. Highly energetic.
 * **Vocal Confirmation:** *"Tayne."*
 
-### 4. Talk Mode (`SRC_TALK`)
-* **Associated Sound Engine:** `ENG_FORMANT`
-* **Synthesis Architecture:** Fixed-point 10-pole vocal tract formant filter modulating retro synthetic vowels.
-* **Musical Character:** Melodic robotic singing voice mapped chromatically across the 27 physical piano keys.
-* **Vocal Confirmation:** *"Can I entertayne you?"*
+### 4. Computer Voice (`Preset 3`)
+* **Dancer Identity:** Speech Synthesizer
+* **Associated Sound Engine:** `ENG_FORMANT` (Vocal Tract Formant Choir)
+* **Synthesis Architecture:** Fixed-point multi-pole vocal tract formant filter generating robotic singing vowels.
+* **Musical Character:** Melodic synthetic choir and robotic speech tones mapped chromatically across the keyboard.
+* **Vocal Confirmation:** *"Now Tayne I can get into."*
+
+### 5. Celery 4D Supersaw (`Preset 4`)
+* **Dancer Identity:** Celery Man
+* **Associated Sound Engine:** `ENG_ANALOG` (Dual-Saw Poly Brass with Expanded Chorus)
+* **Synthesis Architecture:** Dual detuned saw waves with maximized 4D chorus depth and widened stereo spread.
+* **Musical Character:** Massive, soaring Eurodance supersaw brass for peak productivity hours.
+* **Vocal Confirmation:** *"4d3d3d3 engaged."*
+
+### 6. Oyster Velvet Chime (`Preset 5`)
+* **Dancer Identity:** Oyster Smiling
+* **Associated Sound Engine:** `ENGI_FM6` (FM Dual-Modulator Bell)
+* **Synthesis Architecture:** Branching 4-operator FM algorithm generating rich harmonic ratio bell and chime timbres.
+* **Musical Character:** Warm velvet chime with rich, glassy resonance.
+* **Vocal Confirmation:** *"Yes, Paul."*
+
+### 7. Tayne BETA Rave (`Preset 6`)
+* **Dancer Identity:** Tayne (BETA)
+* **Associated Sound Engine:** `ENGI_FM6` (FM 4-Op Linear Cascade)
+* **Synthesis Architecture:** Linear 4-operator FM cascade with high modulator index and bright carrier modulation.
+* **Musical Character:** Searing 90s rave synth lead designed for high-BPM productivity anthems.
+* **Vocal Confirmation:** *"Beta."*
+
+### 8. Nude Tayne Acid 303 (`Preset 7`)
+* **Dancer Identity:** Tayne (Censored Mosaic)
+* **Associated Sound Engine:** `ENG_LOFI` / `ENG_ANALOG` (Acid Bass)
+* **Synthesis Architecture:** Screaming high-resonance sawtooth filter envelope with bitcrushed saturation.
+* **Musical Character:** Sizzling TB-303 acid squelch with screaming resonant whistles. Strictly non-OSHA compliant.
+* **Vocal Confirmation:** *"Warning: this is not suitable for work."*
 
 ---
 
@@ -171,7 +203,9 @@ The Cinco 2.5 workstation features non-modal, stackable performance controls tha
 |  K2 KNOB   | Tone / Cutoff / Mosaic Depth   | Live Timbre Modulator      |
 |  K3 KNOB   | Tempo Calibrator (80-160 BPM)  | Updates Taskbar BPM Gauge  |
 |  K4 KNOB   | Mix Balance (Groove vs Synth)  | Proportional Level Scale   |
-|  EN_ALGO   | Groove Pattern (3 Styles)      | Switches Rhythm Engine     |
+|  EN_ALGO   | Synth Algo (8 Keyboard Engines)| Direct Synthesis Engine    |
+|  PLAY+ALGO | Groove Pattern (8 90s Styles)  | Switches Rhythm Engine     |
+|  EN_PRESET | Identity Patch (8 Curated)     | Selects Character Preset   |
 |  EN_SELECT | Console Nav / HUD Toggle       | Toggles Diagnostic HUD     |
 |  LFO BTN   | Hat Wobble Pitch Vibrato (6Hz) | Switches to Hat Wobble     |
 |  ARP BTN   | Flarhgunnstow 16th Arp Slicer  | Switches to Flarhgunnstow  |
@@ -184,9 +218,11 @@ The Cinco 2.5 workstation features non-modal, stackable performance controls tha
 +--------------------------------------------------------------------------+
 ```
 
-### 1. The 4d3d3d3™ Macro (`K1` Knob)
+### 1. The 4d3d3d3™ Macro (`K1` Knob) & Filter Resonance
 As `K1` is rotated clockwise from `0` to `127`:
-- **Audio Reaction:** Progressively drives filter resonance and stereo chorus depth into saturation.
+- **Resonance & Filter Squelch:** Smoothly scales filter resonance from 24 up to 92 (`P_E5`). Employs **authentic analog passband compensation**, dynamically attenuating the base low-frequency passband by -2.2 dB as resonance climbs. This prevents volume explosion while letting the whistling resonant frequency cut through in pristine, squelchy analog clarity (classic Moog / TB-303 behavior).
+- **Decoupled Overdrive:** Distortion drive (`P_DIST`) is decoupled from low-to-mid resonance and engages cleanly only when `K1 > 100` (scaling subtly up to 12 at maximum), avoiding flat-topping and preserving harmonic dynamics.
+- **Master Limiter Headroom:** Audio mix applies a -1.16 dB master headroom backoff and soft-knee hyperbolic tangent saturation before rail clamping, preventing digital harshness.
 - **Visual Reaction:** The active dancer window cascades smoothly across the desktop in real time up to **16 overlapping windows** (`1 + (k4d * 15) / 120`), replicating authentic early graphical OS window redraw lag.
 - **Threshold Warning:** Turning `K1` to maximum `127` triggers an emergency dialog: *"WARNING: 4d3d3d3 exceeded recommended OSHA flarh levels."*
 
@@ -235,11 +271,27 @@ As `K1` is rotated clockwise from `0` to `127`:
 - **Floppy Drive Easter Egg:** Holding `HOME` while pressing `GLO`, or pressing `GLO` every 8th time, triggers `ERR 0xCE1E`: *"CINCO ALERT: Celery stalk detected in 3.5\" floppy drive."*
 - **Diagnostic HUD Toggle:** Hold `GLO` for 500 ms, or press `GLO + EDIT`, or turn `SELECT` to toggle the green phosphor Diagnostic HUD overlay.
 
-### 8. Groove Engine Styles (`ALGO` Encoder)
-- **Operation:** Turn `ALGO` encoder clockwise or counter-clockwise to cycle rhythm styles:
-  - Pattern 0: `> Groove: Eurodance 90s`
-  - Pattern 1: `> Groove: Rave Breakbeat`
-  - Pattern 2: `> Groove: Pumping House`
+### 8. Live Synthesis Algorithms (`ALGO` Encoder)
+Turn the **`ALGO`** rotary encoder clockwise or counter-clockwise to instantly alter the underlying synthesis engine and oscillator topology of the playable keyboard (Track 0):
+- **Algo 0: Dual-Saw Poly Brass (`ENG_ANALOG`)**: Classic detuned saw pair through 24dB ladder lowpass filter, 8-voice polyphonic.
+- **Algo 1: Hard Sync Lead (`ENG_ANALOG`)**: Searing oscillator sync pulse with aggressive upper harmonics, mono legato.
+- **Algo 2: Sub-Octave Acid Bass (`ENG_ANALOG`)**: Heavy sawtooth with sub-octave square wave and snappy filter decay.
+- **Algo 3: CZ Resonant Trapezoid (`ENG_PHASE`)**: Casio CZ phase-distortion resonant waveform with stereo chorus.
+- **Algo 4: FM 4-Op Linear Cascade (`ENGI_FM6`)**: 4-operator linear frequency modulation cascade (4>3>2>1), crystal bells & bright digital keys.
+- **Algo 5: FM Dual-Modulator Bell (`ENGI_FM6`)**: Branching FM algorithm ((3+4)>2>1), rich FM slap bass and metallic percussive chimes.
+- **Algo 6: Formant Vowel Choir (`ENG_FORMANT`)**: Robotic multi-formant vocal tract filters with vowel morphing ("AAH/EEH/OOH").
+- **Algo 7: 8-Bit Chip Lofi (`ENG_LOFI`)**: Vintage NES / Commodore 64 bitcrushed pulse wave with variable sample reduction.
+
+### 9. 90s Dance Groove Engine (`PLAY` or `GLO` + `ALGO` Encoder)
+Hold the **`PLAY`** or **`GLO`** button while rotating the **`ALGO`** encoder to select between 8 iconic 1990s electronic dance styles:
+- **Style 0: Eurodance 90s (132 BPM)**: Driving 4-on-the-floor kick, snappy claps, 16th-note pump bass, and offbeat rave chords.
+- **Style 1: Rave Breakbeat (138 BPM)**: Syncopated breakbeat kick/snare pattern, rolling sub bass, and nostalgic rave stabs.
+- **Style 2: Pumping House (126 BPM)**: Swung 909-style four-on-the-floor, offbeat open hi-hats, and deep bouncy organ bass.
+- **Style 3: Acid Trance 303 (138 BPM)**: Fast rolling 16th-note driving groove with TB-303 running acid basslines.
+- **Style 4: Happy Hardcore (160 BPM)**: High-energy four-on-the-floor with fast rolling breakbeats and euphoric piano stabs.
+- **Style 5: Speed Garage (130 BPM)**: Syncopated 2-step kick pattern, skipping hats, and heavy warped Reese sub bass.
+- **Style 6: Belgian Techno (135 BPM)**: Heavy industrial stomp kick, dark driving 16th bass, and metallic FM stabs.
+- **Style 7: Italo Disco (122 BPM)**: Giorgio Moroder-style galloping 16th octave bass, crisp electro hats, and vintage space chords.
 
 ---
 

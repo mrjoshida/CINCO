@@ -186,60 +186,70 @@ void cinco_sound_apply_scale(uint8_t mode)
     }
 }
 
-void cinco_sound_set_source(uint8_t src)
+void cinco_sound_set_algo(uint8_t algo)
 {
-    if (src >= SRC_COUNT)
-        src = SRC_CELERY;
-
-    perf.source = src;
-
-    switch (src) {
-    case SRC_CELERY:
-        /* Dual saw/pulse brass, snappy 24dB ladder filter envelope, decay ~350ms, sustain 20% */
-        set_engine_of(&trk[0], 0); /* ENG_ANALOG */
-        trk[0].p[P_E0] = 0;        /* WAVE: SAW */
-        trk[0].p[P_E1] = 16;       /* DTN: 16 cents */
-        trk[0].p[P_E2] = 64;       /* MIX: 50% */
-        trk[0].p[P_E4] = 48;       /* CUT */
-        trk[0].p[P_E5] = 36;       /* RES */
-        trk[0].p[P_ED_FLT] = 52;   /* Snappy ladder filter envelope */
-        trk[0].p[P_ATK] = 8;       /* Fast attack */
-        trk[0].p[P_DEC] = 68;      /* Decay ~350ms */
-        trk[0].p[P_SUS] = 25;      /* Sustain 20% of 127 */
-        trk[0].p[P_REL] = 45;
+    perf.variant = algo % CINCO_ALGO_COUNT;
+    switch (perf.variant) {
+    case 0:
+        /* Dual-Saw Poly Brass */
+        set_engine_of(&trk[0], 0);
+        trk[0].p[P_E0] = 0;
+        trk[0].p[P_E1] = 16;
         trk[0].p[P_VOICE] = V_POLY;
         trk[0].p[P_LEVEL] = 100;
         break;
-
-    case SRC_OYSTER:
-        /* Glassy bell/chorus CZ patch, chorus send 60% */
-        set_engine_of(&trk[0], 2); /* ENG_PHASE */
-        apply_preset_to(&trk[0], 4); /* BELL preset */
-        trk[0].p[P_CHOR] = 76;     /* Chorus send 60% (76 / 127) */
+    case 1:
+        /* Hard Sync Lead */
+        set_engine_of(&trk[0], 0);
+        trk[0].p[P_E0] = 5;
+        trk[0].p[P_E1] = 28;
         trk[0].p[P_VOICE] = V_POLY;
         trk[0].p[P_LEVEL] = 100;
         break;
-
-    case SRC_TAYNE:
-        /* 90s FM brass/slap bass */
-        set_engine_of(&trk[0], ENGI_FM6); /* ENGI_FM6 = 12 */
-        apply_preset_to(&trk[0], 2);      /* FM BASS preset */
+    case 2:
+        /* Sub-Octave Acid Bass */
+        set_engine_of(&trk[0], 0);
+        trk[0].p[P_E0] = 6;
+        trk[0].p[P_E2] = 64;
         trk[0].p[P_VOICE] = V_MONO;
-        trk[0].p[P_ATK] = 0;
-        trk[0].p[P_DEC] = 55;
-        trk[0].p[P_SUS] = 20;
-        trk[0].p[P_REL] = 30;
         trk[0].p[P_LEVEL] = 100;
         break;
-
-    case SRC_TALK:
-        /* ENG_FORMANT ("VOICE") */
-        set_engine_of(&trk[0], 5); /* ENG_FORMANT */
-        apply_preset_to(&trk[0], 0); /* CHOIR AAH */
+    case 3:
+        /* CZ Resonant Trapezoid */
+        set_engine_of(&trk[0], 2);
+        apply_preset_to(&trk[0], 4);
+        trk[0].p[P_CHOR] = 60;
         trk[0].p[P_VOICE] = V_POLY;
         trk[0].p[P_LEVEL] = 100;
         break;
-
+    case 4:
+        /* FM 4-Op Linear Cascade */
+        set_engine_of(&trk[0], ENGI_FM6);
+        apply_preset_to(&trk[0], 1);
+        trk[0].p[P_VOICE] = V_POLY;
+        trk[0].p[P_LEVEL] = 100;
+        break;
+    case 5:
+        /* FM Dual-Modulator Bell */
+        set_engine_of(&trk[0], ENGI_FM6);
+        apply_preset_to(&trk[0], 2);
+        trk[0].p[P_VOICE] = V_MONO;
+        trk[0].p[P_LEVEL] = 100;
+        break;
+    case 6:
+        /* Formant Vowel Choir */
+        set_engine_of(&trk[0], 5);
+        apply_preset_to(&trk[0], 0);
+        trk[0].p[P_VOICE] = V_POLY;
+        trk[0].p[P_LEVEL] = 100;
+        break;
+    case 7:
+        /* 8-Bit Chip Lofi */
+        set_engine_of(&trk[0], 3);
+        apply_preset_to(&trk[0], 2);
+        trk[0].p[P_VOICE] = V_POLY;
+        trk[0].p[P_LEVEL] = 100;
+        break;
     default:
         break;
     }
@@ -248,40 +258,90 @@ void cinco_sound_set_source(uint8_t src)
     cinco_sound_apply_scale(perf.scale_mode);
 }
 
+void cinco_sound_set_preset(uint8_t preset)
+{
+    perf.source = preset % CINCO_PRESET_COUNT;
+    switch (perf.source) {
+    case 0:
+        /* Celery Man (Brass) */
+        cinco_sound_set_algo(0);
+        break;
+    case 1:
+        /* Oyster Smiling (CZ Glass Chime) */
+        cinco_sound_set_algo(3);
+        break;
+    case 2:
+        /* Tayne Classic (FM Slap Bass) */
+        cinco_sound_set_algo(5);
+        break;
+    case 3:
+        /* Computer Voice (Singing Formant) */
+        cinco_sound_set_algo(6);
+        break;
+    case 4:
+        /* Celery 4D Supersaw (Cascading Saw) */
+        cinco_sound_set_algo(0);
+        trk[0].p[P_CHOR] = 90;
+        break;
+    case 5:
+        /* Oyster Velvet Chime (CZ Resonant String) */
+        cinco_sound_set_algo(3);
+        trk[0].p[P_CHOR] = 85;
+        break;
+    case 6:
+        /* Tayne BETA Rave (Rave FM Lead) */
+        cinco_sound_set_algo(4);
+        break;
+    case 7:
+        /* Nude Tayne Acid 303 (Acid 303 Squelch) */
+        cinco_sound_set_algo(2);
+        trk[0].p[P_E5] = 80;
+        break;
+    default:
+        break;
+    }
+}
+
+void cinco_sound_set_source(uint8_t src)
+{
+    cinco_sound_set_preset(src);
+}
+
 void cinco_sound_init(void)
 {
     cinco_perf_init();
-    cinco_sound_set_source(perf.source);
+    cinco_sound_set_preset(perf.source);
 }
 
 void cinco_audio_block(int32_t *out, uint32_t n)
 {
     /* 1. Macro updates on Track 0 */
-    /* When NSFW mode is OFF, Knob 2 (perf.tone) sweeps filter cutoff across full musical spectrum */
+    /* When NSFW mode is OFF, Knob 2 (perf.tone) sweeps filter cutoff/timbre across full musical spectrum */
     if (!perf.nude) {
-        switch (perf.source) {
-        case SRC_CELERY: {
+        switch (trk[0].eng_req) {
+        case 0: /* ENG_ANALOG */
+        case 3: /* ENG_LOFI */ {
             int32_t cut = 10 + ((int32_t)perf.tone * 117) / 127;
             if (cut > 127) cut = 127;
             if (cut < 0) cut = 0;
             trk[0].p[P_E4] = (int16_t)cut;
             break;
         }
-        case SRC_OYSTER: {
+        case 2: /* ENG_PHASE */ {
             int32_t dcw = 5 + ((int32_t)perf.tone * 122) / 127;
             if (dcw > 127) dcw = 127;
             if (dcw < 0) dcw = 0;
             trk[0].p[P_E2] = (int16_t)dcw;
             break;
         }
-        case SRC_TAYNE: {
+        case 12: /* ENGI_FM6 */ {
             int32_t mlvl = -64 + ((int32_t)perf.tone * 127) / 127;
             if (mlvl > 63) mlvl = 63;
             if (mlvl < -64) mlvl = -64;
             trk[0].p[P_E2] = (int16_t)mlvl;
             break;
         }
-        case SRC_TALK: {
+        case 5: /* ENG_FORMANT */ {
             int32_t vowel = ((int32_t)perf.tone * 127) / 127;
             if (vowel > 127) vowel = 127;
             if (vowel < 0) vowel = 0;
@@ -294,37 +354,42 @@ void cinco_audio_block(int32_t *out, uint32_t n)
     }
 
     /* 4d3d3d3: Analog drive & delay send on Track 0 */
-    trk[0].p[P_DIST] = (int16_t)(((int32_t)perf.k4d * 60) / 127);
+    trk[0].p[P_DIST] = (perf.k4d > 100) ? (int16_t)(((perf.k4d - 100) * 12) / 27) : 0;
     trk[0].p[P_DLY] = (int16_t)(((int32_t)perf.k4d * 50) / 127);
+    trk[0].p[P_E5] = (int16_t)(24 + ((int32_t)perf.k4d * 68) / 127);
+    trk[0].p[P_LEVEL] = (int16_t)(100 - (((int32_t)perf.k4d * 22) / 127));
 
-    /* 4d3d3d3: Unison detune, resonance, chorus, and voice modulations */
-    switch (perf.source) {
-    case SRC_CELERY: {
-        trk[0].p[P_E1] = (int16_t)(16 + ((int32_t)perf.k4d * 90) / 127);
-        trk[0].p[P_E5] = (int16_t)(30 + ((int32_t)perf.k4d * 85) / 127);
+    /* 4d3d3d3: Chorus, detune, and engine-specific macro modulation */
+    switch (trk[0].eng_req) {
+    case 0: /* ENG_ANALOG */ {
+        if (trk[0].p[P_E0] == 0) {
+            trk[0].p[P_E1] = (int16_t)(16 + ((int32_t)perf.k4d * 90) / 127);
+        }
         trk[0].p[P_CHOR] = (int16_t)(((int32_t)perf.k4d * 115) / 127);
         break;
     }
-    case SRC_OYSTER: {
-        int32_t chor = 76 + ((int32_t)perf.k4d * 40) / 127;
+    case 2: /* ENG_PHASE */ {
+        int32_t chor = 60 + ((int32_t)perf.k4d * 56) / 127;
         if (chor > 127) chor = 127;
         trk[0].p[P_CHOR] = (int16_t)chor;
         break;
     }
-    case SRC_TAYNE: {
+    case 12: /* ENGI_FM6 */ {
         int32_t chor = ((int32_t)perf.k4d * 115) / 127;
         trk[0].p[P_CHOR] = (int16_t)chor;
         break;
     }
-    case SRC_TALK: {
+    case 5: /* ENG_FORMANT */ {
         int32_t buzz = 30 + ((int32_t)perf.k4d * 80) / 127;
         if (buzz > 127) buzz = 127;
         trk[0].p[P_E4] = (int16_t)buzz;
         trk[0].p[P_CHOR] = (int16_t)(((int32_t)perf.k4d * 115) / 127);
         break;
     }
-    default:
+    default: {
+        trk[0].p[P_CHOR] = (int16_t)(((int32_t)perf.k4d * 115) / 127);
         break;
+    }
     }
 
     /* 2. Pitch LFO wobble (6 Hz tempo-synced vibrato on trk[0] active voices) */
@@ -386,10 +451,12 @@ void cinco_audio_block(int32_t *out, uint32_t n)
         mosaic_cnt = 0;
     }
 
-    /* 7. Clamping to [-32767, 32767] */
+    /* 7. Master headroom backoff, softclip, and clamping to [-32767, 32767] */
     for (uint32_t i = 0; i < n; i++) {
-        int32_t l = out[2u * i];
-        int32_t r = out[2u * i + 1u];
+        int32_t l = (out[2u * i] * 7) >> 3;
+        int32_t r = (out[2u * i + 1u] * 7) >> 3;
+        l = softclip(l);
+        r = softclip(r);
         if (l > 32767) l = 32767;
         else if (l < -32767) l = -32767;
         if (r > 32767) r = 32767;
