@@ -213,28 +213,36 @@ void cinco_sound_apply_env(uint8_t mode)
 void cinco_sound_apply_scale(uint8_t mode)
 {
     perf.scale_mode = (uint8_t)(mode % 5u);
+    int16_t quant = QN_SNAP;
+    int16_t scale = 0;
+
     switch (perf.scale_mode) {
     case 0: /* Chromatic */
-        trk[0].p[P_QUANT] = QN_CHROM;
-        trk[0].p[P_SCALE] = 0;
+        quant = QN_CHROM;
+        scale = 0;
         break;
     case 1: /* Natural Minor */
-        trk[0].p[P_QUANT] = QN_SNAP;
-        trk[0].p[P_SCALE] = 2;
+        quant = QN_SNAP;
+        scale = 2;
         break;
     case 2: /* Major */
-        trk[0].p[P_QUANT] = QN_SNAP;
-        trk[0].p[P_SCALE] = 1;
+        quant = QN_SNAP;
+        scale = 1;
         break;
     case 3: /* Minor Pentatonic */
-        trk[0].p[P_QUANT] = QN_SNAP;
-        trk[0].p[P_SCALE] = 6;
+        quant = QN_SNAP;
+        scale = 6;
         break;
-    case 4: /* Blues / Dorian */
+    case 4: /* Blues */
     default:
-        trk[0].p[P_QUANT] = QN_SNAP;
-        trk[0].p[P_SCALE] = 3;
+        quant = QN_SNAP;
+        scale = 12;
         break;
+    }
+
+    for (uint32_t t = 0; t < 3u; t++) {
+        trk[t].p[P_QUANT] = quant;
+        trk[t].p[P_SCALE] = scale;
     }
 }
 

@@ -97,6 +97,8 @@ void cinco_groove_init(void);
 void cinco_groove_set_pattern(uint8_t pat);
 void cinco_groove_load_template(uint8_t pat);
 uint8_t cinco_groove_get_step(void);
+uint8_t cinco_groove_get_bass_root(uint8_t mode, uint8_t bar);
+uint8_t cinco_groove_get_stab_chord(uint8_t mode, uint8_t bar, uint8_t note_idx);
 void cinco_groove_process(uint32_t n);
 void cinco_audio_block(int32_t *out, uint32_t n);
 void cinco_save_state(void);

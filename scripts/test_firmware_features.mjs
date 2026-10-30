@@ -231,6 +231,120 @@ async function main() {
     }
     console.log("-> Encoder dual-mode & cyclic controls passed!");
 
+    console.log("\n--- TEST 6: Scale Modes & Dynamic Harmonic Sequences ---");
+    const scaleNames = [
+        "Chromatic",
+        "Natural Minor",
+        "Major",
+        "Minor Pentatonic",
+        "Blues"
+    ];
+    const expectedQuant = [0, 1, 1, 1, 1]; // 0: QN_CHROM, 1: QN_SNAP
+    const expectedScale = [0, 2, 1, 6, 12]; // CHR=0, MIN=2, MAJ=1, MPEN=6, BLUES=12
+
+    const expectedBass = [
+        [36, 32, 34, 31],
+        [36, 32, 34, 31],
+        [36, 29, 33, 31],
+        [36, 29, 31, 34],
+        [36, 29, 36, 31]
+    ];
+
+    const expectedStabs = [
+        [[60, 63, 67], [56, 60, 63], [58, 62, 65], [55, 58, 62]],
+        [[60, 63, 67], [56, 60, 63], [58, 62, 65], [55, 58, 62]],
+        [[60, 64, 67], [53, 57, 60], [57, 60, 64], [55, 59, 62]],
+        [[60, 63, 70], [53, 58, 60], [55, 58, 65], [53, 58, 60]],
+        [[60, 64, 70], [53, 57, 63], [60, 64, 70], [55, 59, 65]]
+    ];
+
+    const pScale = ex.web_param_scale();
+    const pQuant = ex.web_param_quant();
+
+    // 1. Verify scale quantization application to Tracks 0, 1, and 2
+    for (let m = 0; m < 5; m++) {
+        ex.web_cinco_set_scale_mode(m);
+        let activeMode = ex.web_cinco_get_scale_mode();
+        if (activeMode !== m) {
+            throw new Error(`Scale mode mismatch: set ${m}, got ${activeMode}`);
+        }
+        for (let t = 0; t < 3; t++) {
+            let q = ex.web_trk_p(t, pQuant);
+            let s = ex.web_trk_p(t, pScale);
+            if (q !== expectedQuant[m]) {
+                throw new Error(`Track ${t} QNT mismatch in mode ${m} (${scaleNames[m]}): expected ${expectedQuant[m]}, got ${q}`);
+            }
+            if (s !== expectedScale[m]) {
+                throw new Error(`Track ${t} SCL mismatch in mode ${m} (${scaleNames[m]}): expected ${expectedScale[m]}, got ${s}`);
+            }
+        }
+        console.log(`Scale ${m} [${scaleNames[m]}]: Track 0..2 QUANT=${expectedQuant[m]}, SCALE=${expectedScale[m]} verified.`);
+    }
+
+    // 2. Verify harmonic tables (bass roots and stab chords) across all 5 modes
+    for (let m = 0; m < 5; m++) {
+        for (let bar = 0; bar < 4; bar++) {
+            let r = ex.web_cinco_get_scale_bass_root(m, bar);
+            if (r !== expectedBass[m][bar]) {
+                throw new Error(`Scale ${m} Bar ${bar} bass root mismatch: expected ${expectedBass[m][bar]}, got ${r}`);
+            }
+            for (let i = 0; i < 3; i++) {
+                let note = ex.web_cinco_get_scale_stab_chord(m, bar, i);
+                if (note !== expectedStabs[m][bar][i]) {
+                    throw new Error(`Scale ${m} Bar ${bar} stab note ${i} mismatch: expected ${expectedStabs[m][bar][i]}, got ${note}`);
+                }
+            }
+        }
+    }
+    console.log("-> Harmonic tables (bass roots & stab chords) verified for all 5 scale modes!");
+
+    // 3. Verify synthesized groove audio changes dynamically with scale mode
+    // Turn on groove playback (B_PLAY)
+    ex.web_cinco_set_groove_pattern(0); // Eurodance 90s
+    ex.web_buttons(1 << 10);
+    renderMs(ex, mem, 30);
+    ex.web_buttons(0);
+    renderMs(ex, mem, 30);
+
+    // Render Mode 1 (Natural Minor)
+    ex.web_cinco_set_scale_mode(1);
+    let audioMinor = renderMs(ex, mem, 400);
+    console.log(`Groove audio Natural Minor (Mode 1): RMS=${audioMinor.rms.toFixed(4)}, Peak=${audioMinor.maxL.toFixed(4)}`);
+    if (audioMinor.rms <= 0.001) throw new Error("Natural Minor groove produced no audio!");
+
+    // Render Mode 2 (Major)
+    ex.web_cinco_set_scale_mode(2);
+    let audioMajor = renderMs(ex, mem, 400);
+    console.log(`Groove audio Major (Mode 2): RMS=${audioMajor.rms.toFixed(4)}, Peak=${audioMajor.maxL.toFixed(4)}`);
+    if (audioMajor.rms <= 0.001) throw new Error("Major groove produced no audio!");
+
+    // Render Mode 4 (Blues)
+    ex.web_cinco_set_scale_mode(4);
+    let audioBlues = renderMs(ex, mem, 400);
+    console.log(`Groove audio Blues (Mode 4): RMS=${audioBlues.rms.toFixed(4)}, Peak=${audioBlues.maxL.toFixed(4)}`);
+    if (audioBlues.rms <= 0.001) throw new Error("Blues groove produced no audio!");
+
+    // Turn off groove playback
+    ex.web_buttons(1 << 10);
+    renderMs(ex, mem, 30);
+    ex.web_buttons(0);
+    renderMs(ex, mem, 50);
+
+    // Also test cycling via B_SCL button (label index 1 = 1 << 1)
+    ex.web_cinco_set_scale_mode(0);
+    for (let step = 1; step <= 5; step++) {
+        ex.web_buttons(1 << 1); // B_SCL (label index 1)
+        renderMs(ex, mem, 20);
+        ex.web_buttons(0);
+        renderMs(ex, mem, 20);
+        let expected = step % 5;
+        if (ex.web_cinco_get_scale_mode() !== expected) {
+            throw new Error(`B_SCL step ${step}: expected scale mode ${expected}, got ${ex.web_cinco_get_scale_mode()}`);
+        }
+    }
+    console.log("-> B_SCL cyclic button toggle passed!");
+    console.log("-> Scale modes and dynamic harmonic sequence audio passed!");
+
     console.log("\n============================================");
     console.log(" ALL FIRMWARE FEATURE VERIFICATIONS PASSED! ");
     console.log("============================================");

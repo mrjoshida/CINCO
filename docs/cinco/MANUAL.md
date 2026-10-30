@@ -259,10 +259,12 @@ The Cinco 2.5 workstation features non-modal, stackable performance controls tha
 |  K2 KNOB   | Tone / Cutoff / Mosaic Depth   | Live Timbre Modulator      |
 |  K3 KNOB   | Tempo Calibrator (80-160 BPM)  | Updates Taskbar BPM Gauge  |
 |  K4 KNOB   | Mix Balance (Groove vs Synth)  | Proportional Level Scale   |
-|  EN_ALGO   | Synth Algo (8 Keyboard Engines)| Direct Synthesis Engine    |
+|  EN_ALGO   | Synth Algo (16 Live Engines)   | Direct Synthesis Engine    |
 |  PLAY+ALGO | Groove Pattern (8 90s Styles)  | Switches Rhythm Engine     |
-|  EN_PRESET | Identity Patch (8 Curated)     | Selects Character Preset   |
+|  EN_PRESET | Identity Patch (16 Curated)    | Selects Character Preset   |
 |  EN_SELECT | Console Nav / HUD Toggle       | Toggles Diagnostic HUD     |
+|  SCL BTN   | Scale Modes (5 Dynamic Roots)  | Re-harmonizes Groove Sequence|
+|  ENV BTN   | Envelope Shaping (4 Modes)     | Brass, Pad, Pluck, Bass    |
 |  LFO BTN   | Hat Wobble Pitch Vibrato (6Hz) | Switches to Hat Wobble     |
 |  ARP BTN   | Flarhgunnstow 16th Arp Slicer  | Switches to Flarhgunnstow  |
 |  FX BTN    | Direct Latch Nude Mode         | 1-sec NSFW Warning Dialog  |
@@ -356,6 +358,34 @@ Hold the **`PLAY`** or **`GLO`** button while rotating the **`ALGO`** encoder to
 - **Style 5: Speed Garage (130 BPM)**: Syncopated 2-step kick pattern, skipping hats, and heavy warped Reese sub bass.
 - **Style 6: Belgian Techno (135 BPM)**: Heavy industrial stomp kick, dark driving 16th bass, and metallic FM stabs.
 - **Style 7: Italo Disco (122 BPM)**: Giorgio Moroder-style galloping 16th octave bass, crisp electro hats, and vintage space chords.
+
+### 10. Scale Modes & Dynamic Harmonic Progression (`SCL` Button)
+Tap the **`SCL`** button to cycle through 5 distinct musical scale modes. In addition to snapping the 27 physical keyboard touch keys to the selected scale, **the backing sequence automatically re-harmonizes in real time** to match the mode across all 4 bars:
+- **Mode 0: Chromatic (Free / Classic Acid)**
+  - *Harmony:* Classic C minor progression ($i \to VI \to VII \to v$).
+  - *Bass Roots:* C2 (36), Ab1 (32), Bb1 (34), G1 (31).
+  - *Stab Chords:* Cm (60, 63, 67), Ab (56, 60, 63), Bb (58, 62, 65), Gm (55, 58, 62).
+  - *Keyboard:* All 12 chromatic semitones unquantized.
+- **Mode 1: Natural Minor (90s Eurodance Rave)**
+  - *Harmony:* Classic Eurodance dark minor progression ($i \to VI \to VII \to v$).
+  - *Bass Roots:* C2, Ab1, Bb1, G1.
+  - *Stab Chords:* Cm, Ab, Bb, Gm.
+  - *Keyboard:* Quantized to Natural Minor scale (C, D, Eb, F, G, Ab, Bb).
+- **Mode 2: Major (Uplifting 90s Pop Anthem)**
+  - *Harmony:* Bright, euphoric Major pop progression ($I \to IV \to vi \to V$).
+  - *Bass Roots:* C2 (36), F1 (29), A1 (33), G1 (31).
+  - *Stab Chords:* Cmaj (60, 64, 67), Fmaj (53, 57, 60), Amin (57, 60, 64), Gmaj (55, 59, 62).
+  - *Keyboard:* Quantized to Major scale (C, D, E, F, G, A, B).
+- **Mode 3: Minor Pentatonic (Hypnotic Funk / Rave)**
+  - *Harmony:* 7th and sus chord funk progression ($i7 \to IV\text{sus4} \to v7 \to \flat VII$).
+  - *Bass Roots:* C2 (36), F1 (29), G1 (31), Bb1 (34).
+  - *Stab Chords:* Cm7 (60, 63, 70), Fsus4 (53, 58, 60), Gm7 (55, 58, 65), Bbsus2 (53, 58, 60).
+  - *Keyboard:* Quantized to Minor Pentatonic (C, Eb, F, G, Bb).
+- **Mode 4: Blues (Acid Blues Shuffle / Dorian)**
+  - *Harmony:* 12-bar blues dominant 7th progression ($I7 \to IV7 \to I7 \to V7$).
+  - *Bass Roots:* C2 (36), F1 (29), C2 (36), G1 (31).
+  - *Stab Chords:* C7 (60, 64, 70), F7 (53, 57, 63), C7 (60, 64, 70), G7 (55, 59, 65).
+  - *Keyboard:* Quantized to Blues scale (C, Eb, F, F#, G, Bb).
 
 ---
 

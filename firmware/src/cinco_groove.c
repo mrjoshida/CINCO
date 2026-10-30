@@ -18,20 +18,47 @@ static uint32_t sample_acc = 0;
 static uint8_t prev_bass_note = 0;
 static uint8_t prev_stab_notes[3] = {0, 0, 0};
 
-/* Eurodance chord roots: C2 (36), Ab1 (32), Bb1 (34), G1 (31) */
-static const uint8_t bass_roots[4] = {36, 32, 34, 31};
-
-/* Offbeat rave synth chords:
- * Bar 0: C minor (C4=60, Eb4=63, G4=67)
- * Bar 1: Ab major (Ab3=56, C4=60, Eb4=63)
- * Bar 2: Bb major (Bb3=58, D4=62, F4=65)
- * Bar 3: G minor (G3=55, Bb3=58, D4=62) */
-static const uint8_t stab_chords[4][3] = {
-    {60, 63, 67},
-    {56, 60, 63},
-    {58, 62, 65},
-    {55, 58, 62}
+/* Scale-aware harmonic tables for bass roots and stab chords across 5 scale modes:
+ * Mode 0: Chromatic / Rave Minor (i - VI - VII - v)
+ * Mode 1: Natural Minor (i - VI - VII - v)
+ * Mode 2: Major (I - IV - vi - V Uplifting Pop)
+ * Mode 3: Minor Pentatonic (i7 - IVsus4 - v7 - bVII Funk Rave)
+ * Mode 4: Blues (I7 - IV7 - I7 - V7 Acid Blues Shuffle) */
+static const uint8_t SCALE_BASS_ROOTS[5][4] = {
+    /* Mode 0: Chromatic / Rave Minor (i - VI - VII - v) */
+    {36, 32, 34, 31},
+    /* Mode 1: Natural Minor (i - VI - VII - v) */
+    {36, 32, 34, 31},
+    /* Mode 2: Major (I - IV - vi - V Uplifting Pop) */
+    {36, 29, 33, 31},
+    /* Mode 3: Minor Pentatonic (i7 - IVsus4 - v7 - bVII Funk Rave) */
+    {36, 29, 31, 34},
+    /* Mode 4: Blues (I7 - IV7 - I7 - V7 Acid Blues Shuffle) */
+    {36, 29, 36, 31}
 };
+
+static const uint8_t SCALE_STAB_CHORDS[5][4][3] = {
+    /* Mode 0: Chromatic / Rave Minor (Cm, Ab, Bb, Gm) */
+    {{60, 63, 67}, {56, 60, 63}, {58, 62, 65}, {55, 58, 62}},
+    /* Mode 1: Natural Minor (Cm, Ab, Bb, Gm) */
+    {{60, 63, 67}, {56, 60, 63}, {58, 62, 65}, {55, 58, 62}},
+    /* Mode 2: Major (Cmaj, Fmaj, Amin, Gmaj) */
+    {{60, 64, 67}, {53, 57, 60}, {57, 60, 64}, {55, 59, 62}},
+    /* Mode 3: Minor Pentatonic (Cm7, Fsus4, Gm7, Bbsus2) */
+    {{60, 63, 70}, {53, 58, 60}, {55, 58, 65}, {53, 58, 60}},
+    /* Mode 4: Blues (C7, F7, C7, G7) */
+    {{60, 64, 70}, {53, 57, 63}, {60, 64, 70}, {55, 59, 65}}
+};
+
+uint8_t cinco_groove_get_bass_root(uint8_t mode, uint8_t bar)
+{
+    return SCALE_BASS_ROOTS[mode % 5u][bar & 3u];
+}
+
+uint8_t cinco_groove_get_stab_chord(uint8_t mode, uint8_t bar, uint8_t note_idx)
+{
+    return SCALE_STAB_CHORDS[mode % 5u][bar & 3u][note_idx % 3u];
+}
 
 /* 8 styles x 6 tracks defragmenter pattern templates */
 static const uint16_t GROOVE_TEMPLATES[8][6] = {
@@ -64,6 +91,7 @@ void cinco_groove_load_template(uint8_t pat)
 static void cinco_groove_step(uint8_t step, uint8_t bar)
 {
     uint16_t mask = (uint16_t)(1u << (step & 15u));
+    uint8_t sm = perf.scale_mode % 5u;
 
     /* Row 0 (Kick) */
     if (perf.seq_grid[0] & mask) {
@@ -91,7 +119,7 @@ static void cinco_groove_step(uint8_t step, uint8_t bar)
             trk_note_off(&trk[1], prev_bass_note);
             prev_bass_note = 0;
         }
-        int32_t r = (int32_t)bass_roots[bar & 3u] + perf.seq_pitch_offset;
+        int32_t r = (int32_t)SCALE_BASS_ROOTS[sm][bar & 3u] + perf.seq_pitch_offset;
         if (r < 12) r = 12;
         if (r > 108) r = 108;
         uint8_t root = (uint8_t)r;
@@ -109,7 +137,7 @@ static void cinco_groove_step(uint8_t step, uint8_t bar)
             }
         }
         for (uint32_t i = 0; i < 3; i++) {
-            int32_t sn = (int32_t)stab_chords[bar & 3u][i] + perf.seq_pitch_offset;
+            int32_t sn = (int32_t)SCALE_STAB_CHORDS[sm][bar & 3u][i] + perf.seq_pitch_offset;
             if (sn < 12) sn = 12;
             if (sn > 120) sn = 120;
             prev_stab_notes[i] = (uint8_t)sn;
@@ -159,6 +187,8 @@ void cinco_groove_init(void)
     trk[2].p[P_CHOR] = 50;
     trk[2].p[P_REV] = 40;
     trk[2].p[P_LEVEL] = perf.mix;
+
+    cinco_sound_apply_scale(perf.scale_mode);
 }
 
 void cinco_groove_process(uint32_t n)
