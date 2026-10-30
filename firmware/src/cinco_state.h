@@ -17,9 +17,13 @@ enum {
     SRC_COUNT  = 4
 };
 
-#define CINCO_PRESET_COUNT 8
-#define CINCO_ALGO_COUNT 8
+#define CINCO_PRESET_COUNT 16
+#define CINCO_ALGO_COUNT 16
 #define CINCO_GROOVE_COUNT 8
+
+extern const char *const CINCO_ALGO_NAMES[CINCO_ALGO_COUNT];
+extern const char *const CINCO_PRESET_NAMES[CINCO_PRESET_COUNT];
+extern const char *const CINCO_GROOVE_NAMES[CINCO_GROOVE_COUNT];
 
 /* Unified performance state: single source of truth for sound + view */
 typedef struct {
@@ -105,8 +109,8 @@ static const char * const SEQ_ROW_NAMES[6] = {
 #define CINCO_SAVE_MAGIC 0x4F434E49 /* "INCO" */
 typedef struct __attribute__((packed)) {
     uint32_t magic;
-    uint8_t  source;          /* Preset 0..7 */
-    uint8_t  variant;         /* Synth Algo 0..7 */
+    uint8_t  source;          /* Preset 0..15 */
+    uint8_t  variant;         /* Synth Algo 0..15 */
     uint8_t  k4d;
     uint8_t  tone;
     uint8_t  mosaic;

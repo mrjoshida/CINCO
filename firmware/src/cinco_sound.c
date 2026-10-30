@@ -10,6 +10,55 @@
 
 cinco_perf_t perf;
 
+const char *const CINCO_ALGO_NAMES[CINCO_ALGO_COUNT] = {
+    "4D Brass [Dual Saw]",
+    "Flarh Sync [Hard Sync]",
+    "Oyster Sub [Sub Bass]",
+    "Cinco CZ [Reso Trapezoid]",
+    "Tayne FM4 [Cascade Bell]",
+    "Paul Rudd [FM Slap Bass]",
+    "Mancierge [Formant Choir]",
+    "C-Phone [8-Bit Lofi]",
+    "Plucked Celery [Physical]",
+    "Flarh Cloud [Granular]",
+    "Executive [B3 Organ]",
+    "Boardroom [Trio Unison]",
+    "Oyster Glass [CZ String]",
+    "Solid Bass [DX7 House]",
+    "Robo-Vowel [Formant Morph]",
+    "D-Pants [Filtered Noise]"
+};
+
+const char *const CINCO_PRESET_NAMES[CINCO_PRESET_COUNT] = {
+    "Celery Man",
+    "Oyster Smiling",
+    "Tayne Classic",
+    "Computer Voice",
+    "Celery 4D Supersaw",
+    "Oyster Velvet Chime",
+    "Tayne BETA Rave",
+    "Nude Tayne Acid 303",
+    "Cinco C-Phone",
+    "Plucked Celery Harp",
+    "Hat Wobble Organ",
+    "Paul Rudd Deluxe",
+    "Executive Coffee Pad",
+    "OSHA Warning Sync",
+    "Cinco D-Pants Filter",
+    "Identity 2.5 Cyber Choir"
+};
+
+const char *const CINCO_GROOVE_NAMES[CINCO_GROOVE_COUNT] = {
+    "Eurodance 90s",
+    "Rave Breakbeat",
+    "Pumping House",
+    "Acid Trance 303",
+    "Happy Hardcore",
+    "Speed Garage",
+    "Belgian Techno",
+    "Italo Disco"
+};
+
 static uint32_t wobble_ph = 0;
 static uint32_t mosaic_cnt = 0;
 static int32_t mosaic_l = 0;
@@ -194,7 +243,7 @@ void cinco_sound_set_algo(uint8_t algo)
     perf.variant = algo % CINCO_ALGO_COUNT;
     switch (perf.variant) {
     case 0:
-        /* Dual-Saw Poly Brass */
+        /* 0: ENG_ANALOG (Saw dual detune, snappy filter) */
         set_engine_of(&trk[0], 0);
         trk[0].p[P_E0] = 0;
         trk[0].p[P_E1] = 16;
@@ -202,7 +251,7 @@ void cinco_sound_set_algo(uint8_t algo)
         trk[0].p[P_LEVEL] = 100;
         break;
     case 1:
-        /* Hard Sync Lead */
+        /* 1: ENG_ANALOG (AW_SYNC = 5, sync lead) */
         set_engine_of(&trk[0], 0);
         trk[0].p[P_E0] = 5;
         trk[0].p[P_E1] = 28;
@@ -210,7 +259,7 @@ void cinco_sound_set_algo(uint8_t algo)
         trk[0].p[P_LEVEL] = 100;
         break;
     case 2:
-        /* Sub-Octave Acid Bass */
+        /* 2: ENG_ANALOG (AW_SUB = 6, sub bass) */
         set_engine_of(&trk[0], 0);
         trk[0].p[P_E0] = 6;
         trk[0].p[P_E2] = 64;
@@ -218,7 +267,7 @@ void cinco_sound_set_algo(uint8_t algo)
         trk[0].p[P_LEVEL] = 100;
         break;
     case 3:
-        /* CZ Resonant Trapezoid */
+        /* 3: ENG_PHASE (preset 4, resonant trapezoid) */
         set_engine_of(&trk[0], 2);
         apply_preset_to(&trk[0], 4);
         trk[0].p[P_CHOR] = 60;
@@ -226,30 +275,87 @@ void cinco_sound_set_algo(uint8_t algo)
         trk[0].p[P_LEVEL] = 100;
         break;
     case 4:
-        /* FM 4-Op Linear Cascade */
+        /* 4: ENGI_FM6 (preset 1, BELL 4-op cascade) */
         set_engine_of(&trk[0], ENGI_FM6);
         apply_preset_to(&trk[0], 1);
         trk[0].p[P_VOICE] = V_POLY;
         trk[0].p[P_LEVEL] = 100;
         break;
     case 5:
-        /* FM Dual-Modulator Bell */
+        /* 5: ENGI_FM6 (preset 2, FM BASS slap) */
         set_engine_of(&trk[0], ENGI_FM6);
         apply_preset_to(&trk[0], 2);
         trk[0].p[P_VOICE] = V_MONO;
         trk[0].p[P_LEVEL] = 100;
         break;
     case 6:
-        /* Formant Vowel Choir */
+        /* 6: ENG_FORMANT (preset 0, CHOIR AAH) */
         set_engine_of(&trk[0], 5);
         apply_preset_to(&trk[0], 0);
         trk[0].p[P_VOICE] = V_POLY;
         trk[0].p[P_LEVEL] = 100;
         break;
     case 7:
-        /* 8-Bit Chip Lofi */
+        /* 7: ENG_LOFI (preset 2, 8-bit chip) */
         set_engine_of(&trk[0], 3);
         apply_preset_to(&trk[0], 2);
+        trk[0].p[P_VOICE] = V_POLY;
+        trk[0].p[P_LEVEL] = 100;
+        break;
+    case 8:
+        /* 8: ENG_PHYS (preset 0, Karplus physical pluck string) */
+        set_engine_of(&trk[0], ENGI_PHYS);
+        apply_preset_to(&trk[0], 0);
+        trk[0].p[P_VOICE] = V_POLY;
+        trk[0].p[P_LEVEL] = 100;
+        break;
+    case 9:
+        /* 9: ENG_GRAIN (preset 0, Granular particle cloud) */
+        set_engine_of(&trk[0], 8);
+        apply_preset_to(&trk[0], 0);
+        trk[0].p[P_VOICE] = V_POLY;
+        trk[0].p[P_LEVEL] = 100;
+        break;
+    case 10:
+        /* 10: ENG_WHEEL (preset 0, Tonewheel organ with rotary) */
+        set_engine_of(&trk[0], 7);
+        apply_preset_to(&trk[0], 0);
+        trk[0].p[P_VOICE] = V_POLY;
+        trk[0].p[P_LEVEL] = 100;
+        break;
+    case 11:
+        /* 11: ENG_TRIO (preset 0, 3-oscillator unison chord) */
+        set_engine_of(&trk[0], 6);
+        apply_preset_to(&trk[0], 0);
+        trk[0].p[P_VOICE] = V_POLY;
+        trk[0].p[P_LEVEL] = 100;
+        break;
+    case 12:
+        /* 12: ENG_PHASE (preset 5, CZ resonant string with chorus) */
+        set_engine_of(&trk[0], 2);
+        apply_preset_to(&trk[0], 5);
+        trk[0].p[P_CHOR] = 85;
+        trk[0].p[P_VOICE] = V_POLY;
+        trk[0].p[P_LEVEL] = 100;
+        break;
+    case 13:
+        /* 13: ENGI_FM6 (preset 3, FM brass / solid lead) */
+        set_engine_of(&trk[0], ENGI_FM6);
+        apply_preset_to(&trk[0], 3);
+        trk[0].p[P_VOICE] = V_POLY;
+        trk[0].p[P_LEVEL] = 100;
+        break;
+    case 14:
+        /* 14: ENG_FORMANT (preset 1, CHOIR OOH vowel morph) */
+        set_engine_of(&trk[0], 5);
+        apply_preset_to(&trk[0], 1);
+        trk[0].p[P_VOICE] = V_POLY;
+        trk[0].p[P_LEVEL] = 100;
+        break;
+    case 15:
+        /* 15: ENG_NOISE (preset 0, filtered pink noise sweep) */
+        set_engine_of(&trk[0], 11);
+        apply_preset_to(&trk[0], 0);
         trk[0].p[P_VOICE] = V_POLY;
         trk[0].p[P_LEVEL] = 100;
         break;
@@ -288,7 +394,7 @@ void cinco_sound_set_preset(uint8_t preset)
         break;
     case 5:
         /* Oyster Velvet Chime (CZ Resonant String) */
-        cinco_sound_set_algo(3);
+        cinco_sound_set_algo(12);
         trk[0].p[P_CHOR] = 85;
         break;
     case 6:
@@ -299,6 +405,40 @@ void cinco_sound_set_preset(uint8_t preset)
         /* Nude Tayne Acid 303 (Acid 303 Squelch) */
         cinco_sound_set_algo(2);
         trk[0].p[P_E5] = 80;
+        break;
+    case 8:
+        /* Cinco C-Phone (8-Bit Lofi) */
+        cinco_sound_set_algo(7);
+        break;
+    case 9:
+        /* Plucked Celery Harp (Karplus Physical Pluck) */
+        cinco_sound_set_algo(8);
+        trk[0].p[P_CHOR] = 40;
+        break;
+    case 10:
+        /* Hat Wobble Organ (Tonewheel B3 Organ) */
+        cinco_sound_set_algo(10);
+        break;
+    case 11:
+        /* Paul Rudd Deluxe (Trio Unison Lead) */
+        cinco_sound_set_algo(11);
+        trk[0].p[P_CHOR] = 60;
+        break;
+    case 12:
+        /* Executive Coffee Pad (Granular Cloud Pad) */
+        cinco_sound_set_algo(9);
+        break;
+    case 13:
+        /* OSHA Warning Sync (Hard Sync Lead) */
+        cinco_sound_set_algo(1);
+        break;
+    case 14:
+        /* Cinco D-Pants Filter (Filtered Pink Noise Sweep) */
+        cinco_sound_set_algo(15);
+        break;
+    case 15:
+        /* Identity 2.5 Cyber Choir (Formant Morph Choir) */
+        cinco_sound_set_algo(14);
         break;
     default:
         break;
@@ -349,6 +489,39 @@ void cinco_audio_block(int32_t *out, uint32_t n)
             if (vowel > 127) vowel = 127;
             if (vowel < 0) vowel = 0;
             trk[0].p[P_E0] = (int16_t)vowel;
+            break;
+        }
+        case 6: /* ENG_TRIO */ {
+            int32_t cut = 10 + ((int32_t)perf.tone * 117) / 127;
+            if (cut > 127) cut = 127;
+            if (cut < 0) cut = 0;
+            trk[0].p[P_E5] = (int16_t)cut;
+            break;
+        }
+        case 7: /* ENG_WHEEL */ {
+            int32_t reg = ((int32_t)perf.tone * 15) / 127;
+            trk[0].p[P_E0] = (int16_t)reg;
+            break;
+        }
+        case 8: /* ENG_GRAIN */ {
+            int32_t tone = 10 + ((int32_t)perf.tone * 117) / 127;
+            if (tone > 127) tone = 127;
+            if (tone < 0) tone = 0;
+            trk[0].p[P_E7] = (int16_t)tone;
+            break;
+        }
+        case 9: /* ENGI_PHYS */ {
+            int32_t brit = 10 + ((int32_t)perf.tone * 117) / 127;
+            if (brit > 127) brit = 127;
+            if (brit < 0) brit = 0;
+            trk[0].p[P_E2] = (int16_t)brit;
+            break;
+        }
+        case 11: /* ENG_NOISE */ {
+            int32_t freq = 10 + ((int32_t)perf.tone * 117) / 127;
+            if (freq > 127) freq = 127;
+            if (freq < 0) freq = 0;
+            trk[0].p[P_E2] = (int16_t)freq;
             break;
         }
         default:

@@ -599,16 +599,16 @@ static inline uint32_t cinco_get_layout_state(int32_t nwindows)
     s |= (uint32_t)(perf.boss_mode & 1u) << 1;
     s |= (uint32_t)(perf.view_mode & 1u) << 2;
     s |= (uint32_t)((nwindows - 1) & 0x0Fu) << 3;
-    s |= (uint32_t)(perf.source & 0x07u) << 7;
-    s |= (uint32_t)(perf.nude & 1u) << 10;
-    s |= (uint32_t)(perf.wobble & 1u) << 11;
-    s |= (uint32_t)(perf.flail & 1u) << 12;
-    s |= (uint32_t)(perf.nsfw_popup_t > 0 ? 1u : 0u) << 13;
-    s |= (uint32_t)(perf.receipt_t > 0 ? 1u : 0u) << 14;
-    s |= (uint32_t)(perf.diag > 0 ? 1u : 0u) << 15;
-    s |= (uint32_t)(perf.error_popup_t > 0 ? 1u : 0u) << 16;
-    s |= (uint32_t)(perf.mosaic & 0x3Fu) << 17;
-    s |= (uint32_t)(perf.variant & 0x07u) << 23;
+    s |= (uint32_t)(perf.source & 0x0Fu) << 7;
+    s |= (uint32_t)(perf.nude & 1u) << 11;
+    s |= (uint32_t)(perf.wobble & 1u) << 12;
+    s |= (uint32_t)(perf.flail & 1u) << 13;
+    s |= (uint32_t)(perf.nsfw_popup_t > 0 ? 1u : 0u) << 14;
+    s |= (uint32_t)(perf.receipt_t > 0 ? 1u : 0u) << 15;
+    s |= (uint32_t)(perf.diag > 0 ? 1u : 0u) << 16;
+    s |= (uint32_t)(perf.error_popup_t > 0 ? 1u : 0u) << 17;
+    s |= (uint32_t)(perf.mosaic & 0x1Fu) << 18;
+    s |= (uint32_t)(perf.variant & 0x0Fu) << 23;
     return s;
 }
 
@@ -795,15 +795,34 @@ static void cinco_draw_overlays(void)
         lcd_fill((uint32_t)(dx + 1), (uint32_t)(dy + 1), 1, (uint32_t)(dh - 2), C_BORDER_MID);
 
         /* HUD Title & line */
-        cinco_draw_string(dx + 26, dy + 10, "=== SYSTEM DIAGNOSTICS ===", C_GREEN);
+        cinco_draw_string(dx + 8, dy + 10, "=== CINCO SYSTEM DIAGNOSTICS ===", C_GREEN);
         lcd_fill((uint32_t)(dx + 6), (uint32_t)(dy + 22), (uint32_t)(dw - 12), 1, C_GREEN);
 
         /* Retro diagnostic lines */
-        cinco_draw_string(dx + 12, dy + 28, "CPU: JieLi AC7916 120MHz", C_GREEN);
-        cinco_draw_string(dx + 12, dy + 44, "RAM: 56.8KB / 73.7KB (23% Free)", C_GREEN);
-        cinco_draw_string(dx + 12, dy + 60, "AUDIO: 44.1kHz 32-bit Q15", C_GREEN);
-        cinco_draw_string(dx + 12, dy + 76, "DANCER: 118px 4-bit RLE OK", C_GREEN);
-        cinco_draw_string(dx + 12, dy + 92, "GROOVE: 16-Step Sequencer", C_GREEN);
+        char dline[36];
+        snprintf(dline, sizeof(dline), "PRESET: %.22s", CINCO_PRESET_NAMES[perf.source % CINCO_PRESET_COUNT]);
+        cinco_draw_string(dx + 10, dy + 28, dline, C_GREEN);
+
+        snprintf(dline, sizeof(dline), "ALGO:   %.22s", CINCO_ALGO_NAMES[perf.variant % CINCO_ALGO_COUNT]);
+        cinco_draw_string(dx + 10, dy + 44, dline, C_GREEN);
+
+        snprintf(dline, sizeof(dline), "GROOVE: %.12s (%u BPM)",
+                 CINCO_GROOVE_NAMES[perf.groove_pattern % CINCO_GROOVE_COUNT],
+                 (unsigned)(perf.tempo ? perf.tempo : 120u));
+        cinco_draw_string(dx + 10, dy + 60, dline, C_GREEN);
+
+        snprintf(dline, sizeof(dline), "AUDIO:  44.1kHz Q15 | TRK0: %.7s",
+                 ENGINES[eng_idx(trk[0].eng_req)]->name);
+        cinco_draw_string(dx + 10, dy + 76, dline, C_GREEN);
+
+        uint32_t active_sectors = 0;
+        for (uint32_t r = 0; r < 6u; r++) {
+            active_sectors += (uint32_t)__builtin_popcount((unsigned int)perf.seq_grid[r]);
+        }
+        uint32_t alloc_pct = (active_sectors * 100u) / 96u;
+        snprintf(dline, sizeof(dline), "DEFRAG: %u/96 Sectors (%u%%)",
+                 (unsigned)active_sectors, (unsigned)alloc_pct);
+        cinco_draw_string(dx + 10, dy + 92, dline, C_GREEN);
     }
 
     /* 8. Overlays: Cinco System Alert Dialog */
@@ -898,7 +917,15 @@ static void cinco_view_render(void)
             case 4: title = perf.nude ? "NUDE 4D - FLARHGUNNSTOW" : "4D Supersaw - FLARH!"; break;
             case 5: title = perf.nude ? "NUDE CHIME - FLARHGUNNSTOW" : "Velvet Chime - FLARH!"; break;
             case 6: title = perf.nude ? "NUDE RAVE - FLARHGUNNSTOW" : "BETA Rave - FLARH!"; break;
-            case 7: default: title = perf.nude ? "NUDE 303 - FLARHGUNNSTOW" : "Acid 303 - FLARH!"; break;
+            case 7: title = perf.nude ? "NUDE 303 - FLARHGUNNSTOW" : "Acid 303 - FLARH!"; break;
+            case 8: title = perf.nude ? "NUDE C-PHONE - FLARH!" : "Cinco C-Phone - FLARH!"; break;
+            case 9: title = perf.nude ? "NUDE HARP - FLARH!" : "Plucked Celery - FLARH!"; break;
+            case 10: title = perf.nude ? "NUDE ORGAN - FLARH!" : "Hat Wobble Organ - FLARH!"; break;
+            case 11: title = perf.nude ? "NUDE PAUL - FLARH!" : "Paul Rudd - FLARH!"; break;
+            case 12: title = perf.nude ? "NUDE COFFEE - FLARH!" : "Executive Coffee - FLARH!"; break;
+            case 13: title = perf.nude ? "NUDE SYNC - FLARH!" : "OSHA Warning - FLARH!"; break;
+            case 14: title = perf.nude ? "NUDE D-PANTS - FLARH!" : "Cinco D-Pants - FLARH!"; break;
+            case 15: default: title = perf.nude ? "NUDE CHOIR - FLARH!" : "Identity Choir - FLARH!"; break;
             }
         } else if (perf.wobble) {
             switch (perf.source & 3u) {
@@ -922,7 +949,15 @@ static void cinco_view_render(void)
             case 4: title = perf.nude ? "NUDE 4D - Hat Wobble" : "4D Supersaw - Wobble"; break;
             case 5: title = perf.nude ? "NUDE CHIME - Hat Wobble" : "Velvet Chime - Wobble"; break;
             case 6: title = perf.nude ? "NUDE RAVE - Hat Wobble" : "BETA Rave - Wobble"; break;
-            case 7: default: title = perf.nude ? "NUDE 303 - Hat Wobble" : "Acid 303 - Wobble"; break;
+            case 7: title = perf.nude ? "NUDE 303 - Hat Wobble" : "Acid 303 - Wobble"; break;
+            case 8: title = perf.nude ? "NUDE C-PHONE - Wobble" : "Cinco C-Phone - Wobble"; break;
+            case 9: title = perf.nude ? "NUDE HARP - Wobble" : "Plucked Celery - Wobble"; break;
+            case 10: title = perf.nude ? "NUDE ORGAN - Hat Wobble" : "Hat Wobble Organ"; break;
+            case 11: title = perf.nude ? "NUDE PAUL - Wobble" : "Paul Rudd - Wobble"; break;
+            case 12: title = perf.nude ? "NUDE COFFEE - Wobble" : "Executive Coffee - Wobble"; break;
+            case 13: title = perf.nude ? "NUDE SYNC - Wobble" : "OSHA Warning - Wobble"; break;
+            case 14: title = perf.nude ? "NUDE D-PANTS - Wobble" : "Cinco D-Pants - Wobble"; break;
+            case 15: default: title = perf.nude ? "NUDE CHOIR - Wobble" : "Identity Choir - Wobble"; break;
             }
         } else {
             switch (perf.source & 3u) {
@@ -948,7 +983,15 @@ static void cinco_view_render(void)
             case 4: title = perf.nude ? "NUDE CELERY 4D" : "Celery 4D Supersaw"; break;
             case 5: title = perf.nude ? "NUDE OYSTER CHIME" : "Oyster Velvet Chime"; break;
             case 6: title = perf.nude ? "NUDE TAYNE BETA" : "Tayne BETA Rave"; break;
-            case 7: default: title = perf.nude ? "NUDE TAYNE 303" : "Nude Tayne Acid 303"; break;
+            case 7: title = perf.nude ? "NUDE TAYNE 303" : "Nude Tayne Acid 303"; break;
+            case 8: title = perf.nude ? "NUDE CINCO C-PHONE" : "Cinco C-Phone"; break;
+            case 9: title = perf.nude ? "NUDE PLUCKED CELERY" : "Plucked Celery Harp"; break;
+            case 10: title = perf.nude ? "NUDE HAT WOBBLE ORGAN" : "Hat Wobble Organ"; break;
+            case 11: title = perf.nude ? "NUDE PAUL RUDD" : "Paul Rudd Deluxe"; break;
+            case 12: title = perf.nude ? "NUDE EXECUTIVE COFFEE" : "Executive Coffee Pad"; break;
+            case 13: title = perf.nude ? "NUDE OSHA WARNING" : "OSHA Warning Sync"; break;
+            case 14: title = perf.nude ? "NUDE D-PANTS FILTER" : "Cinco D-Pants Filter"; break;
+            case 15: default: title = perf.nude ? "NUDE IDENTITY CHOIR" : "Identity 2.5 Cyber Choir"; break;
             }
         }
 

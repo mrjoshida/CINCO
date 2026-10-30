@@ -34,7 +34,7 @@ async function main() {
     ex.web_nor_erase();
     ex.web_boot();
 
-    console.log("\n--- TEST 1: All 8 Presets ---");
+    console.log("\n--- TEST 1: All 16 Presets ---");
     const presetNames = [
         "Celery Man",
         "Oyster Smiling",
@@ -43,10 +43,18 @@ async function main() {
         "Celery 4D Supersaw",
         "Oyster Velvet Chime",
         "Tayne BETA Rave",
-        "Nude Tayne Acid 303"
+        "Nude Tayne Acid 303",
+        "Cinco C-Phone",
+        "Plucked Celery Harp",
+        "Hat Wobble Organ",
+        "Paul Rudd Deluxe",
+        "Executive Coffee Pad",
+        "OSHA Warning Sync",
+        "Cinco D-Pants Filter",
+        "Identity 2.5 Cyber Choir"
     ];
 
-    for (let p = 0; p < 8; p++) {
+    for (let p = 0; p < 16; p++) {
         ex.web_cinco_set_preset(p);
         renderMs(ex, mem, 20); // allow engine crossfade to settle
         let src = ex.web_cinco_get_preset();
@@ -67,21 +75,29 @@ async function main() {
             throw new Error(`Preset ${p} exceeded headroom! Peak=${audio.maxL}`);
         }
     }
-    console.log("-> All 8 Presets passed!");
+    console.log("-> All 16 Presets passed!");
 
-    console.log("\n--- TEST 2: All 8 Synth Algorithms on Track 0 ---");
+    console.log("\n--- TEST 2: All 16 Synth Algorithms on Track 0 ---");
     const algoNames = [
-        "Dual-Saw Poly Brass",
-        "Hard Sync Lead",
-        "Sub-Octave Acid Bass",
-        "CZ Resonant Trapezoid",
-        "FM 4-Op Linear Cascade",
-        "FM Dual-Modulator Bell",
-        "Formant Vowel Choir",
-        "8-Bit Chip Lofi"
+        "4D Brass [Dual Saw]",
+        "Flarh Sync [Hard Sync]",
+        "Oyster Sub [Sub Bass]",
+        "Cinco CZ [Reso Trapezoid]",
+        "Tayne FM4 [Cascade Bell]",
+        "Paul Rudd [FM Slap Bass]",
+        "Mancierge [Formant Choir]",
+        "C-Phone [8-Bit Lofi]",
+        "Plucked Celery [Physical]",
+        "Flarh Cloud [Granular]",
+        "Executive [B3 Organ]",
+        "Boardroom [Trio Unison]",
+        "Oyster Glass [CZ String]",
+        "Solid Bass [DX7 House]",
+        "Robo-Vowel [Formant Morph]",
+        "D-Pants [Filtered Noise]"
     ];
 
-    for (let a = 0; a < 8; a++) {
+    for (let a = 0; a < 16; a++) {
         ex.web_cinco_set_algo(a);
         renderMs(ex, mem, 20); // allow engine crossfade to settle
         let algo = ex.web_cinco_get_algo();
@@ -98,7 +114,7 @@ async function main() {
             throw new Error(`Algo ${a} [${algoNames[a]}] generated no audio!`);
         }
     }
-    console.log("-> All 8 Algorithms passed!");
+    console.log("-> All 16 Algorithms passed!");
 
     console.log("\n--- TEST 3: All 8 90s Groove Styles ---");
     const grooveNames = [
@@ -203,12 +219,12 @@ async function main() {
     renderMs(ex, mem, 20);
     if (ex.web_cinco_get_groove_pattern() !== 1) throw new Error(`Algo encoder with B_PLAY held did not increment groove pattern!`);
 
-    // Test PRESET encoder (role 2): cycles presets 0..7
+    // Test PRESET encoder (role 2): cycles presets 0..15
     ex.web_cinco_set_preset(0);
-    for (let step = 1; step <= 8; step++) {
+    for (let step = 1; step <= 16; step++) {
         ex.web_enc(2, 1);
         renderMs(ex, mem, 20);
-        let expected = step % 8;
+        let expected = step % 16;
         if (ex.web_cinco_get_preset() !== expected) {
             throw new Error(`Preset encoder step ${step}: expected ${expected}, got ${ex.web_cinco_get_preset()}`);
         }

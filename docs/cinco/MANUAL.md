@@ -127,9 +127,9 @@ The console display renders a faithful recreation of **CINCO OS 2.5**:
 
 ---
 
-## CHAPTER 4: THE IDENTITY ROSTER (8 CURATED PRESETS)
+## CHAPTER 4: THE IDENTITY ROSTER (16 CURATED PRESETS)
 
-Turn the **`PRESET`** rotary encoder to cycle through 8 curated employee identity profiles:
+Turn the **`PRESET`** rotary encoder to cycle through 16 curated employee identity profiles with signature sound designs, dancer animations, and vocal confirmations:
 
 ### 1. Celery Man (`Preset 0`)
 * **Dancer Identity:** Celery Man
@@ -186,6 +186,62 @@ Turn the **`PRESET`** rotary encoder to cycle through 8 curated employee identit
 * **Synthesis Architecture:** Screaming high-resonance sawtooth filter envelope with bitcrushed saturation.
 * **Musical Character:** Sizzling TB-303 acid squelch with screaming resonant whistles. Strictly non-OSHA compliant.
 * **Vocal Confirmation:** *"Warning: this is not suitable for work."*
+
+### 9. Cinco C-Phone (`Preset 8`)
+* **Dancer Identity:** Celery Man
+* **Associated Sound Engine:** `ENG_LOFI` (8-Bit NES Chip)
+* **Synthesis Architecture:** Variable sample-rate pulse wave with authentic 8-bit DAC quantization.
+* **Musical Character:** Crunchy, nostalgic chiptune key lead modeled after the revolutionary Cinco C-Phone.
+* **Vocal Confirmation:** *"Celery Man."*
+
+### 10. Plucked Celery Harp (`Preset 9`)
+* **Dancer Identity:** Oyster Smiling
+* **Associated Sound Engine:** `ENG_PHYS` (Karplus-Strong Physical Modeling)
+* **Synthesis Architecture:** Delay-line acoustic string resonator with impulse excitation and damping.
+* **Musical Character:** Organic nylon plucked acoustic strings and harp-like timbres for meditative corporate breaks.
+* **Vocal Confirmation:** *"Printout of Oyster smiling."*
+
+### 11. Hat Wobble Organ (`Preset 10`)
+* **Dancer Identity:** Tayne
+* **Associated Sound Engine:** `ENG_WHEEL` (Tonewheel B3 Organ)
+* **Synthesis Architecture:** 9 virtual mechanical tonewheel drawbars with scanner vibrato and rotary speaker spin.
+* **Musical Character:** Classic 1990s house organ with punchy percussion and warm rotary growl.
+* **Vocal Confirmation:** *"Hat wobble."*
+
+### 12. Paul Rudd Deluxe (`Preset 11`)
+* **Dancer Identity:** Speech Synthesizer
+* **Associated Sound Engine:** `ENG_TRIO` (3-Oscillator Stacked Unison)
+* **Synthesis Architecture:** Triple virtual analog oscillators stacked in intervals with detune.
+* **Musical Character:** Extremely thick unison brass and lead sound for executive keynote presentations.
+* **Vocal Confirmation:** *"Now Tayne I can get into."*
+
+### 13. Executive Coffee Pad (`Preset 12`)
+* **Dancer Identity:** Celery Man
+* **Associated Sound Engine:** `ENG_ANALOG` (Slow-Attack 24dB Ladder Pad)
+* **Synthesis Architecture:** Warm analog saws routed through dual envelopes with slow 800 ms attack and lush filter decay.
+* **Musical Character:** Deep, relaxing ambient corporate pad for espresso replenishment breaks.
+* **Vocal Confirmation:** *"Yes, Paul."*
+
+### 14. OSHA Warning Sync (`Preset 13`)
+* **Dancer Identity:** Oyster Smiling
+* **Associated Sound Engine:** `ENG_ANALOG` (Hard Oscillator Sync)
+* **Synthesis Architecture:** Master-slave oscillator hard sync with screaming high-register harmonic sweeps.
+* **Musical Character:** Biting, aggressive synth lead indicating workplace flarh levels approaching emergency limits.
+* **Vocal Confirmation:** *"Flarhgunnstow."*
+
+### 15. Cinco D-Pants Filter (`Preset 14`)
+* **Dancer Identity:** Tayne (Censored Mosaic)
+* **Associated Sound Engine:** `ENG_NOISE` (Resonant Pink Noise Sweep)
+* **Synthesis Architecture:** Multi-pole resonant bandpass and lowpass filters sweeping through textured noise.
+* **Musical Character:** Atmospheric whooshes, sweeps, and percussive wind effects. Solid corporate moisture management.
+* **Vocal Confirmation:** *"Warning: this is not suitable for work."*
+
+### 16. Identity 2.5 Cyber Choir (`Preset 15`)
+* **Dancer Identity:** Speech Synthesizer
+* **Associated Sound Engine:** `ENG_FORMANT` (Morphing Vowel Resonators)
+* **Synthesis Architecture:** Dual 5-formant vocal resonators morphing continuously between open vowels "AAH", "EEH", and "OOH".
+* **Musical Character:** Ethereal cybernetic choir celebrating full Cinco system integration.
+* **Vocal Confirmation:** *"Now Tayne I can get into."*
 
 ---
 
@@ -272,15 +328,23 @@ As `K1` is rotated clockwise from `0` to `127`:
 - **Diagnostic HUD Toggle:** Hold `GLO` for 500 ms, or press `GLO + EDIT`, or turn `SELECT` to toggle the green phosphor Diagnostic HUD overlay.
 
 ### 8. Live Synthesis Algorithms (`ALGO` Encoder)
-Turn the **`ALGO`** rotary encoder clockwise or counter-clockwise to instantly alter the underlying synthesis engine and oscillator topology of the playable keyboard (Track 0):
-- **Algo 0: Dual-Saw Poly Brass (`ENG_ANALOG`)**: Classic detuned saw pair through 24dB ladder lowpass filter, 8-voice polyphonic.
-- **Algo 1: Hard Sync Lead (`ENG_ANALOG`)**: Searing oscillator sync pulse with aggressive upper harmonics, mono legato.
-- **Algo 2: Sub-Octave Acid Bass (`ENG_ANALOG`)**: Heavy sawtooth with sub-octave square wave and snappy filter decay.
-- **Algo 3: CZ Resonant Trapezoid (`ENG_PHASE`)**: Casio CZ phase-distortion resonant waveform with stereo chorus.
-- **Algo 4: FM 4-Op Linear Cascade (`ENGI_FM6`)**: 4-operator linear frequency modulation cascade (4>3>2>1), crystal bells & bright digital keys.
-- **Algo 5: FM Dual-Modulator Bell (`ENGI_FM6`)**: Branching FM algorithm ((3+4)>2>1), rich FM slap bass and metallic percussive chimes.
-- **Algo 6: Formant Vowel Choir (`ENG_FORMANT`)**: Robotic multi-formant vocal tract filters with vowel morphing ("AAH/EEH/OOH").
-- **Algo 7: 8-Bit Chip Lofi (`ENG_LOFI`)**: Vintage NES / Commodore 64 bitcrushed pulse wave with variable sample reduction.
+Turn the **`ALGO`** rotary encoder clockwise or counter-clockwise to instantly alter the underlying synthesis engine and oscillator topology of the playable keyboard (Track 0 across 16 deep models):
+- **Algo 0: 4D Brass [Dual Saw] (`ENG_ANALOG`)**: Classic detuned saw pair through 24dB ladder lowpass filter, 8-voice polyphonic.
+- **Algo 1: Flarh Sync [Hard Sync] (`ENG_ANALOG`)**: Searing oscillator sync pulse with aggressive upper harmonics, mono legato.
+- **Algo 2: Oyster Sub [Sub Bass] (`ENG_ANALOG`)**: Heavy sawtooth with sub-octave square wave and snappy filter decay.
+- **Algo 3: Cinco CZ [Reso Trapezoid] (`ENG_PHASE`)**: Casio CZ phase-distortion resonant trapezoid waveform with stereo chorus.
+- **Algo 4: Tayne FM4 [Cascade Bell] (`ENGI_FM6`)**: 4-operator linear frequency modulation cascade (4>3>2>1), crystal bells & bright digital keys.
+- **Algo 5: Paul Rudd [FM Slap Bass] (`ENGI_FM6`)**: Branching FM algorithm ((3+4)>2>1), rich FM slap bass and metallic percussive chimes.
+- **Algo 6: Mancierge [Formant Choir] (`ENG_FORMANT`)**: Robotic multi-formant vocal tract filters with open "AAH" choir resonance.
+- **Algo 7: C-Phone [8-Bit Lofi] (`ENG_LOFI`)**: Vintage NES / Commodore 64 bitcrushed pulse wave with variable sample reduction.
+- **Algo 8: Plucked Celery [Physical] (`ENG_PHYS`)**: Karplus-Strong physical modeling acoustic string and harp excitation.
+- **Algo 9: Flarh Cloud [Granular] (`ENG_GRAIN`)**: Granular particle cloud texture generator with micro-loop scatter.
+- **Algo 10: Executive [B3 Organ] (`ENG_WHEEL`)**: 9-drawbar Hammond B3 tonewheel organ with rotary speaker simulation.
+- **Algo 11: Boardroom [Trio Unison] (`ENG_TRIO`)**: Triple virtual analog oscillator stack with interval chords and detuned unison.
+- **Algo 12: Oyster Glass [CZ String] (`ENG_PHASE`)**: Casio CZ resonant pulse waveform modeled into ethereal glassy synth strings.
+- **Algo 13: Solid Bass [DX7 House] (`ENGI_FM6`)**: Iconic 1990s Yamaha DX7 solid/lately bass algorithm with tight carrier attack.
+- **Algo 14: Robo-Vowel [Formant Morph] (`ENG_FORMANT`)**: Morphing vowel formant filters ("EEH/OOH") with dynamic formant frequency modulation.
+- **Algo 15: D-Pants [Filtered Noise] (`ENG_NOISE`)**: Resonant multi-pole filtered pink noise sweeps and atmospheric textures.
 
 ### 9. 90s Dance Groove Engine (`PLAY` or `GLO` + `ALGO` Encoder)
 Hold the **`PLAY`** or **`GLO`** button while rotating the **`ALGO`** encoder to select between 8 iconic 1990s electronic dance styles:
