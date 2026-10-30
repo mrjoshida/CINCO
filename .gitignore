@@ -10,3 +10,4 @@ refs/
 scratch/
 repomix-output.*
 assets/speech/test_*.wav
+!firmware/prebuilt/*.fwsc

@@ -95,6 +95,8 @@ def prepare_firmware():
         BUILD_DIR / "felucca.fwsc",
         FIRMWARE_DIR / "cinco.fwsc",
         FIRMWARE_DIR / "felucca.fwsc",
+        REPO_ROOT / "firmware" / "prebuilt" / "cinco.fwsc",  # committed fresh build, used by CI
+
     ]
     for c in candidates:
         if c.is_file() and c.stat().st_size > 0:
