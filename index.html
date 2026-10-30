@@ -896,7 +896,65 @@ kbd {
 }
 
 /* Cinco Defrag */
-#win-defrag { width: 440px; }
+#win-defrag {
+  width: 460px;
+  left: 760px;
+  top: 40px;
+}
+@media (max-width: 1240px) {
+  #win-defrag {
+    left: calc(100vw - 480px);
+    top: 40px;
+  }
+}
+@media (max-width: 600px) {
+  #win-defrag {
+    left: 10px;
+    width: calc(100vw - 20px);
+  }
+}
+
+/* Sequencer Mode Overlays on Piano Keybed */
+.badge-seq-step { display: none; pointer-events: none; }
+.lbl-seq-step { display: none; pointer-events: none; }
+.lbl-seq-track { display: none; pointer-events: none; }
+.lbl-note { pointer-events: none; }
+
+.seq-mode .badge-seq-step { display: block; }
+.seq-mode .lbl-seq-step { display: block; font-weight: bold; }
+.seq-mode .lbl-seq-track { display: block; font-weight: bold; }
+.seq-mode .lbl-note { display: none !important; }
+
+/* Active Track Highlighting on Black Keys */
+.seq-mode .key-g.black.active-track .face {
+  fill: #000080 !important;
+  stroke: #ffcc00 !important;
+  stroke-width: 1.5px !important;
+}
+.seq-mode .key-g.black.active-track .lbl-seq-track {
+  fill: #ffff00 !important;
+  font-weight: 900 !important;
+}
+.seq-mode .key-g.black.active-track .slit {
+  fill: #ffcc00 !important;
+}
+
+/* Playing Step Highlighting on White Keys */
+.seq-mode .key-g.playing-step .face {
+  fill: #a0ffa0 !important;
+}
+.seq-mode .key-g.playing-step .slit {
+  fill: #00ff00 !important;
+}
+.seq-mode .key-g.playing-step .badge-seq-step {
+  fill: #000080 !important;
+  stroke: #00ff00 !important;
+}
+.seq-mode .key-g.playing-step .lbl-seq-step {
+  fill: #ffffff !important;
+  font-weight: 900 !important;
+}
+
 .defrag-grid {
   display: grid;
   grid-template-columns: repeat(20, 1fr);
@@ -1794,6 +1852,12 @@ kbd {
   </div>
   <div class="dialog-body">
     <div style="font-weight:bold;margin-bottom:4px;">Drive C: (Cinco 4D3D3D3 Partition)</div>
+    <div class="defrag-help-banner" style="background:#ffffe1;border:1px solid #808080;padding:6px 8px;margin-bottom:8px;font-size:11px;line-height:1.45;color:#000;">
+      <strong>Norton Disk Defragmenter &amp; Step Sequencer Active</strong><br>
+      • White Keys 1–16: Toggle Steps on Active Track<br>
+      • Black Keys 1–6: Select Track (Kick, Snare, C.Hat, O.Hat, Bass, Stab)<br>
+      • Knobs: SELECT Track | K1 Fill | K2 Pitch | ALGO Template
+    </div>
     <div id="defrag-cluster-grid" class="defrag-grid"></div>
     <div style="display:flex;justify-content:space-between;margin:4px 0;font-size:11px;">
       <span>■ Allocated</span><span>■ Free</span><span>■ 4d3d3d3 Fragmented</span><span>■ Unmovable</span>
@@ -1866,7 +1930,7 @@ kbd {
     </div>
     <div class="manual-view" id="manual-content-view">
       <h3>Welcome to Cinco Identity Generator 2.5™</h3>
-      <p>This workstation runs custom Cinco OS 2.5 firmware for the M-VAVE FM-1 Synthesizer Terminal, featuring 4d3d3d3 window cascading, rotoscoped SCUMM dancers, and LPC speech synthesis.</p>
+      <p>This workstation runs custom Cinco OS 2.5 firmware for the M-VAVE FM-1 Synthesizer Terminal, featuring 4d3d3d3 window cascading, rotoscoped pixel dancers, and LPC speech synthesis.</p>
     </div>
   </div>
   <footer class="win-statusbar">
@@ -2134,9 +2198,9 @@ const ROW1 = ["FX", "SCL", "ENV", "LFO", "EDIT", "GLO"];
 const ROW2 = ["HOME", "SAVE", "ARP", "SEQ", "PLAY", "REC"];
 const KNOBS = ["MASTER", "SELECT", "ALGO", "PRESET", "K1", "K2", "K3", "K4"];
 const KNOB_SUBS = {
-  SELECT: "CHAR",
-  ALGO: "GROOVE", ALGORITHM: "GROOVE",
-  PRESET: "", PRESETS: "",
+  SELECT: "HUD",
+  ALGO: "ALGO", ALGORITHM: "ALGO",
+  PRESET: "VOICE", PRESETS: "VOICE",
   K1: "4d3d3d3", "KNOB 1": "4d3d3d3",
   K2: "CUTOFF", "KNOB 2": "CUTOFF",
   K3: "TEMPO", "KNOB 3": "TEMPO",
@@ -2185,11 +2249,52 @@ const KEYNAMES = ["F", "F♯", "G", "G♯", "A", "A♯", "B", "C", "C♯", "D", 
 const keyName = (k) => KEYNAMES[k % 12] + (3 + Math.floor((k + 5) / 12));
 
 let ac = null, node = null, btnMask = 0, keyMask = 0, latched = 0, masterValue = 700, lastLeds = [0, 0, 0, 0, 0], layout = null;
+let currentView = 0, currentSeqRow = 0, currentSeqStep = 0, currentGroove = 0;
 const angle = Object.fromEntries(KNOBS.map((n) => [n, 0]));
 angle.MASTER = -135 + 270 * masterValue / 1023;
 const knobs = [], buttons = [], keys = [];
 const btnBy = new Map(), keyBy = new Map();
 const send = (m) => { if (node) node.port.postMessage(m); };
+
+function updateSeqUI(view, row, step) {
+  const mainWin = document.getElementById("main-win");
+  const defragWin = document.getElementById("win-defrag");
+  const isSeq = (view === 1);
+
+  if (isSeq) {
+    if (!document.body.classList.contains("seq-mode")) {
+      document.body.classList.add("seq-mode");
+      if (mainWin) mainWin.classList.add("seq-mode");
+      if (typeof openWindow === "function") openWindow("win-defrag", "task-pill-defrag");
+    }
+  } else {
+    if (document.body.classList.contains("seq-mode")) {
+      document.body.classList.remove("seq-mode");
+      if (mainWin) mainWin.classList.remove("seq-mode");
+    }
+    if (defragWin && defragWin.style.display !== "none") {
+      defragWin.style.display = "none";
+      const pill = document.getElementById("task-pill-defrag");
+      if (pill) pill.style.display = "none";
+    }
+  }
+
+  // Update track highlighting on black keys
+  const trackBlackKeys = [1, 3, 5, 8, 10, 13];
+  trackBlackKeys.forEach((k, idx) => {
+    if (keys[k]?.g) {
+      keys[k].g.classList.toggle("active-track", isSeq && (idx === row));
+    }
+  });
+
+  // Update step highlighting on white keys
+  WHITE.forEach((k, idx) => {
+    if (keys[k]?.g) {
+      const isPlaying = isSeq && !!currentGroove && (idx === step);
+      keys[k].g.classList.toggle("playing-step", isPlaying);
+    }
+  });
+}
 
 function build(name) {
   const L = LAYOUTS[name];
@@ -2384,9 +2489,26 @@ function build(name) {
 
     const name = keyName(k);
     if (name.startsWith("C") || name.startsWith("F") || name === "G5") {
-      label(g, cx, y + kh - 4, name, 8.5, SANS, isBlack ? "#888890" : "#000080");
+      const nl = label(g, cx, y + kh - 4, name, 8.5, SANS, isBlack ? "#888890" : "#000080");
+      nl.classList.add("lbl-note");
     }
-    keys[k] = { g, name };
+
+    if (!isBlack) {
+      const stepIdx = WHITE.indexOf(k);
+      if (stepIdx >= 0) {
+        el("rect", { x: cx - 9, y: y + kh - 13.5, width: 18, height: 11, rx: 2, fill: "#ffffff", stroke: "#808080", "stroke-width": 0.5, class: "badge-seq-step" }, g);
+        const sl = label(g, cx, y + kh - 4.5, String(stepIdx + 1), 8.5, SANS, "#000080");
+        sl.classList.add("lbl-seq-step");
+      }
+    } else {
+      const TRACK_NAMES = ["KICK", "SNARE", "C.HAT", "O.HAT", "BASS", "STAB"];
+      const trackIdx = [1, 3, 5, 8, 10, 13].indexOf(k);
+      if (trackIdx >= 0 && trackIdx < 6) {
+        const tl = label(g, cx, y + kh - 4, TRACK_NAMES[trackIdx], 6.5, SANS, "#ffcc00");
+        tl.classList.add("lbl-seq-track");
+      }
+    }
+    keys[k] = { g, name, isBlack };
   };
 
   WHITE.forEach((k, i) => key(x0 + 12 + (i + 0.5) * pitch, y0 + h * 0.75, k));
@@ -2421,6 +2543,7 @@ function build(name) {
   syncButtons(true);
   syncKeys(true);
   drawLights(lastLeds);
+  updateSeqUI(currentView, currentSeqRow, currentSeqStep);
 }
 
 // ------------------------------------------------------------------ Input bindings
@@ -2554,11 +2677,12 @@ const KEYMAP = {};
 ["KeyZ", "KeyX", "KeyC", "KeyV", "KeyB", "KeyN", "KeyM", "Comma", "Period", "Slash"].forEach((c, i) => KEYMAP[c] = { key: WHITE[i] });
 [["KeyS", 1], ["KeyD", 3], ["KeyF", 5], ["KeyH", 8], ["KeyJ", 10], ["KeyL", 13], ["Semicolon", 15], ["Quote", 17]].forEach(([c, k]) => KEYMAP[c] = { key: k });
 ["KeyQ", "KeyW", "KeyE", "KeyR", "KeyT", "KeyY", "KeyU", "KeyI", "KeyO"].forEach((c, i) => KEYMAP[c] = { key: WHITE[7 + i] });
-[["Digit2", 13], ["Digit3", 15], ["Digit5", 18], ["Digit6", 20], ["Digit7", 22], ["Digit9", 25]].forEach(([c, k]) => KEYMAP[c] = { key: k });
-["Digit1", "Digit2", "Digit3", "Digit4", "Digit5", "Digit6"].forEach((c, i) => KEYMAP[c] = { btn: B[ROW1[i]] });
-["Digit7", "Digit8", "Digit9", "Digit0", "Minus", "Equal"].forEach((c, i) => KEYMAP[c] = { btn: B[ROW2[i]] });
+[["Digit1", WHITE[7]], ["Digit2", 13], ["Digit3", 15], ["Digit4", 17], ["Digit5", WHITE[10]], ["Digit6", 20], ["Digit7", 22], ["Digit8", WHITE[12]], ["Digit9", 25], ["Digit0", WHITE[14]], ["Minus", WHITE[15]], ["Equal", 26]].forEach(([c, k]) => KEYMAP[c] = { key: k });
 KEYMAP.BracketLeft = { btn: B["OCT-"] };
 KEYMAP.BracketRight = { btn: B["OCT+"] };
+KEYMAP.Escape = { btn: B["HOME"] };
+KEYMAP.Backquote = { btn: B["HOME"] };
+KEYMAP.Space = { btn: B["PLAY"] };
 
 const ARROWS = { ArrowUp: ["SELECT", 1], ArrowDown: ["SELECT", -1], ArrowRight: ["ALGO", 1], ArrowLeft: ["ALGO", -1] };
 
@@ -2582,7 +2706,30 @@ addEventListener("keydown", (e) => {
     e.preventDefault();
     return;
   }
-  const m = KEYMAP[e.code];
+
+  let m = KEYMAP[e.code];
+
+  if (currentView === 1) {
+    // In Sequencer Mode:
+    // Digit1..Digit8 toggle Steps 1..8
+    // Digit9, Digit0, Minus, Equal toggle Steps 9..12
+    // KeyQ..KeyI toggle Steps 9..16
+    const seqDigits = {
+      Digit1: 0, Digit2: 1, Digit3: 2, Digit4: 3,
+      Digit5: 4, Digit6: 5, Digit7: 6, Digit8: 7,
+      Digit9: 8, Digit0: 9, Minus: 10, Equal: 11
+    };
+    const seqUpper = {
+      KeyQ: 8, KeyW: 9, KeyE: 10, KeyR: 11,
+      KeyT: 12, KeyY: 13, KeyU: 14, KeyI: 15
+    };
+    if (seqDigits[e.code] !== undefined) {
+      m = { key: WHITE[seqDigits[e.code]] };
+    } else if (seqUpper[e.code] !== undefined) {
+      m = { key: WHITE[seqUpper[e.code]] };
+    }
+  }
+
   if (!m) return;
   e.preventDefault();
   if (e.repeat) return;
@@ -2741,6 +2888,11 @@ async function bootFirmware() {
         else if (m.type === "frame") {
           if (m.fb) drawScreen(m.fb);
           if (m.leds) drawLights(lastLeds = m.leds, m.anim);
+          if (m.view !== undefined) currentView = m.view;
+          if (m.seq_row !== undefined) currentSeqRow = m.seq_row;
+          if (m.seq_step !== undefined) currentSeqStep = m.seq_step;
+          if (m.groove !== undefined) currentGroove = m.groove;
+          updateSeqUI(currentView, currentSeqRow, currentSeqStep);
           if (m.sectors && !saveFlash(m.sectors) && !warned) {
             warned = true;
             console.warn("Felucca: saves kept in session only.");
@@ -2991,6 +3143,9 @@ document.querySelectorAll(".win-close-btn").forEach((btn) => {
     e.stopPropagation();
     const target = btn.dataset.target;
     if (target) {
+      if (target === "win-defrag" && currentView === 1) {
+        pressBtn("SEQ");
+      }
       const elTarget = document.getElementById(target);
       if (elTarget) {
         if (elTarget.classList.contains("modal-overlay")) elTarget.classList.remove("open");
@@ -3085,6 +3240,17 @@ document.getElementById("m-k4d")?.addEventListener("click", () => {
 });
 
 document.getElementById("m-defrag")?.addEventListener("click", () => { pressBtn("SEQ"); openWindow("win-defrag", "task-pill-defrag"); });
+document.getElementById("btn-defrag-pause")?.addEventListener("click", () => {
+  pressBtn("PLAY");
+});
+document.getElementById("btn-defrag-stop")?.addEventListener("click", () => {
+  if (currentGroove || (lastLeds && (lastLeds[0] & (1 << B["PLAY"])))) {
+    pressBtn("PLAY");
+  }
+});
+document.getElementById("btn-defrag-details")?.addEventListener("click", () => {
+  pressBtn("EDIT");
+});
 document.getElementById("m-boss")?.addEventListener("click", () => { pressBtn("EDIT"); openWindow("win-lotus", "task-pill-lotus"); });
 document.getElementById("m-screensaver")?.addEventListener("click", () => turnKnob("PRESETS", 4));
 document.getElementById("m-sysprop")?.addEventListener("click", () => document.getElementById("sysprop-modal")?.classList.add("open"));
@@ -3590,9 +3756,9 @@ document.getElementById("btn-dos-exit")?.addEventListener("click", () => {
 
 // CINCO Manual TOC Switching
 const MANUAL_SECTIONS = {
-  "toc-welcome": "<h3>Welcome to Cinco Identity Generator 2.5™</h3><p>This workstation runs custom Cinco OS 2.5 firmware for the M-VAVE FM-1 Synthesizer Terminal, featuring 4d3d3d3 window cascading, rotoscoped SCUMM dancers, and LPC speech synthesis.</p>",
+  "toc-welcome": "<h3>Welcome to Cinco Identity Generator 2.5™</h3><p>This workstation runs custom Cinco OS 2.5 firmware for the M-VAVE FM-1 Synthesizer Terminal, featuring 4d3d3d3 window cascading, rotoscoped pixel dancers, and LPC speech synthesis.</p>",
   "toc-controls": "<h3>Workstation & Synthesizer Controls</h3><p>Use keys Z through / for the lower manual, Q through O for the upper manual. Number keys 1-6 trigger row 1 buttons (FX, SCL, ENV, LFO, EDIT, GLO). Press [ and ] for octave shifts.</p>",
-  "toc-identities": "<h3>Cinco Identity Routines</h3><p>Rotate PRESETS encoder to toggle dancer routines: Celery Man (default 4d3d3d3 sequence), Oyster Smiling, and Tayne (Beta). Press GLO for phonetic LPC speech generation.</p>",
+  "toc-identities": "<h3>Cinco Identity Routines & Sound Engines</h3><p>Rotate PRESET encoder to select across 8 curated identities (Celery Man, Oyster Smiling, Tayne Classic, Computer Voice, Celery 4D, Oyster Velvet, Tayne BETA, Nude Tayne). Rotate ALGO encoder to choose between 8 live synthesis algorithms on the keyboard (Dual-Saw Brass, Hard Sync, Sub Bass, CZ Resonant, FM Cascade, FM Bell, Formant Choir, 8-Bit Lofi), or hold PLAY to cycle 8 90s dance groove styles. Press GLO for phonetic LPC speech generation.</p>",
   "toc-kinetics": "<h3>Kinetic Modulation (4d3d3d3)</h3><p>Engage Hat Wobble with LFO key (4). Flarhgunnstow arpeggiation mode engages with ARP key (9). Kick up the 4d3d3d3 with Macro Knob 1.</p>",
   "toc-boss": "<h3>Lotus 1-2-3 Stealth Boss Key</h3><p>Press EDIT key or Tools &gt; Lotus 1-2-3 to instantly summon corporate spreadsheet cover mode. Total corporate allocation: $32,820,000.</p>",
   "toc-osha": "<h3>OSHA Compliance Guidelines</h3><p>15-minute executive espresso recesses are mandatory under Cinco corporate policy. Maintain safe distance from Celery Man kinetic routines.</p>"
